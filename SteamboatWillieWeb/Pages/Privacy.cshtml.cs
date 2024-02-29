@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Steamboat_Willie.Pages
+namespace SteamboatWillieWeb.Pages
 {
     public class PrivacyModel : PageModel
     {

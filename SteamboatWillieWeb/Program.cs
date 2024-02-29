@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Steamboat_Willie.Data;
+using SteamboatWillieWeb.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,5 +38,3 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
-
-//useless comments
