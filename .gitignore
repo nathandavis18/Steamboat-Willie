@@ -398,3 +398,5 @@ FodyWeavers.xsd
 *.sln.iml
 /Steamboat-Willie/appsettings.json
 /Steamboat-Willie/appsettings.Development.json
+/SteamboatWillieWeb/appsettings.json
+/SteamboatWillieWeb/appsettings.Development.json
