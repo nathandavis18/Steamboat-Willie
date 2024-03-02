@@ -7,13 +7,28 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-var connectionString = builder.Configuration.GetConnectionString("SmarterASP") ?? throw new InvalidOperationException("Connection string 'SmarterASP' not found.");
+var connectionString = builder.Configuration.GetConnectionString("LocalConnection") ?? throw new InvalidOperationException("Connection string 'SmarterASP' not found.");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>().AddDefaultTokenProviders()
     .AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = $"/Identity/Account/Login";
+    options.LogoutPath = $"/Identity/Account/Logout";
+    options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+});
+
+builder.Services.AddAuthentication().AddGoogle(googleOptions =>
+{
+    IConfigurationSection googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
+    googleOptions.ClientId = googleAuthSection["ClientId"];
+    googleOptions.ClientSecret = googleAuthSection["ClientSecret"];
+});
 
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<DbInitializer>();
