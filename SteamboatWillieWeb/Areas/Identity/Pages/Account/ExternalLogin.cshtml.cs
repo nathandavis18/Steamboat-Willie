@@ -135,7 +135,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         Email = info.Principal.FindFirstValue(ClaimTypes.Email)
                     };
                 }
-                return Page();
+                return await OnPostConfirmationAsync(returnUrl);
             }
         }
 
