@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamboatWillieWeb", "SteamboatWillieWeb\SteamboatWillieWeb.csproj", "{E56AE358-E421-4539-B609-52C74EAE0842}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteamboatWillieWeb", "SteamboatWillieWeb\SteamboatWillieWeb.csproj", "{E56AE358-E421-4539-B609-52C74EAE0842}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{C7A67EF8-EF6F-4939-BB09-263574A62F72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{C7A67EF8-EF6F-4939-BB09-263574A62F72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{A7718BB0-1EAE-4D66-9602-8AB0A5AEB35F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{A7718BB0-1EAE-4D66-9602-8AB0A5AEB35F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utility", "Utility\Utility.csproj", "{1EEF2495-CB70-4958-AE26-532A43CBC589}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility", "Utility\Utility.csproj", "{1EEF2495-CB70-4958-AE26-532A43CBC589}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
