@@ -13,7 +13,7 @@ namespace Infrastructure.Models
         [Key]
         public int Id { get; set; }
 
-        public string AppUserId { get; set; }
+        public Guid AppUserId { get; set; }
 
         public int? DepartmentId { get; set; }
 
