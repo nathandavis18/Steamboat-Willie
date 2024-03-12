@@ -21,6 +21,7 @@ body {
   margin-bottom: 60px;
 }
 
+/* SIGN IN WITH GOOGLE BUTTON STUFF */
 .gsi-material-button {
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -82,6 +83,7 @@ body {
         overflow: hidden;
         text-overflow: ellipsis;
         vertical-align: top;
+        font-size: 15px;
     }
 
     .gsi-material-button .gsi-material-button-state {
@@ -124,3 +126,30 @@ body {
             background-color: #303030;
             opacity: 8%;
         }
+
+.ggl-btn{
+    width: 205px;
+}
+
+
+/* SIGN IN WITH MICROSOFT STUFF */
+.bsk-container {
+    margin-top: 15px;
+}
+
+.x-icon {
+    height: 1em;
+    width: 1em;
+    top: .125em;
+    position: relative;
+}
+
+.x-alt {
+    color: #777;
+}
+
+.msf-btn{
+    padding-top: 8px;
+    padding-bottom: 8px;
+    width: 205px;
+}

@@ -71,7 +71,7 @@
                                 {
                                     if (provider.DisplayName == "Google")
                                     {
-                                        <button type="submit" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account" class="gsi-material-button">
+                                        <button type="submit" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account" class="gsi-material-button ggl-btn">
                                             <div class="gsi-material-button-state"></div>
                                             <div class="gsi-material-button-content-wrapper">
                                                 <div class="gsi-material-button-icon">
@@ -87,6 +87,15 @@
                                                 <span style="display: none;">Sign in with Google</span>
                                             </div>-
                                         </button>
+                                    }
+                                    else if(provider.DisplayName == "Microsoft")
+                                    {
+                                        <div class="bsk-container">
+                                            <button type="submit" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account" class="bsk-btn bsk-btn-default msf-btn">
+                                                <object type="image/svg+xml" data="https://s3-eu-west-1.amazonaws.com/cdn-testing.web.bas.ac.uk/scratch/bas-style-kit/ms-pictogram/ms-pictogram.svg" class="x-icon"></object>
+                                                Sign in with Microsoft
+                                            </button>
+                                        </div>
                                     }
                                     else
                                     {
