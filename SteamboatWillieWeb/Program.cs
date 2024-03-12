@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-var connectionString = builder.Configuration.GetConnectionString("LocalConnection") ?? throw new InvalidOperationException("Connection string 'SmarterASP' not found.");
+var connectionString = builder.Configuration.GetConnectionString("SmarterASP") ?? throw new InvalidOperationException("Connection string 'SmarterASP' not found.");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -32,6 +32,13 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     IConfigurationSection googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
     googleOptions.ClientId = googleAuthSection["ClientId"];
     googleOptions.ClientSecret = googleAuthSection["ClientSecret"];
+});
+
+builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
+{
+    IConfigurationSection microsoftAuthSection = builder.Configuration.GetSection("Authentication:Microsoft");
+    microsoftOptions.ClientId = microsoftAuthSection["ClientId"];
+    microsoftOptions.ClientSecret = microsoftAuthSection["ClientSecret"];
 });
 
 builder.Services.AddScoped<UnitOfWork>();
