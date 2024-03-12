@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Utility
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -25,10 +26,11 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">Dashboard</a>
                         </li>
-                        @* Student Account *@
-                        <li>
-                            <a class="nav-link" asp-area="" asp-page="">Schedule Appointment</a>
-                        </li>
+                        @if (User.IsInRole(SD.CLIENT_ROLE)){
+                                <li>
+                                    <a class="nav-link" asp-area="" asp-page="">Schedule Appointment</a>
+                                </li>
+                        }
                         @* Staff account *@
                         <li>
                             <a class="nav-link" asp-area="" asp-page="">Availablity</a>

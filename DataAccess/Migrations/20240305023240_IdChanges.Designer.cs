@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240304035656_GuidToString")]
-    partial class GuidToString
+    [Migration("20240305023240_IdChanges")]
+    partial class IdChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,23 +86,20 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Infrastructure.Models.Client", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("AppUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClassLevel")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("MajorId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("AppUserId");
+                    b.HasKey("AppUserId");
 
                     b.HasIndex("MajorId");
 
@@ -167,26 +164,17 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Infrastructure.Models.Provider", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<string>("AppUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("DepartmentId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
+                    b.HasKey("AppUserId");
 
                     b.HasIndex("DepartmentId");
 
@@ -508,7 +496,9 @@ namespace DataAccess.Migrations
 
                     b.HasOne("Infrastructure.Models.Department", "Department")
                         .WithMany()
-                        .HasForeignKey("DepartmentId");
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AppUser");
 

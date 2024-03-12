@@ -27,23 +27,23 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly IUserStore<AppUser> _userStore;
-        //private readonly IUserEmailStore<AppUser> _emailStore;
-        //private readonly IEmailSender _emailSender;
+        private readonly IUserEmailStore<AppUser> _emailStore;
+        private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
 
         public ExternalLoginModel(
             SignInManager<AppUser> signInManager,
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
-            ILogger<ExternalLoginModel> logger)
-            //IEmailSender emailSender)
+            ILogger<ExternalLoginModel> logger,
+            IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userStore = userStore;
-            //_emailStore = GetEmailStore();
+            _emailStore = GetEmailStore();
             _logger = logger;
-            //_emailSender = emailSender;
+            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                //await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
@@ -174,8 +174,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            //$"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
@@ -212,13 +212,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             }
         }
 
-        /*private IUserEmailStore<AppUser> GetEmailStore()
+        private IUserEmailStore<AppUser> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
             return (IUserEmailStore<AppUser>)_userStore;
-        }*/
+        }
     }
 }
