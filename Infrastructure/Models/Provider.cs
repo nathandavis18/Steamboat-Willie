@@ -11,13 +11,11 @@ namespace Infrastructure.Models
     public class Provider
     {
         [Key]
-        public int Id { get; set; }
-
-        public string AppUserId { get; set; }
+        public string? AppUserId { get; set; }
 
         public int? DepartmentId { get; set; }
 
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         [ForeignKey("DepartmentId")]
         public Department? Department { get; set; }
