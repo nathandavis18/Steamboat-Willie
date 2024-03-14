@@ -26,27 +26,35 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">Dashboard</a>
                         </li>
-                        @if (User.IsInRole(SD.CLIENT_ROLE)){
-                                <li>
-                                    <a class="nav-link" asp-area="" asp-page="">Schedule Appointment</a>
-                                </li>
+                        @if (User.IsInRole(SD.CLIENT_ROLE))
+                        {
+                            <li>
+                                <a class="nav-link" asp-area="" asp-page="">Schedule Appointment</a>
+                            </li>
                         }
-                        @* Staff account *@
-                        <li>
-                            <a class="nav-link" asp-area="" asp-page="">Availablity</a>
-                        </li>
+
+                        @if (User.IsInRole(SD.PROVIDER_ROLE))
+                        {
+                            <li>
+                                <a class="nav-link" asp-area="" asp-page="">Availablity</a>
+                            </li>
+                        }
+
+
+                        @if (User.IsInRole(SD.ADMIN_ROLE))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" asp-area="" asp-page="">User Managment</a> @* Ignore the asp stuff. Color wouldn't work without them *@
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" asp-area="" asp-page="">Users</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="">Roles</a>
+                                </div>
+                            </li>
+                        }
+
                         <li>
                             <a class="nav-link" asp-area="" asp-page="/AboutUs">About Us</a>
                         </li>
-
-                        @* Super Admin *@
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" asp-area="" asp-page="">User Managment</a> @* Ignore the asp stuff. Color wouldn't work without them *@
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" asp-area="" asp-page="">Users</a>
-                            <a class="dropdown-item" asp-area="" asp-page="">Roles</a>
-                        </div>
-                    </li>
 
                     </ul>
                     <partial name="_LoginPartial" />
