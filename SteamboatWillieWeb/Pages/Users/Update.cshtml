@@ -1,0 +1,46 @@
+﻿@page
+@model SteamboatWillieWeb.Pages.Users.UpdateModel
+@{
+}
+<div class="container">
+    <form class="form" method="post">
+        <div class="row">
+            <input type="hidden" value="@Model.AppUser.Id" asp-for="@Model.AppUser.Id" />
+            <input type="hidden" value="@Model.OldRoles.ToList()" asp-for="@Model.OldRoles" />
+            <div class="form-group col-md-6">
+                <label asp-for="@Model.AppUser.FName">First Name</label>
+                <input class="form-control" asp-for="@Model.AppUser.FName" value="@Model.AppUser.FName" />
+            </div>
+            <div class="form-group col-md-6">
+                <label asp-for="@Model.AppUser.LName">Last Name</label>
+                <input class="form-control" asp-for="@Model.AppUser.LName" value="@Model.AppUser.LName" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label asp-for="@Model.AppUser.Email">Email</label>
+                <input class="form-control" asp-for="@Model.AppUser.Email" value="@Model.AppUser.Email" />
+            </div>
+        </div>
+        @{
+            foreach (var r in Model.AllRoles)
+            {
+                <div class="form-check">
+                    @{
+                        if (Model.UsersRoles.Contains(r))
+                        {
+                            <input class="form-check-input" name="roles" type="checkbox" id="@r" value="@r" checked>
+                            <label class="form-check-label">@r</label>
+                        }
+                        else
+                        {
+                            <input class="form-check-input" name="roles" type="checkbox" id="@r" value="@r">
+                            <label class="form-check-label">@r</label>
+                        }
+                    }
+                </div>
+            }
+        }
+        <button type="submit">Update</button>
+    </form>
+</div>
