@@ -25,6 +25,7 @@ using Utility;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Configuration;
+using DataAccess;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -37,6 +38,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UnitOfWork _unitOfWork;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
@@ -44,7 +46,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            UnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -53,6 +56,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             _roleManager = roleManager;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -185,12 +189,15 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     {
                         Client clientEntry = new Client();
                         clientEntry.AppUserId = user.Id;
+                        _unitOfWork.Client.Add(clientEntry);
                     }
                     if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
                     {
                         Provider providerEntry = new Provider();
                         providerEntry.AppUserId = user.Id;
+                        _unitOfWork.Provider.Add(providerEntry);
                     }
+                    await _unitOfWork.CommitAsync();
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
