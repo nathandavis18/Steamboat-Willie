@@ -139,7 +139,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 {
                     Text = x,
                     Value = x
-                })
+                }),
+                DateOfBirth = DateTime.Now
             };
         }
 
@@ -179,6 +180,17 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
                     await _userManager.AddToRoleAsync(user, (Input.Role == null) ? SD.CLIENT_ROLE : Input.Role); //Adds user to Client Role by default,
                                                                                                                  //or adds them to the chosen role if selection was made by admin
+
+                    if(await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
+                    {
+                        Client clientEntry = new Client();
+                        clientEntry.AppUserId = user.Id;
+                    }
+                    if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
+                    {
+                        Provider providerEntry = new Provider();
+                        providerEntry.AppUserId = user.Id;
+                    }
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

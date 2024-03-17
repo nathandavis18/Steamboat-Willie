@@ -37,7 +37,7 @@
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.DateOfBirth" class="form-control" autocomplete="date of birth" aria-required="true" placeholder="01/01/1999" />
+                <input asp-for="Input.DateOfBirth" class="form-control" autocomplete="date of birth" aria-required="true" placeholder="@DateOnly.FromDateTime(DateTime.Now)" />
                 <label asp-for="Input.DateOfBirth">Birthdate</label>
                 <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
             </div>
