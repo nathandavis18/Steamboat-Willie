@@ -19,6 +19,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Utility;
+using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Configuration;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -30,13 +36,15 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<AppUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +52,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -71,6 +80,22 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
+            [Required]
+            [Display(Name = "First Name")]
+            public string FName { get; set; }
+
+            [Required]
+            [DisplayName("Last Name")]
+            public string? LName { get; set; }
+
+            [Required]
+            [DisplayName("Birthdate")]
+            [DataType(DataType.Date)]
+            public DateTime DateOfBirth { get; set; }
+
+            [DisplayName("Phone Number")]
+            [StringLength(14)]
+            public string PhoneNumber {  get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -98,6 +123,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            public string Role {  get; set; }
+            public IEnumerable<SelectListItem> RoleList { get; set; }
         }
 
 
@@ -105,6 +133,15 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            Input = new InputModel()
+            {
+                RoleList = _roleManager.Roles.Select(r => r.Name).Select(x => new SelectListItem()
+                {
+                    Text = x,
+                    Value = x
+                }),
+                DateOfBirth = DateTime.Now
+            };
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -114,6 +151,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+                user.FName = Input.FName;
+                user.LName = Input.LName;
+                user.DateOfBirth = Input.DateOfBirth;
+                user.PhoneNumber = Input.PhoneNumber;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -126,14 +167,30 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
+                    /*var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");*/
+
+                    //We can change this so it doesn't automatically send the email confirmation
+
+                    await _userManager.AddToRoleAsync(user, (Input.Role == null) ? SD.CLIENT_ROLE : Input.Role); //Adds user to Client Role by default,
+                                                                                                                 //or adds them to the chosen role if selection was made by admin
+
+                    if(await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
+                    {
+                        Client clientEntry = new Client();
+                        clientEntry.AppUserId = user.Id;
+                    }
+                    if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
+                    {
+                        Provider providerEntry = new Provider();
+                        providerEntry.AppUserId = user.Id;
+                    }
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

@@ -16,6 +16,7 @@ namespace Infrastructure.Models
 
         [Required]
         [DisplayName("Birthdate")]
+        [DataType(DataType.Date)]
         public DateTime DateOfBirth { get; set; }
 
         [DisplayName("Profile Picture")]
