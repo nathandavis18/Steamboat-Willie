@@ -61,6 +61,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             public string PhoneNumber { get; set; }
         }
 
+        private string ReturnUrl { get; set; }
+
         private async Task LoadAsync(AppUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
@@ -74,8 +76,12 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             };
         }
 
-        public async Task<IActionResult> OnGetAsync()
+        public async Task<IActionResult> OnGetAsync() 
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToPage("../Login", new { ReturnUrl = "~/Identity/Account/Manage" });
+            }
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
