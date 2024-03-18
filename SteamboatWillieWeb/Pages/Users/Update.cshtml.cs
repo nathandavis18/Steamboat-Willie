@@ -63,20 +63,40 @@ namespace SteamboatWillieWeb.Pages.Users
                 }
             }
             var result1 = await _userManager.AddToRolesAsync(user, rolesToAdd.AsEnumerable());
-            if(!(await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE)))
+
+            //Creating/Removing Client and Provider DB Entires as needed
+            if (!(await _userManager.IsInRoleAsync(AppUser, SD.CLIENT_ROLE)))
             {
-                var client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == user.Id);
+                var client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == AppUser.Id);
                 if (client != null)
                 {
                     _unitOfWork.Client.Delete(client);
                 }
             }
-            if (!(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE)))
+            else if (await _userManager.IsInRoleAsync(AppUser, SD.CLIENT_ROLE))
             {
-                var provider = await _unitOfWork.Provider.GetAsync(p => p.AppUserId == user.Id);
+                var client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == AppUser.Id);
+                if (client == null)
+                {
+                    Client clientEntry = new Client();
+                    clientEntry.AppUserId = AppUser.Id;
+                }
+            }
+            if (!(await _userManager.IsInRoleAsync(AppUser, SD.PROVIDER_ROLE)))
+            {
+                var provider = await _unitOfWork.Provider.GetAsync(p => p.AppUserId == AppUser.Id);
                 if(provider != null)
                 {
                     _unitOfWork.Provider.Delete(provider);
+                }
+            }
+            else if (await _userManager.IsInRoleAsync(AppUser, SD.PROVIDER_ROLE))
+            {
+                var provider = await _unitOfWork.Provider.GetAsync(p => p.AppUserId == AppUser.Id);
+                if (provider == null)
+                {
+                    Provider providerEntry = new Provider();
+                    providerEntry.AppUserId = AppUser.Id;
                 }
             }
             await _unitOfWork.CommitAsync();
