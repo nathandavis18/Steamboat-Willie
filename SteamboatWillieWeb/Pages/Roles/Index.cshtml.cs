@@ -15,14 +15,14 @@ namespace SteamboatWillieWeb.Pages.Roles
 
         public IEnumerable<IdentityRole> RolesObj { get; set; }
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
-        public async Task OnGetAsync(bool success = false, string message = null)
+        public IActionResult OnGet(bool success = false, string? message = null) //Does this need to be async?
         {
             Success = success;
             Message = message;
             RolesObj = _roleManager.Roles;
-
+            return Page();
         }
     }
 

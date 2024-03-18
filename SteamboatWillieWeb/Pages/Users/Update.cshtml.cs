@@ -80,6 +80,7 @@ namespace SteamboatWillieWeb.Pages.Users
                 {
                     Client clientEntry = new Client();
                     clientEntry.AppUserId = AppUser.Id;
+                    _unitOfWork.Client.Add(clientEntry);
                 }
             }
             if (!(await _userManager.IsInRoleAsync(AppUser, SD.PROVIDER_ROLE)))
@@ -97,6 +98,7 @@ namespace SteamboatWillieWeb.Pages.Users
                 {
                     Provider providerEntry = new Provider();
                     providerEntry.AppUserId = AppUser.Id;
+                    _unitOfWork.Provider.Add(providerEntry);
                 }
             }
             await _unitOfWork.CommitAsync();
