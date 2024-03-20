@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="~/SteamboatWillieWeb.styles.css" asp-append-version="true" />
     <script src="https://cdn.tiny.cloud/1/rbmn6134w0xwl27zltscq3547nfsov9c4du4iupormmw32mp/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <header>
@@ -64,6 +63,7 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <partial name="_ToastrNotification" />
             @RenderBody()
         </main>
     </div>

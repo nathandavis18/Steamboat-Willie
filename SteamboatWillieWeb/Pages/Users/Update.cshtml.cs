@@ -2,6 +2,7 @@ using DataAccess;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utility;
 
@@ -26,13 +27,23 @@ namespace SteamboatWillieWeb.Pages.Users
         public List<string> OldRoles { get; set; }
 
 
-        public async Task OnGet(string id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return RedirectToPage("/Account/Login", new { ReturnUrl = "~/Users/Index", Area = "Identity" });
+            }
+            if (!User.IsInRole(SD.ADMIN_ROLE))
+            {
+                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                return RedirectToPage("../Index");
+            }
             AppUser = _unitOfWork.AppUser.Get(u => u.Id == id);
             var roles = await _userManager.GetRolesAsync(AppUser);
             UsersRoles = roles.ToList();
             OldRoles = roles.ToList();
             AllRoles = _roleManager.Roles.Select(r=> r.Name).ToList();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()

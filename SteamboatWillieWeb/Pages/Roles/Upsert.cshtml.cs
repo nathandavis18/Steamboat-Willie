@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Utility;
 
 namespace SteamboatWillieWeb.Pages.Roles
 {
@@ -18,8 +19,17 @@ namespace SteamboatWillieWeb.Pages.Roles
         [BindProperty]
         public bool IsUpdate { get; set; }
 
-        public async Task OnGetAsync(string? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return RedirectToPage("/Account/Login", new { ReturnUrl = "~/Roles/Index", Area = "Identity" });
+            }
+            if (!User.IsInRole(SD.ADMIN_ROLE))
+            {
+                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                return RedirectToPage("../Index");
+            }
             if (id != null)
             {
                 CurrentRole = await _roleManager.FindByIdAsync(id);
@@ -30,6 +40,7 @@ namespace SteamboatWillieWeb.Pages.Roles
                 CurrentRole = new IdentityRole();
                 IsUpdate = false;
             }
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()

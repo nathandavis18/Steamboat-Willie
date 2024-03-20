@@ -18,6 +18,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Globalization;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -51,7 +55,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new InputModel();
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -85,6 +89,24 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             public string Email { get; set; }
+
+            [Required]
+            [Display(Name = "First Name")]
+            public string FName { get; set; }
+
+            [Required]
+            [DisplayName("Last Name")]
+            public string? LName { get; set; }
+
+            [Required]
+            [DisplayName("Birthdate")]
+            [DataType(DataType.Date)]
+            public DateTime DateOfBirth { get; set; }
+
+            [DisplayName("Phone Number")]
+            [StringLength(14)]
+            public string PhoneNumber { get; set; }
+
         }
         
         public IActionResult OnGet() => RedirectToPage("./Login");
@@ -130,12 +152,33 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 ProviderDisplayName = info.ProviderDisplayName;
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
                 {
-                    Input = new InputModel
-                    {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
-                    };
+                    Input.Email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 }
-                return await OnPostConfirmationAsync(returnUrl);
+                if(info.Principal.HasClaim(c => c.Type == ClaimTypes.GivenName))
+                {
+                    Input.FName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+                }
+                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Surname))
+                {
+                    Input.LName = info.Principal.FindFirstValue(ClaimTypes.Surname);
+                }
+                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.MobilePhone))
+                {
+                    Input.PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone);
+                }
+                else if(info.Principal.HasClaim(c => c.Type == ClaimTypes.HomePhone))
+                {
+                    Input.PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.HomePhone);
+                }
+                else if(info.Principal.HasClaim(c => c.Type == ClaimTypes.OtherPhone))
+                {
+                    Input.PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.OtherPhone);
+                }
+                if(info.Principal.HasClaim(c => c.Type == ClaimTypes.DateOfBirth))
+                {
+                    Input.DateOfBirth = DateTime.ParseExact(info.Principal.FindFirstValue(ClaimTypes.DateOfBirth), "D", new CultureInfo("en-US"));
+                }
+                return Page();
             }
         }
 

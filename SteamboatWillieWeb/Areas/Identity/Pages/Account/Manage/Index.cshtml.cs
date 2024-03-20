@@ -78,14 +78,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync() 
         {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return RedirectToPage("../Login", new { ReturnUrl = "~/Identity/Account/Manage" });
-            }
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToPage("../Login", new { ReturnUrl = "~/Identity/Account/Manage/Index" });
             }
 
             await LoadAsync(user);
