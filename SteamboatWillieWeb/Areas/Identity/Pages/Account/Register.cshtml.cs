@@ -98,7 +98,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             public DateTime DateOfBirth { get; set; }
 
             [DisplayName("Phone Number")]
-            [StringLength(14)]
+            [Phone]
             public string PhoneNumber {  get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
