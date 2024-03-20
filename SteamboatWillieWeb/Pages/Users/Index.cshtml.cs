@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
+using Utility;
 using AppUser = Infrastructure.Models.AppUser;
 
 namespace SteamboatWillieWeb.Pages.Users
@@ -23,8 +24,17 @@ namespace SteamboatWillieWeb.Pages.Users
         public IEnumerable<AppUser> ApplicationUsers { get; set; }
         public Dictionary<string, List<string>> UserRoles { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return RedirectToPage("/Account/Login", new { ReturnUrl = "~/Users/Index", Area = "Identity" });
+            }
+            if (!User.IsInRole(SD.ADMIN_ROLE))
+            {
+                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                return RedirectToPage("../Index");
+            }
             UserRoles = new Dictionary<string, List<string>>();
             ApplicationUsers = (IEnumerable<AppUser>)_unitOfWork.AppUser.GetAll();
             foreach (var user in ApplicationUsers)
@@ -32,6 +42,7 @@ namespace SteamboatWillieWeb.Pages.Users
                 var userRole = await _userManager.GetRolesAsync(user);
                 UserRoles.Add(user.Id, userRole.ToList());
             }
+            return Page();
         }
 
         public async Task<IActionResult> OnPostLockUnlock(string id)
