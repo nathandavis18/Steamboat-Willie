@@ -3,7 +3,39 @@
 @{
     ViewData["Title"] = "Home page";
 }
+@using Utility
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-</div>
+@if (!User.IsInRole(SD.PROVIDER_ROLE))
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+    </div>
+}
+else
+{
+    <head>
+        <meta charset='utf-8' />
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+        <script>document.addEventListener('DOMContentLoaded', function () {
+                var calendarEl = document.getElementById('calendar');
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '19:00:00',
+                    height: 'auto',
+                    headerToolbar: {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek' // user can switch between the two
+                    }
+                });
+                calendar.render();
+            });</script>
+    </head>
+    <body>
+        <div class="text-end">
+            <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
+        </div>
+        <div id='calendar'></div>
+    </body>
+}
