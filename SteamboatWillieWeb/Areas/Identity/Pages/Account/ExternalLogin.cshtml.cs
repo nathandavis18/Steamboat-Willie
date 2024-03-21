@@ -103,6 +103,16 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [DataType(DataType.Date)]
             public DateTime DateOfBirth { get; set; }
 
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Password)]
+            [Display(Name = "Password (Optional)")]
+            public string Password { get; set; }
+
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+
             [DisplayName("Phone Number")]
             [StringLength(14)]
             public string PhoneNumber { get; set; }
@@ -178,6 +188,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 {
                     Input.DateOfBirth = DateTime.ParseExact(info.Principal.FindFirstValue(ClaimTypes.DateOfBirth), "D", new CultureInfo("en-US"));
                 }
+                else
+                {
+                    Input.DateOfBirth = DateTime.Now.AddYears(-16);
+                }
                 return Page();
             }
         }
@@ -200,7 +214,16 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-                var result = await _userManager.CreateAsync(user);
+                IdentityResult result;
+
+                if (Input.Password != null)
+                {
+                    result = await _userManager.CreateAsync(user, Input.Password);
+                }
+                else
+                {
+                    result = await _userManager.CreateAsync(user);
+                }
                 if (result.Succeeded)
                 {
                     result = await _userManager.AddLoginAsync(user, info);
@@ -234,6 +257,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
+                user.FName = Input.FName;
+                user.LName = Input.LName;
+                user.DateOfBirth = Input.DateOfBirth;
+                if (Input.PhoneNumber != null) {
+                    await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                }
+                
             }
 
             ProviderDisplayName = info.ProviderDisplayName;
