@@ -1,5 +1,7 @@
 ﻿@page
 @model IndexModel
+@using Infrastructure.Models
+@inject UserManager<AppUser> UserManager
 @{
     ViewData["Title"] = "Home page";
 }
@@ -12,7 +14,7 @@
         <p class="display-4 login-signup">Please, <a asp-page="/Account/Login" asp-area="Identity">log in</a> or <a asp-page="/Account/Register" asp-area="Identity">sign up</a> to continue</p>
     </div>
 }
-else
+else if(User.IsInRole(SD.PROVIDER_ROLE) || User.IsInRole(SD.CLIENT_ROLE))
 {
     <head>
         <meta charset='utf-8' />
@@ -41,5 +43,11 @@ else
                 </div>
             }
             <div id='calendar'></div>
-        </body>
+    </body>
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome, @UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName</h1>
+    </div>
 }
