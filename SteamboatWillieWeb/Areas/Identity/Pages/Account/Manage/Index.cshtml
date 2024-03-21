@@ -35,6 +35,17 @@
                 </select>
                 <label asp-for="Input.MajorID" class="form-label"></label>
             </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="Input.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
+                        <option disabled selected>--Select Class Level--</option>
+                        <option>Freshman</option>
+                        <option>Sophomore</option>
+                        <option>Junior</option>
+                        <option>Senior</option>
+                    </select>
+                    <label asp-for="Input.ClassLevel" class="form-label"></label>
+                    <span asp-validation-for="Input.ClassLevel" class="text-danger"></span>
+                </div>
             }
             @if (User.IsInRole(SD.PROVIDER_ROLE))
             {
