@@ -84,8 +84,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Phone]
             [Display(Name = "Phone number")]
-            [RegularExpression("[0-9]{9}")]
-            [StringLength(9)]
+            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}")]
+            [StringLength(15)]
             public string PhoneNumber { get; set; }
 
             [Display(Name = "Major")]

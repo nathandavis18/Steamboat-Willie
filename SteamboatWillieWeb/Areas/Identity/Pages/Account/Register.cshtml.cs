@@ -97,11 +97,11 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [DataType(DataType.Date)]
             public DateTime DateOfBirth { get; set; }
 
-            [DisplayName("Phone Number")]
             [Phone]
-            [RegularExpression("[0-9]{9}")]
-            [StringLength(9)]
-            public string PhoneNumber {  get; set; }
+            [Display(Name = "Phone number")]
+            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}")]
+            [StringLength(15)]
+            public string PhoneNumber { get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
