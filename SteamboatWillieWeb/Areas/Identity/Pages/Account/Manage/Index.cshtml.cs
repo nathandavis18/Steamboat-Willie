@@ -84,7 +84,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Phone]
             [Display(Name = "Phone number")]
-            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}")]
+            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", ErrorMessage = "Phone number must follow the format (xxx) xxx-xxxx")]
             [StringLength(15)]
             public string PhoneNumber { get; set; }
 
