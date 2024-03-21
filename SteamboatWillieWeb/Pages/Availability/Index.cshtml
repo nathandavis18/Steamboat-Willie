@@ -1,0 +1,187 @@
+﻿@page
+@model SteamboatWillieWeb.Pages.Availability.IndexModel
+@{
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-timepicker@latest/dist/css/bootstrap-timepicker.min.css" rel="stylesheet">
+
+<h2>Availability</h2>
+<div class="form-control bg-black">
+    <div class="form-group mb-3">
+        <div>
+            <label for="appointmentType" class="text-white">Appointment Type: </label>
+            <select id="appointmentType" class="form-select bg-secondary text-white">
+                <option selected>Select:</option>
+                <option value="1">Advising</option>
+                <option value="2">Instructing</option>
+                <option value="3">Tutoring</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group mb-3">
+        <label for="startDate" class="text-white">Start: </label>
+        <div class="input-group">
+            <input id="startDate" class="form-control bg-secondary text-white" type="date" />
+            <span id="startCalendarIcon" class="input-group-text bg-secondary">
+                <i class="bi bi-calendar-week-fill"></i>
+            </span>
+        </div>
+    </div>
+    <div class="form-group mb-3">
+        <div>
+            <label for="appointmentDuration" class="text-white">Appointment Duration: </label>
+            <select id="appointmentDuration" class="form-select bg-secondary text-white">
+                <option selected>Select:</option>
+                <option value="1">15 Min</option>
+                <option value="2">30 Min</option>
+                <option value="3">60 Min</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group mb-3">
+        <div>
+            <label for="numAppointments" class="text-white">Number of Appointments: </label>
+            <input id="numAppointments" class="form-control bg-secondary text-white" type="number" />
+        </div>
+    </div>
+    <div class="form-group mb-3">
+        <label for="startTime" class="text-white">Start Time: </label>
+        <div class="input-group">
+            <input id="startTime" class="form-control bg-secondary text-white" type="time" />
+            <span id="clockIcon" class="input-group-text bg-secondary">
+                <i class="bi bi-clock-fill"></i>
+            </span>
+        </div>
+    </div>
+    <div class="form-group mb-3">
+        <div>
+            <label for="location" class="text-white">Location: </label>
+            <input id="location" class="form-control bg-secondary text-white" />
+        </div>
+    </div>
+    <div class="form-group mb-3">
+        <div>
+            <label for="recurrance" class="text-white">Recurrance: </label>
+            <input id="recurrance" class="bg-secondary text-white" type="checkbox"/>
+            
+        </div>
+    </div>
+    <div class="form-group mb-3" id="otherThings" style="display: none">
+        <div>
+            <label for="weekDays" class="text-white">Days of the Week: </label>
+            <div class="dropdown mb-3">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" aria-expanded="false">
+                    Select Options
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="option1" id="checkbox1">
+                        <label class="form-check-label" for="checkbox1">
+                            Sunday
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="option2" id="checkbox2">
+                        <label class="form-check-label" for="checkbox2">
+                            Monday
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="option3" id="checkbox3">
+                        <label class="form-check-label" for="checkbox3">
+                            Tuesday
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="option4" id="checkbox4">
+                        <label class="form-check-label" for="checkbox4">
+                            Wednesday
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="option5" id="checkbox5">
+                        <label class="form-check-label" for="checkbox5">
+                            Thursday
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="option6" id="checkbox6">
+                        <label class="form-check-label" for="checkbox6">
+                            Friday
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="option7" id="checkbox7">
+                        <label class="form-check-label" for="checkbox7">
+                            Saturday
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label for="weekly" class="text-white">Weekly: </label>
+                <input id="weekly" class="bg-secondary text-white" type="checkbox" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="endDate" class="text-white">Until: </label>
+                <div class="input-group">
+                    <input id="endDate" class="form-control bg-secondary text-white" type="date" />
+                    <span id="endCalendarIcon" class="input-group-text bg-secondary">
+                        <i class="bi bi-calendar-week-fill"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-end">
+    <a class="btn btn-secondary">Set Availability</a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-timepicker@latest/dist/js/bootstrap-timepicker.min.js"></script>
+
+<script>document.getElementById('startCalendarIcon').addEventListener('click', function () {
+        document.getElementById('startDate').click();
+        });
+
+    document.getElementById('endCalendarIcon').addEventListener('click', function () {
+        document.getElementById('endDate').click();
+    });
+
+    document.getElementById('clockIcon').addEventListener('click', function () {
+        document.getElementById('startTime').focus();
+    });
+
+    document.getElementById('startDate').addEventListener('change', function () {
+        document.getElementById('startDate').blur(); // Blur to close date picker
+    });
+
+    document.getElementById("recurrance").addEventListener("change", function () {
+        var otherThings = document.getElementById("otherThings");
+        if (this.checked) {
+            otherThings.style.display = "block";
+        } else {
+            otherThings.style.display = "none";
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var dropdownToggle = document.querySelector('.dropdown-toggle');
+        var dropdownMenu = document.querySelector('.dropdown-menu');
+
+        dropdownToggle.addEventListener('click', function () {
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close the dropdown menu if the user clicks outside of it
+        window.addEventListener('click', function (event) {
+            if (!dropdownToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+    });
+</script>

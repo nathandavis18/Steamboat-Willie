@@ -32,5 +32,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
+    <Folder Include="Pages\Availability\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Pages\Availability\" />
   </ItemGroup>
 </Project>
