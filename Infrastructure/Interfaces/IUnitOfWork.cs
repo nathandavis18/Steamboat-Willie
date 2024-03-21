@@ -9,7 +9,6 @@ namespace Infrastructure.Interfaces
         IGenericRepository<Client> Client { get; }
         IGenericRepository<Department> Department { get; }
         IGenericRepository<Location> Location { get; }
-        IGenericRepository<Major> Major { get; }
         IGenericRepository<Provider> Provider { get; }
         IGenericRepository<ProviderAvailability> ProviderAvailability { get; }
         int Commit();

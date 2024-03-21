@@ -90,19 +90,6 @@ namespace DataAccess
             }
         }
 
-        private IGenericRepository<Major> _Major;
-        public IGenericRepository<Major> Major
-        {
-            get
-            {
-                if(_Major == null)
-                {
-                    _Major = new GenericRepository<Major>(_context);
-                }
-                return _Major;
-            }
-        }
-
         private IGenericRepository<Provider> _Provider;
         public IGenericRepository<Provider> Provider
         {

@@ -20,8 +20,6 @@ namespace DataAccess
 
         public DbSet<Location> Locations { get; set; }
 
-        public DbSet<Major> Majors { get; set; }
-
         public DbSet<Provider> Providers { get; set; }
 
         public DbSet<ProviderAvailability> ProviderAvailability { get; set; }

@@ -13,9 +13,5 @@ namespace Infrastructure.Models
         public int Id { get; set; }
 
         public string? DepartmentName { get; set; }
-
-        public string? DepartmentDescription { get; set; }
-
-        public string? DepartmentBuilding { get; set; }
     }
 }

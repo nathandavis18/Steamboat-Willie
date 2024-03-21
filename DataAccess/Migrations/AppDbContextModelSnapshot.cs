@@ -89,7 +89,7 @@ namespace DataAccess.Migrations
                     b.Property<string>("ClassLevel")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("MajorId")
+                    b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("StudentId")
@@ -97,7 +97,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("AppUserId");
 
-                    b.HasIndex("MajorId");
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Clients");
                 });
@@ -109,12 +109,6 @@ namespace DataAccess.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DepartmentBuilding")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DepartmentDescription")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DepartmentName")
                         .HasColumnType("nvarchar(max)");
@@ -139,23 +133,6 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Locations");
-                });
-
-            modelBuilder.Entity("Infrastructure.Models.Major", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Majors");
                 });
 
             modelBuilder.Entity("Infrastructure.Models.Provider", b =>
@@ -472,13 +449,13 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Infrastructure.Models.Major", "Major")
+                    b.HasOne("Infrastructure.Models.Department", "Department")
                         .WithMany()
-                        .HasForeignKey("MajorId");
+                        .HasForeignKey("DepartmentId");
 
                     b.Navigation("AppUser");
 
-                    b.Navigation("Major");
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("Infrastructure.Models.Provider", b =>

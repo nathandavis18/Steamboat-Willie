@@ -30,7 +30,7 @@
                 <span asp-validation-for="Input.WNumber" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <select asp-for="Input.MajorID" asp-items="@Model.Input.Majors" class="form-select">
+                <select asp-for="Input.MajorID" asp-items="@Model.Input.Departments" class="form-select">
                     <option disabled selected>--Select Major--</option>
                 </select>
                 <label asp-for="Input.MajorID" class="form-label"></label>

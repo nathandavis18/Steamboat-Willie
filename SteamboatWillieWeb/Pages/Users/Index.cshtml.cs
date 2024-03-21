@@ -1,5 +1,4 @@
 using DataAccess;
-using DataAccess.Migrations;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
