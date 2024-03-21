@@ -97,6 +97,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Title")]
             public string Title { get; set; }
+
+            [Display(Name = "Class Level")]
+            public string ClassLevel { get; set; }
         }
 
         private string ReturnUrl { get; set; }
@@ -117,6 +120,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 MajorID = (client != null ? client.DepartmentId.ToString() : null),
                 FName = user.FName,
                 LName = user.LName,
+                ClassLevel = (client != null ? client.ClassLevel : null),
                 DateOfBirth = user.DateOfBirth,
                 WNumber = (client != null ? client.StudentId : null),
                 Departments = departments.Select(x => new SelectListItem()
@@ -174,6 +178,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             {
                 client.StudentId = Input.WNumber;
                 client.DepartmentId = Input.MajorID != null ? Int32.Parse(Input.MajorID) : null;
+                client.ClassLevel = Input.ClassLevel;
                 _unitOfWork.Client.Update(client);
             }
 
