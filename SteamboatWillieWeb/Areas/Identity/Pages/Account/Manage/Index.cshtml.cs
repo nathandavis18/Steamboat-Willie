@@ -78,7 +78,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             public DateTime DateOfBirth { get; set; }
 
             [Display(Name = "W#")]
-            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########, where # are numbers")]
+            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
             [StringLength(9)]
             public string WNumber {  get; set; }
 
