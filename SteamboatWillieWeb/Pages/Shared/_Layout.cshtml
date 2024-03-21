@@ -27,8 +27,13 @@
                         </li>
                         @if (User.IsInRole(SD.CLIENT_ROLE))
                         {
-                            <li>
-                                <a class="nav-link" asp-area="" asp-page="">Schedule Appointment</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" asp-area="" asp-page="">Schedule Appointment</a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" asp-area="" asp-page="/Appointment/Index">Tutoring</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="/Appointment/AdvisingNeed">Advising</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="/Appointment/Index">Instructor</a>
+                                </div>
                             </li>
                         }
 
