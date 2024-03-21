@@ -25,22 +25,14 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">Dashboard</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Schedule Appointment</a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" asp-area="" asp-page="">Tutoring</a>
-                                <a class="dropdown-item" asp-area="" asp-page="">Advising</a>
-                                <a class="dropdown-item" asp-area="" asp-page="">Instructor</a>
-                            </div>
-                        </li>
                         @if (User.IsInRole(SD.CLIENT_ROLE))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Schedule Appointment</a>
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" asp-area="" asp-page="">Schedule Appointment</a>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" asp-area="" asp-page="">Tutoring</a>
-                                    <a class="dropdown-item" asp-area="" asp-page="">Advising</a>
-                                    <a class="dropdown-item" asp-area="" asp-page="">Instructor</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="/Appointment/Index">Tutoring</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="/Appointment/AdvisingNeed">Advising</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="/Appointment/Index">Instructor</a>
                                 </div>
                             </li>
                         }
