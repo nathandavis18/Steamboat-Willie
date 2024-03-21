@@ -20,7 +20,7 @@
         </div>
     </div>
     <div class="form-group mb-3">
-        <label for="startDate" class="text-white">Start: </label>
+        <label for="startDate" class="text-white">Start Date: </label>
         <div class="input-group">
             <input id="startDate" class="form-control bg-secondary text-white" type="date" />
             <span id="startCalendarIcon" class="input-group-text bg-secondary">
@@ -32,7 +32,7 @@
         <div>
             <label for="appointmentDuration" class="text-white">Appointment Duration: </label>
             <select id="appointmentDuration" class="form-select bg-secondary text-white">
-                <option selected>Select:</option>
+                <option disabled selected>Select:</option>
                 <option value="1">15 Min</option>
                 <option value="2">30 Min</option>
                 <option value="3">60 Min</option>
@@ -42,7 +42,7 @@
     <div class="form-group mb-3">
         <div>
             <label for="numAppointments" class="text-white">Number of Appointments: </label>
-            <input id="numAppointments" class="form-control bg-secondary text-white" type="number" />
+            <input id="numAppointments" class="form-control bg-secondary text-white" type="number" placeholder="E.g. 4 appointments at 30 min each = 2 hour availability block"/>
         </div>
     </div>
     <div class="form-group mb-3">
@@ -57,7 +57,7 @@
     <div class="form-group mb-3">
         <div>
             <label for="location" class="text-white">Location: </label>
-            <input id="location" class="form-control bg-secondary text-white" />
+            <input id="location" class="form-control bg-secondary text-white" placeholder="Zoom Link, Your Office, Discord Server, etc."/>
         </div>
     </div>
     <div class="form-group mb-3">
