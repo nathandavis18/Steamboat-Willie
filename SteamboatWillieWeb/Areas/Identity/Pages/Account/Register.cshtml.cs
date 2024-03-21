@@ -99,6 +99,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
             [DisplayName("Phone Number")]
             [Phone]
+            [RegularExpression("[0-9]{9}")]
+            [StringLength(9)]
             public string PhoneNumber {  get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -144,7 +146,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     Text = x,
                     Value = x
                 }),
-                DateOfBirth = DateTime.Now
+                DateOfBirth = DateTime.Now.AddYears(-16)
             };
         }
 

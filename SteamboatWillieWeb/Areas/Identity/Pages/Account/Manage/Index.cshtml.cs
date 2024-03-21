@@ -84,11 +84,12 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Phone]
             [Display(Name = "Phone number")]
+            [RegularExpression("[0-9]{9}")]
+            [StringLength(9)]
             public string PhoneNumber { get; set; }
 
             [Display(Name = "Major")]
             public string MajorID { get; set; }
-            public IEnumerable<SelectListItem> Majors { get; set; }
 
             [Display(Name = "Department")]
             public string DepartmentID {  get; set; }
@@ -107,19 +108,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             var client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == user.Id);
             var provider = await _unitOfWork.Provider.GetAsync(p => p.AppUserId == user.Id);
 
-            var majors = _unitOfWork.Major.GetAll();
             var departments = _unitOfWork.Department.GetAll();
 
             Username = userName;
 
             Input = new InputModel
             {
-                Majors = majors.Select(x => new SelectListItem()
-                {
-                    Text = x.Name,
-                    Value = x.Id.ToString()
-                }),
-                MajorID = (client != null ? client.MajorId.ToString() : null),
+                MajorID = (client != null ? client.DepartmentId.ToString() : null),
                 FName = user.FName,
                 LName = user.LName,
                 DateOfBirth = user.DateOfBirth,
@@ -178,7 +173,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             if (client != null)
             {
                 client.StudentId = Input.WNumber;
-                client.MajorId = Int32.Parse(Input.MajorID);
+                client.DepartmentId = Input.MajorID != null ? Int32.Parse(Input.MajorID) : null;
                 _unitOfWork.Client.Update(client);
             }
 
@@ -186,7 +181,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             if (provider != null)
             {
                 provider.Title = Input.Title;
-                provider.DepartmentId = Int32.Parse(Input.DepartmentID);
+                provider.DepartmentId = Input.DepartmentID != null ? Int32.Parse(Input.DepartmentID): null;
                 _unitOfWork.Provider.Update(provider);
             }
 
