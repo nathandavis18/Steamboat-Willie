@@ -1,4 +1,4 @@
-#Steamboat Willie
+# Steamboat Willie
 
 Welcome to Steamboat Willie, a SimplyBook.Me alternative, tailored for Weber State University students and faculty.
 
