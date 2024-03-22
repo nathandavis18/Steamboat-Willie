@@ -39,63 +39,6 @@ namespace DataAccess
                 return;
             }
 
-            _roleManager.CreateAsync(new IdentityRole(SD.ADMIN_ROLE)).GetAwaiter().GetResult();
-            _roleManager.CreateAsync(new IdentityRole(SD.CLIENT_ROLE)).GetAwaiter().GetResult();
-            _roleManager.CreateAsync(new IdentityRole(SD.PROVIDER_ROLE)).GetAwaiter().GetResult();
-
-            //Create a "Super" Admin Account
-            _userManager.CreateAsync(new AppUser
-            {
-                UserName = "admin@gmail.com",
-                Email = "admin@gmail.com",
-                FName = "Admin",
-                LName = "Test",
-                PhoneNumber = "1234567890",
-                DateOfBirth = DateTime.Parse("01/01/0001")
-            }, "Pass1234!").GetAwaiter().GetResult();
-
-            AppUser admin = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@gmail.com");
-            _userManager.AddToRoleAsync(admin, SD.ADMIN_ROLE).GetAwaiter().GetResult();
-
-            _userManager.CreateAsync(new AppUser
-            {
-                UserName = "client@gmail.com",
-                Email = "client@gmail.com",
-                FName = "Client",
-                LName = "Test",
-                PhoneNumber = "1234567890",
-                DateOfBirth = DateTime.Parse("01/01/0001")
-            }, "Pass1234!").GetAwaiter().GetResult();
-
-            AppUser client = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "client@gmail.com");
-            _userManager.AddToRoleAsync(client, SD.CLIENT_ROLE).GetAwaiter().GetResult();
-
-            Client c = new Client()
-            {
-                AppUserId = client.Id
-            };
-            _context.Clients.Add(c);
-
-            _userManager.CreateAsync(new AppUser
-            {
-                UserName = "provider@gmail.com",
-                Email = "provider@gmail.com",
-                FName = "Provider",
-                LName = "Test",
-                PhoneNumber = "1234567890",
-                DateOfBirth = DateTime.Parse("01/01/0001")
-            }, "Pass1234!").GetAwaiter().GetResult();
-
-            AppUser provider = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "provider@gmail.com");
-            _userManager.AddToRoleAsync(provider, SD.PROVIDER_ROLE).GetAwaiter().GetResult();
-
-            Provider p = new Provider()
-            {
-                AppUserId = provider.Id
-            };
-
-            _context.Providers.Add(p);
-
             var Departments = new List<Department>()
             {
                 new Department { DepartmentName = "ACTG" },
@@ -230,6 +173,71 @@ namespace DataAccess
             {
                 _context.Departments.Add(d);
             }
+
+            _roleManager.CreateAsync(new IdentityRole(SD.ADMIN_ROLE)).GetAwaiter().GetResult();
+            _roleManager.CreateAsync(new IdentityRole(SD.CLIENT_ROLE)).GetAwaiter().GetResult();
+            _roleManager.CreateAsync(new IdentityRole(SD.PROVIDER_ROLE)).GetAwaiter().GetResult();
+
+            //Create a "Super" Admin Account
+            _userManager.CreateAsync(new AppUser
+            {
+                UserName = "admin@gmail.com",
+                Email = "admin@gmail.com",
+                FName = "Admin",
+                LName = "Test",
+                PhoneNumber = "1234567890",
+                DateOfBirth = DateTime.Parse("01/01/0001"),
+                WNumber = "W00000000"
+            }, "Pass1234!").GetAwaiter().GetResult();
+
+            AppUser admin = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@gmail.com");
+            _userManager.AddToRoleAsync(admin, SD.ADMIN_ROLE).GetAwaiter().GetResult();
+
+            _userManager.CreateAsync(new AppUser
+            {
+                UserName = "client@gmail.com",
+                Email = "client@gmail.com",
+                FName = "Client",
+                LName = "Test",
+                PhoneNumber = "1234567890",
+                DateOfBirth = DateTime.Parse("01/01/0001"),
+                WNumber = "W00000000"
+            }, "Pass1234!").GetAwaiter().GetResult();
+
+            AppUser client = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "client@gmail.com");
+            _userManager.AddToRoleAsync(client, SD.CLIENT_ROLE).GetAwaiter().GetResult();
+
+            Client c = new Client()
+            {
+                AppUserId = client.Id,
+                DepartmentId = 2,
+                ClassLevel = "Senior"
+            };
+            _context.Clients.Add(c);
+
+            _userManager.CreateAsync(new AppUser
+            {
+                UserName = "provider@gmail.com",
+                Email = "provider@gmail.com",
+                FName = "Provider",
+                LName = "Test",
+                PhoneNumber = "1234567890",
+                DateOfBirth = DateTime.Parse("01/01/0001"),
+                WNumber = "W00000000"
+            }, "Pass1234!").GetAwaiter().GetResult();
+
+            AppUser provider = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "provider@gmail.com");
+            _userManager.AddToRoleAsync(provider, SD.PROVIDER_ROLE).GetAwaiter().GetResult();
+
+            Provider p = new Provider()
+            {
+                AppUserId = provider.Id,
+                DepartmentId = 2,
+                Title = "Teacher"
+            };
+
+            _context.Providers.Add(p);
+
             _context.SaveChanges();
         }
     }

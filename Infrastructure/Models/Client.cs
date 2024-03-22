@@ -13,17 +13,16 @@ namespace Infrastructure.Models
         [Key]
         public string? AppUserId { get; set; }
 
-        [Display(Name = "W Number")]
-        public string? StudentId { get; set; }
-
-        public int? DepartmentId { get; set; }
+        [Required]
+        public int DepartmentId { get; set; }
 
         public string? ClassLevel { get; set; }
+
+        [ForeignKey("AppUserId")]
+        public AppUser? AppUser { get; set; }
 
         [ForeignKey("DepartmentId")]
         public Department? Department { get; set; }
 
-        [ForeignKey("AppUserId")]
-        public AppUser? AppUser { get; set; }
     }
 }

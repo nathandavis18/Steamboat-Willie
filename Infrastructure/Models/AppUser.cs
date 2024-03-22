@@ -15,13 +15,16 @@ namespace Infrastructure.Models
         public string? LName { get; set; }
 
         [Required]
+        [Display(Name = "W Number")]
+        public string? WNumber { get; set; }
+
+        [Required]
         [DisplayName("Birthdate")]
         [DataType(DataType.Date)]
         public DateTime DateOfBirth { get; set; }
 
         [DisplayName("Profile Picture")]
         public string? ProfilePictureURL { get; set; } 
-
 
         [NotMapped]
         public string? FullName { get { return FName + " " + LName; } }

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp;
+using Utility;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 {
@@ -53,54 +54,71 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
+        [BindProperty]
+        public ClientInputModel ClientInput { get; set; }
+
+        [BindProperty]
+        public ProviderInputModel ProviderInput { get; set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            /// [Required]
             [Required]
             [Display(Name = "First Name")]
             public string FName { get; set; }
 
             [Required]
-            [Display(Name = "Last Name")]
-            public string? LName { get; set; }
+            [DisplayName("Last Name")]
+            public string LName { get; set; }
 
             [Required]
-            [Display(Name = "Birthdate")]
+            [DisplayName("Birthdate")]
             [DataType(DataType.Date)]
             public DateTime DateOfBirth { get; set; }
-
-            [Display(Name = "W#")]
-            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
-            [StringLength(9)]
-            public string WNumber {  get; set; }
 
             [Phone]
             [Display(Name = "Phone number")]
             [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", ErrorMessage = "Phone number must follow the format (xxx) xxx-xxxx")]
             [StringLength(15)]
+            [Required]
             public string PhoneNumber { get; set; }
 
-            [Display(Name = "Major")]
-            public string MajorID { get; set; }
+            [Display(Name = "W#")]
+            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
+            [StringLength(9)]
+            [Required]
+            public string WNumber { get; set; }
 
-            [Display(Name = "Department")]
-            public string DepartmentID {  get; set; }
+            [Required]
+            public string DepartmentId { get; set; }
             public IEnumerable<SelectListItem> Departments { get; set; }
+        }
 
+        public class ClientInputModel
+        {
+            [Required]
+            [Display(Name = "Class Level")]
+            public string ClassLevel { get; set; }
+
+            [Display(Name = "Major")]
+            public string DepartmentId { get; set; }
+        }
+
+        public class ProviderInputModel
+        {
+            [Required]
             [Display(Name = "Title")]
             public string Title { get; set; }
 
-            [Display(Name = "Class Level")]
-            public string ClassLevel { get; set; }
+            [Display(Name = "Department")]
+            public string DepartmentId { get; set; }
+
+            public bool CreatingProvider { get; set; }
         }
+
 
         private string ReturnUrl { get; set; }
 
@@ -117,24 +135,36 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                MajorID = (client != null ? client.DepartmentId.ToString() : null),
+                //MajorID = (client != null ? client.DepartmentId.ToString() : null),
                 FName = user.FName,
                 LName = user.LName,
-                ClassLevel = (client != null ? client.ClassLevel : null),
                 DateOfBirth = user.DateOfBirth,
-                WNumber = (client != null ? client.StudentId : null),
+                WNumber = user.WNumber,
                 Departments = departments.Select(x => new SelectListItem()
                 {
                     Text = x.DepartmentName,
                     Value = x.Id.ToString()
                 }),
-                DepartmentID = (provider != null ? provider.DepartmentId.ToString() : null),
-                Title = (provider != null ? provider.Title : null),
+                //DepartmentID = (provider != null ? provider.DepartmentId.ToString() : null),
                 PhoneNumber = phoneNumber
             };
+            if (await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
+            {
+                ClientInput = new ClientInputModel()
+                {
+                    ClassLevel = client.ClassLevel
+                };
+            }
+            if (await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
+            {
+                ProviderInput = new ProviderInputModel()
+                {
+                    Title = provider.Title
+                };
+            }
         }
 
-        public async Task<IActionResult> OnGetAsync() 
+        public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -173,20 +203,18 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             user.FName = Input.FName;
             user.LName = Input.LName;
             user.DateOfBirth = Input.DateOfBirth;
+            user.WNumber = Input.WNumber;
             var client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == user.Id);
             if (client != null)
             {
-                client.StudentId = Input.WNumber;
-                client.DepartmentId = Input.MajorID != null ? Int32.Parse(Input.MajorID) : null;
-                client.ClassLevel = Input.ClassLevel;
+                client.ClassLevel = ClientInput.ClassLevel;
                 _unitOfWork.Client.Update(client);
             }
 
             var provider = await _unitOfWork.Provider.GetAsync(p => p.AppUserId == user.Id);
             if (provider != null)
             {
-                provider.Title = Input.Title;
-                provider.DepartmentId = Input.DepartmentID != null ? Int32.Parse(Input.DepartmentID): null;
+                provider.Title = ProviderInput.Title;
                 _unitOfWork.Provider.Update(provider);
             }
 

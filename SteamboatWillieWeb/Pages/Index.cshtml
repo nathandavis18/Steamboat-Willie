@@ -48,6 +48,6 @@ else if(User.IsInRole(SD.PROVIDER_ROLE) || User.IsInRole(SD.CLIENT_ROLE))
 else
 {
     <div class="text-center">
-        <h1 class="display-4">Welcome, @UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName</h1>
+        <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
     </div>
 }
