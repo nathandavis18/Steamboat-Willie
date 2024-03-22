@@ -66,6 +66,12 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         [BindProperty]
         public InputModel Input { get; set; }
 
+        [BindProperty]
+        public ClientInputModel ClientInput {  get; set; }
+
+        [BindProperty]
+        public ProviderInputModel ProviderInput { get; set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -101,6 +107,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [Display(Name = "Phone number")]
             [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", ErrorMessage = "Phone number must follow the format (xxx) xxx-xxxx")]
             [StringLength(15)]
+            [Required]
             public string PhoneNumber { get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -130,12 +137,44 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
+            [Display(Name = "W#")]
+            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
+            [StringLength(9)]
+            [Required]
+            public string WNumber { get; set; }
+
             public string Role {  get; set; }
             public IEnumerable<SelectListItem> RoleList { get; set; }
+
+            [Required]
+            public string DepartmentId { get; set; }
+            public IEnumerable<SelectListItem> Departments { get; set; }
+        }
+
+        public class ClientInputModel
+        {
+            [Required]
+            [Display(Name = "Class Level")]
+            public string ClassLevel { get; set; }
+
+            [Display(Name = "Major")]
+            public string DepartmentId { get; set; }
+        }
+
+        public class ProviderInputModel
+        {
+            [Required]
+            [Display(Name = "Title")]
+            public string Title { get; set; }
+
+            [Display(Name = "Department")]
+            public string DepartmentId { get; set; }
+
+            public bool CreatingProvider { get; set; }
         }
 
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, bool creatingProvider = false)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -146,8 +185,25 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     Text = x,
                     Value = x
                 }),
-                DateOfBirth = DateTime.Now.AddYears(-16)
+                Departments = _unitOfWork.Department.GetAll().Select(x => new SelectListItem()
+                {
+                    Text = x.DepartmentName,
+                    Value = x.Id.ToString()
+                }),
+                DateOfBirth = DateTime.Now.AddYears(-16),
+                Role = "",
             };
+            if (!creatingProvider)
+            {
+                ClientInput = new ClientInputModel();
+            }
+            else
+            {
+                ProviderInput = new ProviderInputModel()
+                {
+                    CreatingProvider = creatingProvider
+                };
+            }
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -161,6 +217,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 user.LName = Input.LName;
                 user.DateOfBirth = Input.DateOfBirth;
                 user.PhoneNumber = Input.PhoneNumber;
+                user.WNumber = Input.WNumber;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -190,13 +247,17 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     if(await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
                     {
                         Client clientEntry = new Client();
-                        clientEntry.AppUserId = user.Id;
+                        clientEntry.AppUserId = userId;
+                        clientEntry.DepartmentId = Int32.Parse(Input.DepartmentId);
+                        clientEntry.ClassLevel = ClientInput.ClassLevel;
                         _unitOfWork.Client.Add(clientEntry);
                     }
                     if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
                     {
                         Provider providerEntry = new Provider();
-                        providerEntry.AppUserId = user.Id;
+                        providerEntry.AppUserId = userId;
+                        providerEntry.DepartmentId = Int32.Parse(Input.DepartmentId);
+                        providerEntry.Title = ProviderInput.Title;
                         _unitOfWork.Provider.Add(providerEntry);
                     }
                     await _unitOfWork.CommitAsync();

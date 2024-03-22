@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Globalization;
+using DataAccess;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -34,13 +35,15 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<AppUser> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly UnitOfWork _unitOfWork;
 
         public ExternalLoginModel(
             SignInManager<AppUser> signInManager,
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            UnitOfWork unitOfWork)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -48,6 +51,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -116,6 +120,11 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [DisplayName("Phone Number")]
             [StringLength(14)]
             public string PhoneNumber { get; set; }
+
+            [Display(Name = "W# (Optional)")]
+            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
+            [StringLength(9)]
+            public string WNumber { get; set; }
 
         }
         
@@ -249,6 +258,17 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                             return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
                         }
 
+                        user.FName = Input.FName;
+                        user.LName = Input.LName;
+                        user.DateOfBirth = Input.DateOfBirth;
+                        user.WNumber = Input.WNumber;
+                        _unitOfWork.AppUser.Update(user);
+
+                        var client = new Client();
+                        client.AppUserId = user.Id;
+                        _unitOfWork.Client.Add(client);
+
+                        await _unitOfWork.CommitAsync();
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
                         return LocalRedirect(returnUrl);
                     }
@@ -257,13 +277,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-                user.FName = Input.FName;
-                user.LName = Input.LName;
-                user.DateOfBirth = Input.DateOfBirth;
                 if (Input.PhoneNumber != null) {
                     await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 }
-                
             }
 
             ProviderDisplayName = info.ProviderDisplayName;

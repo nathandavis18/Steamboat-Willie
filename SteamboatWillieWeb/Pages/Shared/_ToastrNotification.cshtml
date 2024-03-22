@@ -11,3 +11,11 @@
         });
     </script>
 }
+@if (TempData["no_title"] != null)
+{
+    <script>
+        $(function () {
+            toastr.error('@TempData["no_title"]');
+        });
+    </script>
+}
