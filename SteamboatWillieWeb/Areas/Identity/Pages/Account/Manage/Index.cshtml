@@ -28,29 +28,16 @@
                 <span asp-validation-for="Input.WNumber" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                @if (User.IsInRole(SD.CLIENT_ROLE))
-                {
-                    <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
-                    <label asp-for="ClientInput.DepartmentId" class="form-label"></label>
-                }
-                else if (User.IsInRole(SD.PROVIDER_ROLE))
-                {
-                    <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
-                    <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
-                }
-                else
-                {
-                    @*Validating the model state by completing all required fields*@
-                    <select asp-for="ProviderInput.Title" hidden>
-                        <option selected>Valid</option>
-                    </select>
-                    <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select" hidden>
-                        <option>Valid</option>
-                    </select>
-                    <select asp-for="ClientInput.ClassLevel" hidden>
-                        <option selected>Valid</option>
-                    </select>
-                }
+            @if (User.IsInRole(SD.CLIENT_ROLE))
+            {
+                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
+                <label asp-for="ClientInput.DepartmentId" class="form-label"></label>
+            }
+            else if (User.IsInRole(SD.PROVIDER_ROLE))
+            {
+                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
+                <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
+            }
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.DateOfBirth" class="form-control" autocomplete="date of birth" aria-required="true" placeholder="@DateOnly.FromDateTime(DateTime.Now)" />
@@ -73,12 +60,19 @@
                     </select>
                     <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
                     <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
-
-                    @*Validating the model state by completing all required fields*@
-                    <select asp-for="ProviderInput.Title" hidden>
-                        <option selected>Advisor</option>
-                    </select>
                 </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="ClientInput.StudentType" class="form-select" placeholder="Flex, Regular">
+                        <option>Full-Time Student</option>
+                        <option>Part-Time Student</option>
+                        <option>Flex Student</option>
+                    </select>
+                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
+                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
+                </div>
+
+                @*Validating the model state by completing all required fields*@
+                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
             }
             else if (User.IsInRole(SD.PROVIDER_ROLE))
             {
@@ -89,12 +83,17 @@
                         <option>Tutor</option>
                     </select>
                     <label asp-for="ProviderInput.Title" class="form-label"></label>
-
-                    @*Validating the model state by completing all required fields*@
-                    <select asp-for="ClientInput.ClassLevel" hidden>
-                        <option selected>Valid</option>
-                    </select>
                 </div>
+                    @*Validating the model state by completing all required fields*@
+                    <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
+                    <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" />
+            }
+            else
+            {
+                @*Validating the model state by completing all required fields*@
+                <input asp-for="ProviderInput.Title" value="Valid" hidden />
+                <input asp-for="Input.DepartmentId" value="Valid" hidden />
+                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
             }
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
         </form>

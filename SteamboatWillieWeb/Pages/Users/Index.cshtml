@@ -7,6 +7,9 @@
         <div class="col-6">
             <h2 class="text-primary">User List</h2>
         </div>
+        <div class="col-6">
+            <a asp-page="/Account/Register" asp-area="Identity" asp-route-creatingProvider="@true" asp-route-returnUrl="~/Users/Index" class="btn btn-primary create-provider-btn">Create Provider Account</a>
+        </div>
     </div>
     <br /><br />
     <table class="table table-striped table-bordered" style="width:100%">

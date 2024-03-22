@@ -105,6 +105,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Major")]
             public string DepartmentId { get; set; }
+
+            [Required]
+            [Display(Name = "Student Type")]
+            public string StudentType { get; set; }
         }
 
         public class ProviderInputModel
@@ -115,8 +119,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Department")]
             public string DepartmentId { get; set; }
-
-            public bool CreatingProvider { get; set; }
         }
 
 
@@ -135,7 +137,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                //MajorID = (client != null ? client.DepartmentId.ToString() : null),
                 FName = user.FName,
                 LName = user.LName,
                 DateOfBirth = user.DateOfBirth,
@@ -145,18 +146,20 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                     Text = x.DepartmentName,
                     Value = x.Id.ToString()
                 }),
-                //DepartmentID = (provider != null ? provider.DepartmentId.ToString() : null),
                 PhoneNumber = phoneNumber
             };
             if (await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
             {
+                Input.DepartmentId = client.DepartmentId.ToString();
                 ClientInput = new ClientInputModel()
                 {
-                    ClassLevel = client.ClassLevel
+                    ClassLevel = client.ClassLevel,
+                    StudentType = client.StudentType
                 };
             }
             if (await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
             {
+                Input.DepartmentId = provider.DepartmentId.ToString();
                 ProviderInput = new ProviderInputModel()
                 {
                     Title = provider.Title
@@ -208,6 +211,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             if (client != null)
             {
                 client.ClassLevel = ClientInput.ClassLevel;
+                client.StudentType = ClientInput.StudentType;
                 _unitOfWork.Client.Update(client);
             }
 

@@ -42,16 +42,18 @@
                 <label asp-for="Input.WNumber">W#</label>
                 <span asp-validation-for="Input.WNumber" class="text-danger"></span>
             </div>
-                <div class="form-floating mb-3">
-                    <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
-                    @if (!User.IsInRole(SD.ADMIN_ROLE))
-                    {
+            <div class="form-floating mb-3">
+                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
+                @if (!User.IsInRole(SD.ADMIN_ROLE))
+                {
                     <label asp-for="ClientInput.DepartmentId" class="form-label"></label>
-                    }
-                    else{
+                    <span asp-validation-for="ClientInput.DepartmentId" class="text-danger"></span>
+                }
+                else{
                     <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
-                    }
-                </div>
+                    <span asp-validation-for="ProviderInput.DepartmentId" class="text-danger"></span>
+                }
+            </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.DateOfBirth" class="form-control" autocomplete="date of birth" aria-required="true" placeholder="@DateOnly.FromDateTime(DateTime.Now)" />
                 <label asp-for="Input.DateOfBirth">Birthdate</label>
@@ -74,14 +76,19 @@
                     <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
                     <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
                 </div>
-                <select asp-for="Input.Role" hidden>
-                    <option selected>@SD.CLIENT_ROLE</option>
-                </select>
+                <div class="form-floating mb-3">
+                    <select asp-for="ClientInput.StudentType" class="form-select" placeholder="Flex, Regular">
+                        <option>Full-Time Student</option>
+                        <option>Part-Time Student</option>
+                        <option>Flex Student</option>
+                    </select>
+                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
+                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
+                </div>
 
                 @*Validating the model state by completing all required fields*@
-                <select asp-for="ProviderInput.Title" hidden>
-                    <option selected>Valid</option>
-                </select>
+                <input asp-for="Input.Role" value="@SD.CLIENT_ROLE" hidden />
+                <input asp-for="ProviderInput.Title" value="Valid" hidden />
             }
             else if (User.IsInRole(SD.ADMIN_ROLE) && Model.ProviderInput.CreatingProvider)
             {
@@ -98,9 +105,8 @@
                 </div>
 
                 @*Validating the model state by completing all required fields*@
-                <select asp-for="ClientInput.ClassLevel" hidden>
-                    <option selected>Valid</option>
-                </select>
+                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
+                <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden/>
             }
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
