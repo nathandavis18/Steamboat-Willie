@@ -23,6 +23,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Globalization;
 using DataAccess;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Utility;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -117,14 +119,31 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
-            [DisplayName("Phone Number")]
-            [StringLength(14)]
+            [Phone]
+            [Display(Name = "Phone number")]
+            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", ErrorMessage = "Phone number must follow the format (xxx) xxx-xxxx")]
+            [StringLength(15)]
+            [Required]
             public string PhoneNumber { get; set; }
 
-            [Display(Name = "W# (Optional)")]
+            [Display(Name = "W#")]
             [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
             [StringLength(9)]
+            [Required]
             public string WNumber { get; set; }
+
+            [Required]
+            [Display(Name = "Major")]
+            public string DepartmentId { get; set; }
+            public IEnumerable<SelectListItem> Departments { get; set; }
+
+            [Required]
+            [Display(Name = "Class Level")]
+            public string ClassLevel { get; set; }
+
+            [Required]
+            [Display(Name = "Student Type")]
+            public string StudentType { get; set; }
 
         }
         
@@ -201,7 +220,14 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 {
                     Input.DateOfBirth = DateTime.Now.AddYears(-16);
                 }
+                Input.Departments = _unitOfWork.Department.GetAll().Select(d => new SelectListItem
+                {
+                    Text = d.DepartmentName,
+                    Value = d.Id.ToString()
+                });
+
                 return Page();
+                
             }
         }
 
@@ -249,14 +275,17 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        /*await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        */
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
                             return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
                         }
+                        await _userManager.AddToRoleAsync(user, SD.CLIENT_ROLE);
+                        await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
 
                         user.FName = Input.FName;
                         user.LName = Input.LName;
@@ -265,7 +294,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         _unitOfWork.AppUser.Update(user);
 
                         var client = new Client();
-                        client.AppUserId = user.Id;
+                        client.AppUserId = userId;
+                        client.DepartmentId = Int32.Parse(Input.DepartmentId);
+                        client.ClassLevel = Input.ClassLevel;
+                        client.StudentType = Input.StudentType;
                         _unitOfWork.Client.Add(client);
 
                         await _unitOfWork.CommitAsync();

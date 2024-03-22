@@ -157,3 +157,9 @@ body {
 .login-signup{
     font-size: 20px;
 }
+
+.create-provider-btn{
+    width: 207px;
+    margin-left: calc(100% - 207px);
+    margin-top: 35px;
+}

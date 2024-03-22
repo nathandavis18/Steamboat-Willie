@@ -10,8 +10,7 @@
 
 <p id="external-login-description" class="text-info">
     You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
+    Please enter the following information to complete registering your account!
 </p>
 
 <div class="row">
@@ -49,14 +48,38 @@
                 <span asp-validation-for="Input.WNumber" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
+                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
+                <label asp-for="Input.DepartmentId" class="form-label"></label>
+                <span asp-validation-for="Input.DepartmentId" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
                 <input asp-for="Input.DateOfBirth" class="form-control" autocomplete="birthdate" placeholder="Please enter your date of birth."  />
                 <label asp-for="Input.DateOfBirth" class="form-label"></label>
                 <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="phone number" placeholder="Please enter your phone number."  />
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
+                <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <select asp-for="Input.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
+                    <option>Freshman</option>
+                    <option>Sophomore</option>
+                    <option>Junior</option>
+                    <option>Senior</option>
+                </select>
+                <label asp-for="Input.ClassLevel" class="form-label"></label>
+                <span asp-validation-for="Input.ClassLevel" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <select asp-for="Input.StudentType" class="form-select" placeholder="Flex, Regular">
+                    <option>Full-Time Student</option>
+                    <option>Part-Time Student</option>
+                    <option>Flex Student</option>
+                </select>
+                <label asp-for="Input.StudentType" class="form-label"></label>
+                <span asp-validation-for="Input.StudentType" class="text-danger"></span>
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
@@ -65,4 +88,14 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function phoneFormat(input) {//returns (###) ###-####
+            input = input.replace(/\D/g, '');
+            var size = input.length;
+            if (size > 0) { input = "(" + input }
+            if (size > 3) { input = input.slice(0, 4) + ") " + input.slice(4, 11) }
+            if (size > 6) { input = input.slice(0, 9) + "-" + input.slice(9) }
+            return input;
+        }
+    </script>
 }

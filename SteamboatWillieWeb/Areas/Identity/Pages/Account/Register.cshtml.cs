@@ -157,8 +157,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [Display(Name = "Class Level")]
             public string ClassLevel { get; set; }
 
+            [Required]
+            [Display(Name = "Student Type")]
+            public string StudentType { get; set; }
+
             [Display(Name = "Major")]
             public string DepartmentId { get; set; }
+
         }
 
         public class ProviderInputModel
@@ -250,6 +255,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         clientEntry.AppUserId = userId;
                         clientEntry.DepartmentId = Int32.Parse(Input.DepartmentId);
                         clientEntry.ClassLevel = ClientInput.ClassLevel;
+                        clientEntry.StudentType = ClientInput.StudentType;
                         _unitOfWork.Client.Add(clientEntry);
                     }
                     if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
@@ -258,6 +264,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         providerEntry.AppUserId = userId;
                         providerEntry.DepartmentId = Int32.Parse(Input.DepartmentId);
                         providerEntry.Title = ProviderInput.Title;
+                        ProviderInput.CreatingProvider = true;
                         _unitOfWork.Provider.Add(providerEntry);
                     }
                     await _unitOfWork.CommitAsync();
@@ -268,7 +275,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        if (!ProviderInput.CreatingProvider)
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                        }
                         return LocalRedirect(returnUrl);
                     }
                 }
