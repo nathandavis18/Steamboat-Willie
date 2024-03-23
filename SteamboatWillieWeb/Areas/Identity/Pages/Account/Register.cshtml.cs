@@ -224,6 +224,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 user.PhoneNumber = Input.PhoneNumber;
                 user.WNumber = Input.WNumber;
                 user.ProfilePictureURL = "default.png";
+                _unitOfWork.AppUser.Update(user);
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

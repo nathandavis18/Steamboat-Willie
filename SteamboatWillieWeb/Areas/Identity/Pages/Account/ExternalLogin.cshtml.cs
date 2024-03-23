@@ -291,6 +291,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         user.LName = Input.LName;
                         user.DateOfBirth = Input.DateOfBirth;
                         user.WNumber = Input.WNumber;
+                        user.ProfilePictureURL = "default.png";
                         _unitOfWork.AppUser.Update(user);
 
                         var client = new Client();
