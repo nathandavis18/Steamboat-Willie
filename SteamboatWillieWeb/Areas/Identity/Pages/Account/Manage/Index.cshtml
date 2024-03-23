@@ -98,6 +98,19 @@
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
         </form>
     </div>
+    <div class="col-md-6">
+        <div class="profile-image-box">
+            <div class="profile-image-container container">
+                <form enctype="multipart/form-data" method="post">
+                    <input asp-for="FileInput.ImgFile" type="file" class="profile-image-btn form-control" id="pfp-upload-btn" accept="image/*" />
+                    <span asp-validation-for="FileInput.ImgFile"></span>
+                    <img src="~/images/profileimages/@Html.Raw(Model.Input.ProfilePictureURL)" class="profile-image" id="pfp", title="Click to change image!"/>
+                    <input asp-for="FileInput.Validator" value="Valid" title="Hidden" placeholder="Hidden" hidden />
+                    <input type="submit" asp-page-handler="Image" id="pfp-upload-submit" hidden/>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -112,5 +125,18 @@
             if (size > 6) { input = input.slice(0, 9) + "-" + input.slice(9) }
             return input;
         }
+        var isFileDialogOpen = false;
+        $('#pfp').click(function () { 
+            $('#pfp-upload-btn').trigger('click'); 
+            isFileDialogOpen = true;
+        });
+        function submitForm() {
+            if (isFileDialogOpen) {
+                isFileDialogOpen = false;
+                $('#pfp-upload-submit').trigger('click');
+            }
+        }
+        $('#pfp-upload-btn').change(submitForm)
+        
     </script>
 }

@@ -60,6 +60,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public ProviderInputModel ProviderInput { get; set; }
 
+        [BindProperty]
+        public FileInputModel FileInput { get; set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -95,6 +98,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             [Required]
             public string DepartmentId { get; set; }
             public IEnumerable<SelectListItem> Departments { get; set; }
+
+            [DisplayName("Profile Picture")]
+            public string ProfilePictureURL { get; set; }
         }
 
         public class ClientInputModel
@@ -119,6 +125,16 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Department")]
             public string DepartmentId { get; set; }
+        }
+
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+        public class FileInputModel
+        {
+            [DataType(DataType.Upload)]
+
+            public IFormFile ImgFile { get; set; }
+
+            public string Validator {  get; set; }
         }
 
 
@@ -146,7 +162,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                     Text = x.DepartmentName,
                     Value = x.Id.ToString()
                 }),
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                ProfilePictureURL = user.ProfilePictureURL
             };
             if (await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
             {
@@ -165,6 +182,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                     Title = provider.Title
                 };
             }
+            FileInput = new FileInputModel();
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -226,6 +244,32 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostImageAsync()
+        {
+            if (FileInput.ImgFile == null)
+            {
+                TempData["no_image"] = "Error: No Image Selected";
+                return RedirectToPage();
+            }
+            var extension = Path.GetExtension(FileInput.ImgFile.FileName);
+            if(!(extension.Equals(".png") || extension.Equals(".jpg") || extension.Equals(".jpeg")))
+            {
+                TempData["img_error"] = "Error: Image file type not supported.";
+                return RedirectToPage();
+            }
+            var user = await _userManager.GetUserAsync(User);
+            var fileName = user.Id.Substring(0, 10) + user.FName.Substring(0, 3) + user.LName.Substring(0, 1) + "pfpImage" + extension;
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/profileimages", fileName);
+            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
+            {
+                user.ProfilePictureURL = fileName;
+                await FileInput.ImgFile.CopyToAsync(fs);
+                _unitOfWork.AppUser.Update(user);
+                await _unitOfWork.CommitAsync();
+            }
             return RedirectToPage();
         }
     }
