@@ -19,3 +19,19 @@
         });
     </script>
 }
+@if (TempData["img_error"] != null)
+{
+    <script>
+        $(function () {
+            toastr.error('@TempData["img_error"]');
+        });
+    </script>
+}
+@if (TempData["no_image"] != null)
+{
+    <script>
+        $(function () {
+            toastr.error('@TempData["no_image"]');
+        });
+    </script>
+}
