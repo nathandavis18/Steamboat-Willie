@@ -261,7 +261,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 return RedirectToPage();
             }
             var user = await _userManager.GetUserAsync(User);
-            var fileName = user.Id.Substring(0, 10) + user.FName.Substring(0, 3) + user.LName.Substring(0, 1) + "pfpImage" + extension;
+            var fileName = user.Id.Substring(0, 10) + user.FName.Substring(0, 3) + user.LName.Substring(0, 1) + "pfpImage.png";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/profileimages", fileName);
             using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
             {
