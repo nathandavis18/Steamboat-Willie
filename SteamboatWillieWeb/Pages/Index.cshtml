@@ -14,35 +14,47 @@
         <p class="display-4 login-signup">Please, <a asp-page="/Account/Login" asp-area="Identity">log in</a> or <a asp-page="/Account/Register" asp-area="Identity">sign up</a> to continue</p>
     </div>
 }
-else if(User.IsInRole(SD.PROVIDER_ROLE) || User.IsInRole(SD.CLIENT_ROLE))
+else if (User.IsInRole(SD.PROVIDER_ROLE))
 {
     <head>
         <meta charset='utf-8' />
         <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-        <script>document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            slotMinTime: '07:00:00',
-            slotMaxTime: '19:00:00',
-            height: 'auto',
-            headerToolbar: {
-            left: 'prev,next',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek' // user can switch between the two
-            }
-            });
-            calendar.render();
-            });</script>
-    </head>
-        <body>
-            @if (User.IsInRole(SD.PROVIDER_ROLE))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var calendarEl = document.getElementById('calendar');
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '19:00:00',
+                    height: 'auto',
+                    headerToolbar: {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek' // user can switch between the two
+                    },
+                    eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
+                        alert('event:' + info.event.title);
+                    }
+                });
+            @foreach(var obj in Model.CalendarObj)
             {
-                <div class="text-end">
-                    <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
-                </div>
+                <text>
+                var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
+                calendar.addEvent(e);
+                </text>
             }
-            <div id='calendar'></div>
+            calendar.render();
+            });
+            </script>
+    </head>
+    <body>
+        @if (User.IsInRole(SD.PROVIDER_ROLE))
+        {
+            <div class="text-end">
+                <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
+            </div>
+        }
+        <div id='calendar'></div>
     </body>
 }
 else
