@@ -68,69 +68,31 @@ namespace SteamboatWillieWeb.Pages.Availability
                 DateTime combinedDateTime = startDate.Date + startTime.TimeOfDay;
                 DateTime duration = DateTime.Parse(Request.Form["objAvailability.Duration"]);
 
-                if (Request.Form["recurrance"] == "true")
+                int numAppointments = int.Parse(Request.Form["numAppointments"]);
+                DateTime endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+
+                for (int i = 0; i < numAppointments; i++)
                 {
-                    DateTime endDate = DateTime.Parse(Request.Form["endDate"]);
-                    string[] selectedDaysOfWeek = Request.Form["weekDays[]"];
-                    foreach (string dayOfWeek in selectedDaysOfWeek)
+                    ProviderAvailability availabilitySlot = new ProviderAvailability
                     {
-                        DayOfWeek day = Enum.Parse<DayOfWeek>(dayOfWeek);
-                        DateTime startTimeForDay = CalculateStartTimeForDay(combinedDateTime, day);
-                        DateTime endTimeForDay = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+                        ProviderId = 1,
+                        StartTime = combinedDateTime,
+                        EndTime = endTime,
+                        Duration = duration,
+                        Scheduled = false
+                    };
 
-                        while (startTimeForDay <= endDate)
-                        {
-                            ProviderAvailability availabilitySlot = new ProviderAvailability
-                            {
-                                ProviderId = 1,
-                                StartTime = combinedDateTime,
-                                EndTime = endTimeForDay,
-                                Duration = duration,
-                                Scheduled = false
-                            };
+                    _unitOfWork.ProviderAvailability.Add(availabilitySlot);
 
-                            _unitOfWork.ProviderAvailability.Add(availabilitySlot);
-                            startTimeForDay = startTimeForDay.AddDays(7);
-                            endTimeForDay = endTimeForDay.AddDays(7);
-                        }
-                    }
+                    // Update start and end time for the next appointment
+                    combinedDateTime = endTime;
+                    endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
                 }
-                else
-                {
-                    int numAppointments = int.Parse(Request.Form["numAppointments"]);
-                    DateTime endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-
-                    for (int i = 0; i < numAppointments; i++)
-                    {
-                        ProviderAvailability availabilitySlot = new ProviderAvailability
-                        {
-                            ProviderId = 1,
-                            StartTime = combinedDateTime,
-                            EndTime = endTime,
-                            Duration = duration,
-                            Scheduled = false
-                        };
-
-                        _unitOfWork.ProviderAvailability.Add(availabilitySlot);
-
-                        // Update start and end time for the next appointment
-                        combinedDateTime = endTime;
-                        endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-                    }
-                }
-                _unitOfWork.Commit();
-                return RedirectToPage("./Index");
             }
-            return Page();
-        }
 
-        private DateTime CalculateStartTimeForDay(DateTime baseStartTime, DayOfWeek targetDayOfWeek)
-        {
-            int difference = targetDayOfWeek - baseStartTime.DayOfWeek;
-            if (difference < 0)
-                difference += 7; // To ensure it's a positive value
+            _unitOfWork.Commit();
+            return RedirectToPage("./Index");
 
-            return baseStartTime.AddDays(difference);
         }
     }
 }
