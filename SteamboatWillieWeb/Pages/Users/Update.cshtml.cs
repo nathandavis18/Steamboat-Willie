@@ -91,6 +91,9 @@ namespace SteamboatWillieWeb.Pages.Users
                 {
                     Client clientEntry = new Client();
                     clientEntry.AppUserId = AppUser.Id;
+                    clientEntry.DepartmentId = 1;
+                    clientEntry.ClassLevel = "Freshman";
+                    clientEntry.StudentType = "Full-Time Student";
                     _unitOfWork.Client.Add(clientEntry);
                 }
             }
@@ -107,8 +110,24 @@ namespace SteamboatWillieWeb.Pages.Users
                 var provider = await _unitOfWork.Provider.GetAsync(p => p.AppUserId == AppUser.Id);
                 if (provider == null)
                 {
+                    Client? client;
                     Provider providerEntry = new Provider();
                     providerEntry.AppUserId = AppUser.Id;
+                    client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == AppUser.Id);
+                    if (client != null)
+                    {
+                        providerEntry.DepartmentId = client.DepartmentId;
+                        providerEntry.Title = "Tutor";
+
+                    }
+                    else
+                    {
+                        providerEntry.DepartmentId = 1;
+                        providerEntry.Title = "Instructor";
+                    }
+                    providerEntry.AdvisementTypes = ",";
+                    providerEntry.StartTime = DateTime.Parse("01/01/0001 08:00:00");
+                    providerEntry.EndTime = DateTime.Parse("01/01/0001 18:00:00");
                     _unitOfWork.Provider.Add(providerEntry);
                 }
             }

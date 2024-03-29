@@ -49,7 +49,40 @@
                 <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            @if (User.IsInRole(SD.CLIENT_ROLE))
+            @if(User.IsInRole(SD.CLIENT_ROLE) && User.IsInRole(SD.PROVIDER_ROLE))
+            {
+                <div class="form-floating mb-3">
+                    <select asp-for="ClientInput.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
+                        <option>Freshman</option>
+                        <option>Sophomore</option>
+                        <option>Junior</option>
+                        <option>Senior</option>
+                    </select>
+                    <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
+                    <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="ClientInput.StudentType" class="form-select" placeholder="Flex, Regular">
+                        <option>Full-Time Student</option>
+                        <option>Part-Time Student</option>
+                        <option>Flex Student</option>
+                    </select>
+                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
+                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
+                </div>
+                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
+                <div class="form-floating mb-3">
+                    <input asp-for="ProviderInput.StartTime" class="form-control" required />
+                    <label asp-for="ProviderInput.StartTime" class="form-label"></label>
+                    <span asp-validation-for="ProviderInput.StartTime" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="ProviderInput.EndTime" class="form-control" required />
+                    <label asp-for="ProviderInput.EndTime" class="form-label"></label>
+                    <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
+                </div>
+            }
+            else if (User.IsInRole(SD.CLIENT_ROLE))
             {
                 <div class="form-floating mb-3">
                     <select asp-for="ClientInput.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
@@ -74,8 +107,6 @@
                 @*Validating the model state by completing all required fields*@
                 <input asp-for="ProviderInput.Title" value="Tutor" hidden />
                 <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
-                @*<input asp-for="ProviderInput.StartTime" value="@DateTime.Parse("01/01/0001")" hidden />
-                <input asp-for="ProviderInput.EndTime" value="@DateTime.Parse("01/01/0001")" hidden />*@
             }
             else if (User.IsInRole(SD.PROVIDER_ROLE))
             {
