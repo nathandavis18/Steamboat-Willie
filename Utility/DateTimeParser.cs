@@ -58,6 +58,7 @@
                 }
             }
 
+            //Creating the final return string
             returnString = yearString + "-" + monthString + "-" + dayString + "T" + hourString + ":" + minuteString + ":" + secondString;
             return returnString;
         }

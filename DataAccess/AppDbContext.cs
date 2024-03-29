@@ -12,8 +12,6 @@ namespace DataAccess
 
         public DbSet<Appointment> Appointments { get; set; }
 
-        public DbSet<AppointmentCategory> AppointmentsCategories { get; set;}
-
         public DbSet<Client> Clients { get; set; }
 
         public DbSet<Department> Departments { get; set; }

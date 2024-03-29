@@ -24,19 +24,6 @@ namespace DataAccess
                 return _Appointment;
             }
         }
-            
-        private IGenericRepository<AppointmentCategory> _AppointmentCategory;
-        public IGenericRepository<AppointmentCategory> AppointmentCategory
-        {
-            get
-            {
-                if(_AppointmentCategory == null)
-                {
-                    _AppointmentCategory = new GenericRepository<AppointmentCategory>(_context);
-                }
-                return _AppointmentCategory;
-            }
-        }
 
         private IGenericRepository<AppUser> _AppUser;
         public IGenericRepository<AppUser> AppUser

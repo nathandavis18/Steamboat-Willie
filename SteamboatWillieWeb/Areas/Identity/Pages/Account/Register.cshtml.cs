@@ -96,7 +96,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
             [Required]
             [DisplayName("Last Name")]
-            public string? LName { get; set; }
+            public string LName { get; set; }
 
             [Required]
             [DisplayName("Birthdate")]
@@ -266,6 +266,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         providerEntry.AppUserId = userId;
                         providerEntry.DepartmentId = Int32.Parse(Input.DepartmentId);
                         providerEntry.Title = ProviderInput.Title;
+                        providerEntry.AdvisementTypes = ",";
+                        providerEntry.StartTime = DateTime.Parse("01/01/0001 08:00:00");
+                        providerEntry.EndTime = DateTime.Parse("01/01/0001 20:00:00");
                         ProviderInput.CreatingProvider = true;
                         _unitOfWork.Provider.Add(providerEntry);
                     }
