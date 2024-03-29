@@ -75,7 +75,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                 {
                     ProviderAvailability availabilitySlot = new ProviderAvailability
                     {
-                        ProviderId = 1,
+                        //ProviderId = 1,
                         StartTime = combinedDateTime,
                         EndTime = endTime,
                         Duration = duration,

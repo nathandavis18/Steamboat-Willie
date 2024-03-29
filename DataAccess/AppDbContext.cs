@@ -8,7 +8,7 @@ namespace DataAccess
     {
         public AppDbContext (DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<AppUser> ApplicationUsers { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
 
         public DbSet<Appointment> Appointments { get; set; }
 

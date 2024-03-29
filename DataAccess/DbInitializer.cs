@@ -187,10 +187,11 @@ namespace DataAccess
                 LName = "Test",
                 PhoneNumber = "1234567890",
                 DateOfBirth = DateTime.Parse("01/01/0001"),
-                WNumber = "W00000000"
+                WNumber = "W00000000",
+                ProfilePictureURL = "default.png"
             }, "Pass1234!").GetAwaiter().GetResult();
 
-            AppUser admin = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@gmail.com");
+            AppUser admin = _context.AppUsers.FirstOrDefault(u => u.Email == "admin@gmail.com");
             _userManager.AddToRoleAsync(admin, SD.ADMIN_ROLE).GetAwaiter().GetResult();
 
             _userManager.CreateAsync(new AppUser
@@ -201,17 +202,19 @@ namespace DataAccess
                 LName = "Test",
                 PhoneNumber = "1234567890",
                 DateOfBirth = DateTime.Parse("01/01/0001"),
-                WNumber = "W00000000"
+                WNumber = "W00000000",
+                ProfilePictureURL = "default.png"
             }, "Pass1234!").GetAwaiter().GetResult();
 
-            AppUser client = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "client@gmail.com");
+            AppUser client = _context.AppUsers.FirstOrDefault(u => u.Email == "client@gmail.com");
             _userManager.AddToRoleAsync(client, SD.CLIENT_ROLE).GetAwaiter().GetResult();
 
             Client c = new Client()
             {
                 AppUserId = client.Id,
-                DepartmentId = 2,
-                ClassLevel = "Senior"
+                DepartmentId = 4,
+                ClassLevel = "Senior",
+                StudentType = "New Student"
             };
             _context.Clients.Add(c);
 
@@ -223,17 +226,21 @@ namespace DataAccess
                 LName = "Test",
                 PhoneNumber = "1234567890",
                 DateOfBirth = DateTime.Parse("01/01/0001"),
-                WNumber = "W00000000"
+                WNumber = "W00000000",
+                ProfilePictureURL = "default.png"
             }, "Pass1234!").GetAwaiter().GetResult();
 
-            AppUser provider = _context.ApplicationUsers.FirstOrDefault(u => u.Email == "provider@gmail.com");
+            AppUser provider = _context.AppUsers.FirstOrDefault(u => u.Email == "provider@gmail.com");
             _userManager.AddToRoleAsync(provider, SD.PROVIDER_ROLE).GetAwaiter().GetResult();
 
             Provider p = new Provider()
             {
                 AppUserId = provider.Id,
-                DepartmentId = 2,
-                Title = "Teacher"
+                DepartmentId = 6,
+                Title = "Teacher",
+                AdvisementTypes = ",",
+                StartTime = new DateTime(0),
+                EndTime = new DateTime(0)
             };
 
             _context.Providers.Add(p);

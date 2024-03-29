@@ -24,43 +24,21 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Infrastructure.Models.Appointment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AppointmentCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AppointmentTypeId")
-                        .HasColumnType("int");
+                    b.Property<string>("ProviderAvailabilityId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClientId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProviderAvailabilityId")
-                        .HasColumnType("int");
-
                     b.Property<string>("StudentComments")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppointmentCategoryId");
+                    b.HasKey("ProviderAvailabilityId");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("ProviderAvailabilityId");
 
                     b.ToTable("Appointments");
                 });
@@ -87,14 +65,12 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClassLevel")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("StudentType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AppUserId");
@@ -142,8 +118,17 @@ namespace DataAccess.Migrations
                     b.Property<string>("AppUserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("AdvisementTypes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
@@ -157,11 +142,11 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Infrastructure.Models.ProviderAvailability", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("AppointmentCategoryId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Duration")
                         .HasColumnType("datetime2");
@@ -169,8 +154,11 @@ namespace DataAccess.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ProviderId")
+                    b.Property<int>("LocationId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProviderId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("Scheduled")
                         .HasColumnType("bit");
@@ -179,6 +167,12 @@ namespace DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppointmentCategoryId");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("ProviderAvailability");
                 });
@@ -416,21 +410,9 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Infrastructure.Models.Appointment", b =>
                 {
-                    b.HasOne("Infrastructure.Models.AppointmentCategory", "AppointmentCategory")
-                        .WithMany()
-                        .HasForeignKey("AppointmentCategoryId");
-
                     b.HasOne("Infrastructure.Models.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Infrastructure.Models.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ClientId");
 
                     b.HasOne("Infrastructure.Models.ProviderAvailability", "ProviderAvailability")
                         .WithMany()
@@ -438,11 +420,7 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AppointmentCategory");
-
                     b.Navigation("Client");
-
-                    b.Navigation("Location");
 
                     b.Navigation("ProviderAvailability");
                 });
@@ -483,6 +461,31 @@ namespace DataAccess.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("Infrastructure.Models.ProviderAvailability", b =>
+                {
+                    b.HasOne("Infrastructure.Models.AppointmentCategory", "AppointmentCategory")
+                        .WithMany()
+                        .HasForeignKey("AppointmentCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Models.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId");
+
+                    b.Navigation("AppointmentCategory");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

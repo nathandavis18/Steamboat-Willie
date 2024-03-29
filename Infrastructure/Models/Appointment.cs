@@ -11,15 +11,9 @@ namespace Infrastructure.Models
     public class Appointment
     {
         [Key]
-        public int Id { get; set; }
+        public string? ProviderAvailabilityId { get; set; }
 
-        public int ProviderAvailabilityId { get; set; }
-
-        public string ClientId { get; set; }
-
-        public int AppointmentTypeId { get; set; }
-
-        public int LocationId { get; set; }
+        public string? ClientId { get; set; }
 
         public string? Description { get; set; }
 
@@ -27,19 +21,11 @@ namespace Infrastructure.Models
 
         //navigational stuff
         
-        [ForeignKey("ProviderAvailabilityId")]
+        [ForeignKey(nameof(ProviderAvailabilityId))]
         public ProviderAvailability? ProviderAvailability { get; set; }
 
-        [ForeignKey("ClientId")]
-        public Client? Client { get; set; }
-
-        [ForeignKey("AppointmentCategoryId")]
-        public AppointmentCategory? AppointmentCategory { get; set; }
-
-        [ForeignKey("LocationId")]
-        [Display(Name = "Location")]
-        public Location? Location { get; set; }
-        
+        [ForeignKey(nameof(ClientId))]
+        public Client? Client { get; set; }      
     }
 }
         
