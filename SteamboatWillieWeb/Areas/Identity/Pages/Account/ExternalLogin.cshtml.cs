@@ -102,7 +102,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
             [Required]
             [DisplayName("Last Name")]
-            public string? LName { get; set; }
+            public string LName { get; set; }
 
             [Required]
             [DisplayName("Birthdate")]

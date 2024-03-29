@@ -31,8 +31,6 @@ namespace Infrastructure.Models
 
         public int LocationId { get; set; }
 
-        public int AppointmentCategoryId { get; set; }
-
         public bool Scheduled { get; set; }
 
         [ForeignKey(nameof(ProviderId))]
@@ -41,10 +39,5 @@ namespace Infrastructure.Models
         [ForeignKey(nameof(LocationId))]
         [Display(Name = "Location")]
         public Location? Location { get; set; }
-
-        [ForeignKey(nameof(AppointmentCategoryId))]
-        public AppointmentCategory? AppointmentCategory { get; set; }
-
-
     }
 }
