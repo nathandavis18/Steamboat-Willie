@@ -57,6 +57,52 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
         <div id='calendar'></div>
     </body>
 }
+else if (User.IsInRole(SD.CLIENT_ROLE))
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
+    </div>
+
+    <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
+        <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
+            <div class="card custom-card">
+                <div class="card-header" style="background-color: red;">Tutor Appointment</div>
+                <div class="card-body">
+                    Tutor Name <br />
+                    Start Time <br />
+                    End Time <br />
+                    Location
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
+        <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
+            <div class="card custom-card">
+                <div class="card-header" style="background-color: blue;">Instructor Appointment</div>
+                <div class="card-body">
+                    Instructor Name <br />
+                    Start Time <br />
+                    End Time <br />
+                    Location
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
+        <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
+            <div class="card custom-card">
+                <div class="card-header" style="background-color: green;">Advising Appointment</div>
+                <div class="card-body">
+                    Advisor Name <br />
+                    Start Time <br />
+                    End Time <br />
+                    Location
+                </div>
+            </div>
+        </a>
+    </div>
+}
 else
 {
     <div class="text-center">
