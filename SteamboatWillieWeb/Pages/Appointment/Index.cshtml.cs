@@ -9,7 +9,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
 {
     public class IndexModel : PageModel
     {
-        public Calendar[]? CalendarObj { get; set; }
+        public List<Calendar> CalendarObj { get; set; }
         public class Calendar //Test class, needs to be updated
         {
             public string? Id { get; set; }
@@ -22,15 +22,11 @@ namespace SteamboatWillieWeb.Pages.Appointment
         public IndexModel(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
+            CalendarObj = new List<Calendar>();
         }
         public IActionResult OnGet(string? type = null)
         {
-            CalendarObj = new Calendar[]
-            {
-                new Calendar {Id = "4", Name = "Dr. Fry", StartTime = DateTimeParser.ParseDateTime(DateTime.Parse("2024-03-28 13:30:00")), EndTime = DateTimeParser.ParseDateTime(DateTime.Parse("2024-03-28 14:00:00")) }, //Test data, needs to be pulled from DB
-                new Calendar {Id = "18", Name = "Anderson", StartTime = "2024-03-29T09:30:00", EndTime = "2024-03-29T10:00:00"},
-                new Calendar {Id = "27", Name = "Huson", StartTime = "2024-03-29T10:30:00", EndTime = "2024-03-29T11:00:00" }
-            };
+
             if (!User.Identity!.IsAuthenticated)
             {
                 return RedirectToPage("/Account/Login", new { ReturnUrl = "/Appointment/Index", Area = "Identity" });
@@ -56,25 +52,74 @@ namespace SteamboatWillieWeb.Pages.Appointment
                     Value = x.Id.ToString()
                 });
 
-
-                //_unitOfWork.ProviderAvailability.GetAll().Where(p => p.Provider.Title.Equals("Tutor"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor"));
+                foreach (var a in availabilities)
+                {
+                    CalendarObj.Add(new Calendar
+                    {
+                        Id = a.Id,
+                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                    });
+                }
+                
             }
             else if (type.Equals("NewStudent"))
             {
-                //_unitOfWork.ProviderAvailability.GetAll().Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("NewStudent"));
-                  //NewStudent,ExistingStudent,FlexStudent
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("NewStudent"));
+                foreach (var a in availabilities)
+                {
+                    CalendarObj.Add(new Calendar
+                    {
+                        Id = a.Id,
+                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                    });
+                }
             }
             else if (type.Equals("ExistingStudent"))
             {
-                //_unitOfWork.ProviderAvailability.GetAll().Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("ExistingStudent"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("ExistingStudent"));
+                foreach (var a in availabilities)
+                {
+                    CalendarObj.Add(new Calendar
+                    {
+                        Id = a.Id,
+                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                    });
+                }
             }
             else if (type.Equals("FlexStudent"))
             {
-                //_unitOfWork.ProviderAvailability.GetAll().Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("FlexStudent"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("FlexStudent"));
+                foreach (var a in availabilities)
+                {
+                    CalendarObj.Add(new Calendar
+                    {
+                        Id = a.Id,
+                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                    });
+                }
             }
             else if (type.Equals("Instructing"))
             {
-                //_unitOfWork.ProviderAvailability.GetAll().Where(p => p.Provider.Title.Equals("Instructor"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Instructor"));
+                foreach (var a in availabilities)
+                {
+                    CalendarObj.Add(new Calendar
+                    {
+                        Id = a.Id,
+                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                    });
+                }
             }
 
             return Page();
