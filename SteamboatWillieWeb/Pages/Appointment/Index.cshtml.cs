@@ -43,16 +43,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
 
             if (type.Equals("Tutoring"))
             {
-                //Example of how to retrieve provider locations                                                 //This will be userId, not a hard-coded value
-                var providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(p => p.ProviderId == "f8749ce3-86b8-4173-9bcd-478717de9e0e")
-                        .Select(l => l.LocationId).ToList();
-                var locations = _unitOfWork.Location.GetAll().Where(l => providerAvailabilities.Contains(l.Id)).Select(x => new SelectListItem
-                {
-                    Text = x.LocationValue,
-                    Value = x.Id.ToString()
-                });
-
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor") && !p.Scheduled);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -67,7 +58,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
             }
             else if (type.Equals("NewStudent"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("NewStudent"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("NewStudent") && !p.Scheduled);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -81,7 +72,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
             }
             else if (type.Equals("ExistingStudent"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("ExistingStudent"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("ExistingStudent") && !p.Scheduled);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -95,7 +86,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
             }
             else if (type.Equals("FlexStudent"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("FlexStudent"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("FlexStudent") && !p.Scheduled);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -109,7 +100,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
             }
             else if (type.Equals("Instructing"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Instructor"));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Instructor") && !p.Scheduled);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
