@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,8 +11,9 @@ namespace SteamboatWillieWeb.Pages.Appointment
         public class Calendar //Test class, needs to be updated
         {
             public string Id { get; set; }
-            public string Title { get; set; }
-            public string Date { get; set; }
+            public string Name { get; set; }
+            public string StartTime { get; set; }
+            public string EndTime {  get; set; }
         }
 
         private readonly UnitOfWork _unitOfWork;
@@ -28,9 +25,9 @@ namespace SteamboatWillieWeb.Pages.Appointment
         {
             CalendarObj = new Calendar[]
             {
-                new Calendar {Id = "3", Title = "Test", Date = "2024-03-25" }, //Test data, needs to be pulled from DB
-                new Calendar {Id = "4", Title = "Test2", Date = "2024-03-26"},
-                new Calendar {Id = "5", Title = "Test3", Date = "2024-03-26" }
+                new Calendar {Id = "4", Name = "Dr. Fry", StartTime = DateTimeParser.ParseDateTime(DateTime.Parse("2024-03-28 09:30:00")), EndTime = DateTimeParser.ParseDateTime(DateTime.Parse("2024-03-28T10:00:00")) }, //Test data, needs to be pulled from DB
+                new Calendar {Id = "18", Name = "Anderson", StartTime = "2024-03-29T09:30:00", EndTime = "2024-03-29T10:00:00"},
+                new Calendar {Id = "27", Name = "Huson", StartTime = "2024-03-29T10:30:00", EndTime = "2024-03-29T11:00:00" }
             };
             if (!User.Identity!.IsAuthenticated)
             {

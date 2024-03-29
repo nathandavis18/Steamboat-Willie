@@ -32,14 +32,16 @@
                     $('#detailsForm').submit();
                 }
             });
-        @foreach (var obj in Model.CalendarObj)
-        {
-            <text>
-                var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
-                calendar.addEvent(e);
-            </text>
+        @if(Model.CalendarObj != null){
+            foreach (var obj in Model.CalendarObj)
+            {
+                <text>
+                    var e = { id: '@obj.Id.ToString()', title: '@obj.Name.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()'};
+                    calendar.addEvent(e);
+                </text>
+            }
         }
-                calendar.render();
+        calendar.render();
         });
     </script>
 </head>
