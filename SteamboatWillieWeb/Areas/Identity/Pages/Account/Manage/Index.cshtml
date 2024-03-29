@@ -73,20 +73,50 @@
 
                 @*Validating the model state by completing all required fields*@
                 <input asp-for="ProviderInput.Title" value="Tutor" hidden />
+                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
+                @*<input asp-for="ProviderInput.StartTime" value="@DateTime.Parse("01/01/0001")" hidden />
+                <input asp-for="ProviderInput.EndTime" value="@DateTime.Parse("01/01/0001")" hidden />*@
             }
             else if (User.IsInRole(SD.PROVIDER_ROLE))
             {
                 <div class="form-floating mb-3" id="TitleSelector">
-                    <select asp-for="ProviderInput.Title" class="form-select" placeholder="Choose the best title for this advisor">
+                    <select asp-for="ProviderInput.Title" class="form-select" placeholder="Choose the best title for this advisor" id="providerTitle" onchange="titleChange(this.value)">
                         <option>Advisor</option>
-                        <option>Teacher</option>
+                        <option>Instructor</option>
                         <option>Tutor</option>
                     </select>
                     <label asp-for="ProviderInput.Title" class="form-label"></label>
                 </div>
-                    @*Validating the model state by completing all required fields*@
-                    <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
-                    <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden/>
+                <div class="form-floating mb-3" style="@(Model.ProviderInput.Title.Equals("Advisor") == false ? "display: none" : "display: block")" id="advisementTypes">
+                    <div>
+                    <label asp-for="ProviderInput.AdvisementTypes" class="form-label"></label>
+                    </div>
+                    <div class="form-check">
+                    <label asp-for="ProviderInput.NewStudent" class="form-check-label"></label>
+                    <input asp-for="ProviderInput.NewStudent" class="form-check-input" />
+                    </div>
+                    <div class="form-check">
+                    <label asp-for="ProviderInput.ExistingStudent" class="form-check-label"></label>
+                    <input asp-for="ProviderInput.ExistingStudent" class="form-check-input" />
+                    </div>
+                    <div class="form-check">
+                    <label asp-for="ProviderInput.FlexStudent" class="form-check-label"></label>
+                    <input asp-for="ProviderInput.FlexStudent" class="form-check-input" />
+                    </div>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="ProviderInput.StartTime" class="form-control" required/>
+                    <label asp-for="ProviderInput.StartTime" class="form-label"></label>
+                    <span asp-validation-for="ProviderInput.StartTime" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="ProviderInput.EndTime" class="form-control" required/>
+                    <label asp-for="ProviderInput.EndTime" class="form-label"></label>
+                    <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
+                </div>
+                @*Validating the model state by completing all required fields*@
+                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
+                <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden/>
             }
             else
             {
@@ -94,6 +124,9 @@
                 <input asp-for="ProviderInput.Title" value="Valid" hidden />
                 <input asp-for="Input.DepartmentId" value="Valid" hidden />
                 <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
+                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
+                <input asp-for="ProviderInput.StartTime" value="" hidden />
+                <input asp-for="ProviderInput.EndTime" value="" hidden />
             }
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
         </form>
@@ -105,7 +138,6 @@
                     <input asp-for="FileInput.ImgFile" type="file" class="profile-image-btn form-control" id="pfp-upload-btn" accept="image/*" />
                     <span asp-validation-for="FileInput.ImgFile"></span>
                     <img src="~/images/profileimages/@Html.Raw(Model.Input.ProfilePictureURL)" class="profile-image" id="pfp", title="Click to change image!"/>
-                    <input asp-for="FileInput.Validator" value="Valid" title="Hidden" placeholder="Hidden" hidden />
                     <input type="submit" asp-page-handler="Image" id="pfp-upload-submit" hidden/>
                 </form>
             </div>
@@ -136,7 +168,18 @@
                 $('#pfp-upload-submit').trigger('click');
             }
         }
-        $('#pfp-upload-btn').change(submitForm)
+        $('#pfp-upload-btn').change(submitForm);
+
+        function titleChange(value) {
+            if (value == 'Advisor') {
+                var p = document.getElementById('advisementTypes');
+                p.style.display = 'block';
+            }
+            else {
+                var p = document.getElementById('advisementTypes');
+                p.style.display = 'none';
+            }
+        }
         
     </script>
 }

@@ -113,7 +113,6 @@ namespace SteamboatWillieWeb.Pages.Availability
                             EndTime = endTime,
                             Duration = duration,
                             Scheduled = false,
-                            AppointmentCategoryId = 1,
                             LocationId = 1
                         };
 
@@ -146,7 +145,6 @@ namespace SteamboatWillieWeb.Pages.Availability
                                         EndTime = endTime,
                                         Duration = duration,
                                         Scheduled = false,
-                                        AppointmentCategoryId = 1,
                                         LocationId = 1
                                     };
 
@@ -189,7 +187,6 @@ namespace SteamboatWillieWeb.Pages.Availability
                                             EndTime = endTime,
                                             Duration = duration,
                                             Scheduled = false,
-                                            AppointmentCategoryId = 1,
                                             LocationId = 1
                                         };
 
@@ -219,7 +216,6 @@ namespace SteamboatWillieWeb.Pages.Availability
                                         EndTime = endTime,
                                         Duration = duration,
                                         Scheduled = false,
-                                        AppointmentCategoryId = 1,
                                         LocationId = 1
                                     };
 
@@ -257,7 +253,6 @@ namespace SteamboatWillieWeb.Pages.Availability
                             EndTime = endTime,
                             Duration = duration,
                             Scheduled = false,
-                            AppointmentCategoryId = 1,
                             LocationId = 1
                         };
 

@@ -125,6 +125,24 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Department")]
             public string DepartmentId { get; set; }
+
+            [Display(Name = "Advisement Types")]
+            public string AdvisementTypes {  get; set; }
+
+            [Display(Name = "New Student")]
+            public bool NewStudent { get; set; }
+            [Display(Name = "Current Student")]
+            public bool ExistingStudent {  get; set; }
+            [Display(Name = "Flex Student")]
+            public bool FlexStudent { get; set; }
+
+            [Display(Name = "Working Start Time")]
+            [DataType(DataType.Time)]
+            public DateTime StartTime { get; set; }
+
+            [Display(Name = "Working End Time")]
+            [DataType(DataType.Time)]
+            public DateTime EndTime { get; set; }
         }
 
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
@@ -133,8 +151,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             [DataType(DataType.Upload)]
 
             public IFormFile ImgFile { get; set; }
-
-            public string Validator {  get; set; }
         }
 
 
@@ -179,7 +195,12 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 Input.DepartmentId = provider.DepartmentId.ToString();
                 ProviderInput = new ProviderInputModel()
                 {
-                    Title = provider.Title
+                    Title = provider.Title,
+                    StartTime = provider.StartTime.Value,
+                    EndTime = provider.EndTime.Value,
+                    NewStudent = provider.AdvisementTypes.Split(",").Contains("NewStudent"),
+                    ExistingStudent = provider.AdvisementTypes.Split(",").Contains("ExistingStudent"),
+                    FlexStudent = provider.AdvisementTypes.Split(",").Contains("FlexStudent"),
                 };
             }
             FileInput = new FileInputModel();
@@ -230,6 +251,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             {
                 client.ClassLevel = ClientInput.ClassLevel;
                 client.StudentType = ClientInput.StudentType;
+                client.DepartmentId = int.Parse(Input.DepartmentId);
                 _unitOfWork.Client.Update(client);
             }
 
@@ -237,6 +259,26 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             if (provider != null)
             {
                 provider.Title = ProviderInput.Title;
+                provider.StartTime = ProviderInput.StartTime;
+                provider.EndTime = ProviderInput.EndTime;
+                provider.AdvisementTypes = ",";
+                if (ProviderInput.NewStudent)
+                {
+                    provider.AdvisementTypes += "NewStudent,";
+                }
+                if (ProviderInput.ExistingStudent)
+                {
+                    provider.AdvisementTypes += "ExistingStudent,";
+                }
+                if (ProviderInput.FlexStudent)
+                {
+                    provider.AdvisementTypes += "FlexStudent,";
+                }
+                if(ProviderInput.Title != "Advisor")
+                {
+                    provider.AdvisementTypes = ",";
+                }
+                provider.DepartmentId = int.Parse(Input.DepartmentId);
                 _unitOfWork.Provider.Update(provider);
             }
 

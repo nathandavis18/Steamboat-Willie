@@ -237,7 +237,7 @@ namespace DataAccess
             {
                 AppUserId = provider.Id,
                 DepartmentId = 6,
-                Title = "Teacher",
+                Title = "Instructor",
                 AdvisementTypes = ",",
                 StartTime = new DateTime(0),
                 EndTime = new DateTime(0)
