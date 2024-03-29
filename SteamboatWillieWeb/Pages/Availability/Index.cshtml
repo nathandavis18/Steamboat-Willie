@@ -4,20 +4,22 @@
 }
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-timepicker@latest/dist/css/bootstrap-timepicker.min.css" rel="stylesheet">
 
 <h2>Availability</h2>
-<form method="post" asp-page="Upsert" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" id="form" onsubmit="return validateForm()">
     <input asp-for="objAvailability.Id" hidden />
+    <input asp-for="objAvailability.LocationId" hidden/>
+    <input asp-for="objAvailability.AppointmentCategoryId" hidden/>
     <div class="form-control bg-black">
         <div class="form-group mb-3">
             <label for="startDate" class="text-white">Start: </label>
             <div class="input-group">
-                <input asp-for="objAvailability.StartTime" name ="startDate" id="startDate" class="form-control bg-secondary text-white" type="date" placeholder="@DateOnly.FromDateTime(DateTime.Now)"/>
+                <input asp-for="objAvailability.StartTime" name="startDate" id="startDate" class="form-control bg-secondary text-white" type="date" />
                 <span id="startCalendarIcon" class="input-group-text bg-secondary">
                     <i class="bi bi-calendar-week-fill"></i>
                 </span>
             </div>
+            <span id="startDateError"></span>
         </div>
         <div class="form-group mb-3">
             <div>
@@ -29,12 +31,14 @@
                     <option value="01:00:00">60 Min</option>
                 </select>
             </div>
+            <span id="appointmentDurationError"></span>
         </div>
         <div class="form-group mb-3">
             <div>
                 <label for="numAppointments" class="text-white">Number of Appointments: </label>
                 <input name="numAppointments" id="numAppointments" class="form-control bg-secondary text-white" type="number" />
             </div>
+            <span id="numAppointmentsError"></span>
         </div>
         <div class="form-group mb-3">
             <label for="startTime" class="text-white">Start Time: </label>
@@ -44,19 +48,20 @@
                     <i class="bi bi-clock-fill"></i>
                 </span>
             </div>
+            <span id="startTimeError"></span>
         </div>
         <div class="form-group mb-3">
             <div>
                 <label for="location" class="text-white">Location: </label>
-                <input id="location" class="form-control bg-secondary text-white" />
+                <input asp-for="objLocation.LocationValue" id="location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" />
             </div>
         </div>
         <div class="form-group mb-3">
             <div>
                 <label for="recurrence" class="text-white">Recurrence: </label>
                 <input id="recurrence" name="recurrence" class="bg-secondary text-white" type="checkbox" />
-
             </div>
+            <span id="recurrenceError"></span>
         </div>
         <div class="form-group mb-3" id="otherThings" style="display: none">
             <div>
@@ -67,43 +72,43 @@
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="option1" id="checkbox1" name="weekDays[]">
+                            <input class="form-check-input" type="checkbox" value="Sunday" id="checkbox1" name="weekDays[]">
                             <label class="form-check-label" for="checkbox1">
                                 Sunday
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="option2" id="checkbox2" name="weekDays[]">
+                            <input class="form-check-input" type="checkbox" value="Monday" id="checkbox2" name="weekDays[]">
                             <label class="form-check-label" for="checkbox2">
                                 Monday
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="option3" id="checkbox3" name="weekDays[]">
+                            <input class="form-check-input" type="checkbox" value="Tuesday" id="checkbox3" name="weekDays[]">
                             <label class="form-check-label" for="checkbox3">
                                 Tuesday
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="option4" id="checkbox4" name="weekDays[]">
+                            <input class="form-check-input" type="checkbox" value="Wednesday" id="checkbox4" name="weekDays[]">
                             <label class="form-check-label" for="checkbox4">
                                 Wednesday
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="option5" id="checkbox5" name="weekDays[]">
+                            <input class="form-check-input" type="checkbox" value="Thursday" id="checkbox5" name="weekDays[]">
                             <label class="form-check-label" for="checkbox5">
                                 Thursday
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="option6" id="checkbox6" name="weekDays[]">
+                            <input class="form-check-input" type="checkbox" value="Friday" id="checkbox6" name="weekDays[]">
                             <label class="form-check-label" for="checkbox6">
                                 Friday
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="option7" id="checkbox7" name="weekDays[]">
+                            <input class="form-check-input" type="checkbox" value="Saturday" id="checkbox7" name="weekDays[]">
                             <label class="form-check-label" for="checkbox7">
                                 Saturday
                             </label>
@@ -112,17 +117,18 @@
                 </div>
                 <div class="form-group mb-3">
                     <label for="weekly" class="text-white">Weekly: </label>
-                    <input id="weekly" class="bg-secondary text-white" type="checkbox" />
+                    <input id="weekly" name="weekly" class="bg-secondary text-white" type="checkbox" />
                 </div>
 
                 <div class="form-group mb-3">
                     <label for="endDate" class="text-white">Until: </label>
                     <div class="input-group">
-                        <input id="endDate" class="form-control bg-secondary text-white" type="date" />
+                        <input id="endDate" name="endDate" class="form-control bg-secondary text-white" type="date" />
                         <span id="endCalendarIcon" class="input-group-text bg-secondary">
                             <i class="bi bi-calendar-week-fill"></i>
                         </span>
                     </div>
+                    <span id="endDateError"></span>
                 </div>
             </div>
         </div>
@@ -133,7 +139,6 @@
 </form>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-timepicker@latest/dist/js/bootstrap-timepicker.min.js"></script>
 
 <script>document.getElementById('startCalendarIcon').addEventListener('click', function () {
         document.getElementById('startDate').click();
@@ -176,8 +181,112 @@
         });
     });
 
-    var today = new Date().toISOString().split('T')[0];
+    document.getElementById("form").addEventListener("submit", function (event) {
+        // Prevent form submission if any validation fails
+        if (!validateForm()) {
+            event.preventDefault();
+        }
+    });
 
-    // Set the value of the input field to today's date
-    document.getElementById('startDate').value = today;
-    </script>
+    function validateForm() {
+        var isValid = true;
+
+        // 1. StartDate is not before today
+        var startDate = new Date(document.getElementById("startDate").value);
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (startDate < today) {
+            displayErrorMessage("startDate", "Start date cannot be before today.");
+            TempData["error_message"] = "Start date cannot be before today.";
+            isValid = false;
+        } else {
+            hideErrorMessage("startDate");
+        }
+
+        // 2. End Date is not before today AND not before start
+        var endDate = new Date(document.getElementById("endDate").value);
+        if (endDate < today) {
+            displayErrorMessage("endDate", "End date cannot be before today.");
+            TempData["error_message"] = "End date cannot be before today.";
+            isValid = false;
+        } else {
+            hideErrorMessage("endDate");
+        }
+
+        // 3. If recurrence checkbox is checked, then at least the weekly checkbox is checked OR at least one day is selected in the weekday dropdown
+        var recurrenceCheckbox = document.getElementById("recurrence");
+        if (recurrenceCheckbox.checked) {
+            var weeklyCheckbox = document.getElementById("weekly");
+            var weekDaysCheckboxes = document.querySelectorAll('input[name="weekDays[]"]:checked');
+            if (!weeklyCheckbox.checked && weekDaysCheckboxes.length === 0) {
+                displayErrorMessage("recurrenceError", "If recurrence is selected, either the Weekly checkbox must be checked or at least one day must be selected.");
+                TempData["error_message"] = "If recurrence is selected, either the Weekly checkbox must be checked or at least one day must be selected.";
+                isValid = false;
+            } else {
+                hideErrorMessage("recurrenceError");
+            }
+        } else {
+            hideErrorMessage("recurrenceError");
+        }
+
+        // 4. Time is in intervals of 15 minutes
+        var startTime = document.getElementById("startTime").value;
+        if (!validateTime(startTime)) {
+            displayErrorMessage("startTime", "Start time must be in intervals of 15 minutes.");
+            TempData["error_message"] = "Start time must be in intervals of 15 minutes.";
+            isValid = false;
+        } else {
+            hideErrorMessage("startTime");
+        }
+
+        // 5. An appointment duration is selected
+        var appointmentDuration = document.getElementById("appointmentDuration").value;
+        if (appointmentDuration === "Select:") {
+            displayErrorMessage("appointmentDuration", "Please select an appointment duration.");
+            TempData["error_message"] = "Please select an appointment duration.";
+            isValid = false;
+        } else {
+            hideErrorMessage("appointmentDuration");
+        }
+
+        // 6. Number of appointments is a whole number AND is at least 1, but no more than 10
+        var numAppointments = parseInt(document.getElementById("numAppointments").value);
+        if (isNaN(numAppointments) || numAppointments < 1 || numAppointments > 10 || numAppointments % 1 !== 0) {
+            displayErrorMessage("numAppointments", "Number of appointments must be a whole number between 1 and 10.");
+            TempData["error_message"] = "Number of appointments must be a whole number between 1 and 10.";
+            isValid = false;
+        } else {
+            hideErrorMessage("numAppointments");
+        }
+
+        if (!isValid) {
+            console.log("Validation failed. Error message:", TempData["error_message"]);
+        }
+
+        return isValid;
+    }
+
+    function validateTime(time) {
+        var parts = time.split(":");
+        var minutes = parseInt(parts[1]);
+        return minutes % 15 === 0;
+    }
+
+    function displayErrorMessage(inputId, message) {
+        var errorMessageElement = document.getElementById(inputId + "Error");
+        errorMessageElement.textContent = message;
+        errorMessageElement.style.color = "red";
+        errorMessageElement.style.display = "block"; // Show the error message
+    }
+
+    function hideErrorMessage(inputId) {
+        var errorMessageElement = document.getElementById(inputId + "Error");
+        errorMessageElement.textContent = "";
+        errorMessageElement.style.display = "none"; // Hide the error message
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').value = today;
+        document.getElementById('endDate').value = today;
+    });</script>
