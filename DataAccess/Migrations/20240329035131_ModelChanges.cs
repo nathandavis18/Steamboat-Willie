@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class ModelChanges : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -93,23 +93,6 @@ namespace DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Locations", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProviderAvailability",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProviderId = table.Column<int>(type: "int", nullable: false),
-                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Duration = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Scheduled = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProviderAvailability", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -224,7 +207,8 @@ namespace DataAccess.Migrations
                 {
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    ClassLevel = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ClassLevel = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StudentType = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -249,7 +233,10 @@ namespace DataAccess.Migrations
                 {
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AdvisementTypes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -269,39 +256,57 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Appointments",
+                name: "ProviderAvailability",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProviderAvailabilityId = table.Column<int>(type: "int", nullable: false),
-                    ClientId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AppointmentTypeId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Duration = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StudentComments = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AppointmentCategoryId = table.Column<int>(type: "int", nullable: true)
+                    AppointmentCategoryId = table.Column<int>(type: "int", nullable: false),
+                    Scheduled = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Appointments", x => x.Id);
+                    table.PrimaryKey("PK_ProviderAvailability", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Appointments_AppointmentsCategories_AppointmentCategoryId",
+                        name: "FK_ProviderAvailability_AppointmentsCategories_AppointmentCategoryId",
                         column: x => x.AppointmentCategoryId,
                         principalTable: "AppointmentsCategories",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Appointments_Clients_ClientId",
-                        column: x => x.ClientId,
-                        principalTable: "Clients",
-                        principalColumn: "AppUserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Appointments_Locations_LocationId",
+                        name: "FK_ProviderAvailability_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProviderAvailability_Providers_ProviderId",
+                        column: x => x.ProviderId,
+                        principalTable: "Providers",
+                        principalColumn: "AppUserId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Appointments",
+                columns: table => new
+                {
+                    ProviderAvailabilityId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClientId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StudentComments = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Appointments", x => x.ProviderAvailabilityId);
+                    table.ForeignKey(
+                        name: "FK_Appointments_Clients_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "Clients",
+                        principalColumn: "AppUserId");
                     table.ForeignKey(
                         name: "FK_Appointments_ProviderAvailability_ProviderAvailabilityId",
                         column: x => x.ProviderAvailabilityId,
@@ -311,24 +316,9 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appointments_AppointmentCategoryId",
-                table: "Appointments",
-                column: "AppointmentCategoryId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Appointments_ClientId",
                 table: "Appointments",
                 column: "ClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appointments_LocationId",
-                table: "Appointments",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appointments_ProviderAvailabilityId",
-                table: "Appointments",
-                column: "ProviderAvailabilityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -375,6 +365,21 @@ namespace DataAccess.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProviderAvailability_AppointmentCategoryId",
+                table: "ProviderAvailability",
+                column: "AppointmentCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProviderAvailability_LocationId",
+                table: "ProviderAvailability",
+                column: "LocationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProviderAvailability_ProviderId",
+                table: "ProviderAvailability",
+                column: "ProviderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Providers_DepartmentId",
                 table: "Providers",
                 column: "DepartmentId");
@@ -402,22 +407,22 @@ namespace DataAccess.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Providers");
-
-            migrationBuilder.DropTable(
-                name: "AppointmentsCategories");
-
-            migrationBuilder.DropTable(
                 name: "Clients");
-
-            migrationBuilder.DropTable(
-                name: "Locations");
 
             migrationBuilder.DropTable(
                 name: "ProviderAvailability");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "AppointmentsCategories");
+
+            migrationBuilder.DropTable(
+                name: "Locations");
+
+            migrationBuilder.DropTable(
+                name: "Providers");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

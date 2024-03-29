@@ -13,15 +13,19 @@ namespace Infrastructure.Models
         [Key]
         public string? AppUserId { get; set; }
 
-        [Required]
         public int DepartmentId { get; set; }
 
         public string? Title { get; set; }
 
-        [ForeignKey("AppUserId")]
+        public string? AdvisementTypes {  get; set; } 
+
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
+
+        [ForeignKey(nameof(AppUserId))]
         public AppUser? AppUser { get; set; }
 
-        [ForeignKey("DepartmentId")]
+        [ForeignKey(nameof(DepartmentId))]
         public Department? Department { get; set; }
     }
 }
