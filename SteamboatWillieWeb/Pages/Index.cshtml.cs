@@ -1,14 +1,15 @@
 ﻿using DataAccess;
+using Infrastructure.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json.Converters;
 using System.ComponentModel;
+using System.Drawing;
 using System.Dynamic;
-using Utility;
-using Infrastructure.Models;
 using System.Security.Claims;
-using Microsoft.CodeAnalysis.Options;
+using Utility;
 
 namespace SteamboatWillieWeb.Pages
 {
@@ -16,28 +17,93 @@ namespace SteamboatWillieWeb.Pages
     {
         private readonly ILogger<IndexModel> _logger;
         private readonly UnitOfWork _unitOfWork;
+        private readonly UserManager<AppUser> _userManager;
+
+        public List<AppointmentCard> Appointments { get; set; }
         private IEnumerable<ProviderAvailability> providerAvailabilities;
-        public List<Calendar> CalendarObj {  get; set; }
+        public List<Calendar> CalendarObj { get; set; }
         public class Calendar //Test class, needs to be updated
         {
             public string Id { get; set; }
             public string Title { get; set; }
             public string Start { get; set; }
             public string End { get; set; }
-            public string Type {  get; set; } //appointment or availability, for provider calendar
+            public string Type { get; set; } //appointment or availability, for provider calendar
         }
 
-        public IndexModel(ILogger<IndexModel> logger, UnitOfWork unitOfWork)
+
+        public class AppointmentCard
+        {
+            public string Id { get; set; }
+            public string ProviderName { get; set; }
+            public string AppointmentType { get; set; }
+            public string Date { get; set; }
+            public string StartTime { get; set; }
+            public string EndTime { get; set; }
+            public string Location { get; set; }
+            public string Color { get; set; }
+        }
+
+
+        public IndexModel(ILogger<IndexModel> logger, UnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            Appointments = new List<AppointmentCard>();
             providerAvailabilities = new List<ProviderAvailability>();
             CalendarObj = new List<Calendar>();
         }
 
         public IActionResult OnGet()
         {
-            if (User.IsInRole(SD.PROVIDER_ROLE)) {
+            if (User.IsInRole(SD.CLIENT_ROLE))
+            {
+                var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
+                if (user != null)
+                {
+                    var clientAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability").Where(a => a.ClientId == user.Id);
+                    foreach(var app in clientAppointments)
+                    {
+                        Appointments.Add(new AppointmentCard
+                        {
+                            Id = app.ProviderAvailabilityId,
+                            ProviderName = _unitOfWork.AppUser.Get(x => x.Id == app.ProviderAvailability.ProviderId).FullName,
+                            AppointmentType = _unitOfWork.Provider.Get(x => x.AppUserId == app.ProviderAvailability.ProviderId).Title,
+                            Date = app.ProviderAvailability.StartTime.ToLongDateString(),
+                            StartTime = app.ProviderAvailability.StartTime.ToShortTimeString(),
+                            EndTime = app.ProviderAvailability.EndTime.ToShortTimeString(),
+                            Location = _unitOfWork.Location.Get(x => x.Id == app.ProviderAvailability.LocationId).LocationValue
+                        });
+                        var x = Appointments.Last();
+                        x.Color = GetColor(x.AppointmentType);
+                    }
+                    Appointments.Add(new AppointmentCard
+                    {
+                        Id = "3",
+                        ProviderName = "Test Tutor",
+                        AppointmentType = "Tutor",
+                        Date = "Some Day",
+                        StartTime = "1:00 PM",
+                        EndTime = "2:00 PM",
+                        Location = "That Place",
+                        Color = GetColor("Tutor")
+                    });
+                    Appointments.Add(new AppointmentCard
+                    {
+                        Id = "3",
+                        ProviderName = "Test Advisor",
+                        AppointmentType = "Advisor",
+                        Date = "The Next Day",
+                        StartTime = "1:00 PM",
+                        EndTime = "2:00 PM",
+                        Location = "Other Place",
+                        Color = GetColor("Advisor")
+                    });
+                }
+            }
+            else if (User.IsInRole(SD.PROVIDER_ROLE))
+            {
                 var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == currentUserId && x.StartTime > DateTime.Now.AddDays(-1));
                 var ProviderTitle = _unitOfWork.Provider.GetAll().Where(x => x.AppUserId == currentUserId).Select(x => x.Title).FirstOrDefault();
@@ -47,7 +113,7 @@ namespace SteamboatWillieWeb.Pages
                 else if (ProviderTitle == "Instructor")
                     scheduleTitle = "Office Hours";
                 else scheduleTitle = "Tutoring";
-                
+
                 foreach (var availability in providerAvailabilities)
                 {
                     if (availability.Scheduled)
@@ -55,21 +121,29 @@ namespace SteamboatWillieWeb.Pages
                         var appointment = _unitOfWork.Appointment.GetAll().Where(x => x.ProviderAvailabilityId == availability.Id).FirstOrDefault();
                         var clientName = _unitOfWork.AppUser.GetAll().Where(x => x.Id == appointment.ClientId).Select(x => x.FullName).FirstOrDefault();
 
-                        CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle + ": " + clientName, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Appointment"});
+                        CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle + ": " + clientName, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Appointment" });
                     }
                     else
                     {
                         CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Availability" });
                     }
                 }
-                //CalendarObj = new Calendar[]
-                //{
-                //    new Calendar {Id = "3", Title = "Test", Date = "2024-03-25" }, //Test data, needs to be pulled from DB
-                //    new Calendar {Id = "4", Title = "Test2", Date = "2024-03-26"},
-                //    new Calendar {Id = "5", Title = "Test3", Date = "2024-03-26" }
-                //};
-                }
+            }
             return Page();
+        }
+
+        string GetColor(string type)
+        {
+            switch(type)
+            {
+                case "Instructor":
+                    return "#00BFFF";
+                case "Tutor":
+                    return "#FF6961";
+                case "Advisor":
+                    return "#00fa9a";
+            }
+            return "";
         }
     }
 }
