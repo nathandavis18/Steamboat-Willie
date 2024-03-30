@@ -193,24 +193,14 @@ body {
 
 
 /*Custom Card Stuff (Borrowed from Pink Panthers Project)*/
-.custom-card {
-    width: 300px;
-    height: 300px;
-    background-color: white;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-radius: 10px;
-}
-
 .card-header {
-    color: white;
-    height: 50px;
-    font-size: x-large;
-    border-top-left-radius: 10px !important;
-    border-top-right-radius: 10px !important;
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
 }
 
-.card-body {
-    font-size: 15pt;
+.card-body{
+    color: white;
 }
 
 a.no-decoration {
@@ -222,3 +212,85 @@ a.no-decoration {
         text-decoration: none;
         color: inherit;
     }
+
+
+/*Tutor View Slider*/
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+    /* Hide default HTML checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+.tutor-slider-inner{
+    width: 47%;
+    margin-top: 5px;
+}
+.tutor-slider-div{
+    width: 6%;
+}
+
+.student-view{
+    justify-content: left;
+    text-align: left;
+}
+
+.provider-view{
+    justify-content: right;
+    text-align: right;
+}

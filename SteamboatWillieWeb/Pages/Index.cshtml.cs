@@ -44,7 +44,6 @@ namespace SteamboatWillieWeb.Pages
             public string Color { get; set; }
         }
 
-
         public IndexModel(ILogger<IndexModel> logger, UnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _logger = logger;
