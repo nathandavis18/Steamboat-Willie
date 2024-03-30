@@ -32,14 +32,15 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek' // user can switch between the two
                     },
-                    eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
-                        alert('event:' + info.event.title);
-                    }
+                    // eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
+                    //     alert('event:' + info.event.title);
+                    // }
                 });
             @foreach(var obj in Model.CalendarObj)
             {
+                var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
                 <text>
-                var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
+                var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Start.ToString()', end: '@obj.End.ToString()', backgroundColor: '@backgroundColor', url:'@Url.Page("Availability/Details")' + '?id=' + '@obj.Id.ToString()'};
                 calendar.addEvent(e);
                 </text>
             }
