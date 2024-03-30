@@ -1,0 +1,70 @@
+﻿@page
+@model SteamboatWillieWeb.Pages.Availability.DetailsModel
+@{
+    <div class="text-center">
+        @if (Model.providerAvailability.Scheduled)
+        {
+            <h2>Appointment Details</h2>
+            <form method="post">
+                <table class="table table-striped table-bordered">
+                    <tbody>
+                        <tr>
+                            <td>Date: @Model.details.date</td>
+                        </tr>
+                        <tr>
+                            <td>Appointment Time: @Model.details.time</td>
+                        </tr>
+                        <tr>
+                            <td>Client Name: @Model.details.clientName</td>
+                        </tr>
+                        <tr>
+                            <td>Client W Number: @Model.details.wnumber</td>
+                        </tr>
+                        <tr>
+                            <td>Client Email: @Model.details.clientEmail</td>
+                        </tr>
+                        <tr>
+                            <td>Location: @Model.details.location</td>
+                        </tr>
+                        <tr>
+                            <td>Student Comments: @Model.details.studentComments</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button type="submit" name="removeAppointmentOnly" value="true" class="btn btn-danger">Remove Appointment</button>
+                                <button type="submit" name="removeEverything" value="true" class="btn btn-danger">Remove Availability and Appointment</button>
+                            </td>
+                        </tr>
+                        <input type="hidden" name="id" value="@Model.providerAvailability.Id" />
+                    </tbody>
+                </table>
+            </form>
+
+        }
+        else
+        {
+            <h2>Availability Details</h2>
+            <form method="post">
+                <table class="table table-striped table-bordered">
+                    <tbody>
+                        <tr>
+                            <td>Date: @Model.details.date</td>
+                        </tr>
+                        <tr>
+                            <td>Availability Time: @Model.details.time</td>
+                        </tr>
+                        <tr>
+                            <td>Location: @Model.details.location</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button type="submit" name="removeAvailability" value="true" class="btn btn-danger">Remove Availability</button>
+                            </td>
+                        </tr>
+                        <input type="hidden" name="id" value="@Model.providerAvailability.Id" />
+                    </tbody>
+                </table>
+            </form>
+        }
+    </div>
+}

@@ -8,6 +8,7 @@ using Newtonsoft.Json.Converters;
 using System.ComponentModel;
 using System.Drawing;
 using System.Dynamic;
+using System.Security.Claims;
 using Utility;
 
 namespace SteamboatWillieWeb.Pages
@@ -18,14 +19,18 @@ namespace SteamboatWillieWeb.Pages
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public Calendar[] CalendarObj {  get; set; }
         public List<AppointmentCard> Appointments { get; set; }
+        private IEnumerable<ProviderAvailability> providerAvailabilities;
+        public List<Calendar> CalendarObj { get; set; }
         public class Calendar //Test class, needs to be updated
         {
             public string Id { get; set; }
             public string Title { get; set; }
-            public string Date { get; set; }
+            public string Start { get; set; }
+            public string End { get; set; }
+            public string Type { get; set; } //appointment or availability, for provider calendar
         }
+
 
         public class AppointmentCard
         {
@@ -39,13 +44,14 @@ namespace SteamboatWillieWeb.Pages
             public string Color { get; set; }
         }
 
-
         public IndexModel(ILogger<IndexModel> logger, UnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             Appointments = new List<AppointmentCard>();
+            providerAvailabilities = new List<ProviderAvailability>();
+            CalendarObj = new List<Calendar>();
         }
 
         public IActionResult OnGet()
@@ -95,12 +101,33 @@ namespace SteamboatWillieWeb.Pages
                     });
                 }
             }
-            CalendarObj = new Calendar[]
+            else if (User.IsInRole(SD.PROVIDER_ROLE))
             {
-                new Calendar {Id = "3", Title = "Test", Date = "2024-03-25" }, //Test data, needs to be pulled from DB
-                new Calendar {Id = "4", Title = "Test2", Date = "2024-03-26"},
-                new Calendar {Id = "5", Title = "Test3", Date = "2024-03-26" }
-            };
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == currentUserId && x.StartTime > DateTime.Now.AddDays(-1));
+                var ProviderTitle = _unitOfWork.Provider.GetAll().Where(x => x.AppUserId == currentUserId).Select(x => x.Title).FirstOrDefault();
+                string scheduleTitle;
+                if (ProviderTitle == "Advisor")
+                    scheduleTitle = "Advising";
+                else if (ProviderTitle == "Instructor")
+                    scheduleTitle = "Office Hours";
+                else scheduleTitle = "Tutoring";
+
+                foreach (var availability in providerAvailabilities)
+                {
+                    if (availability.Scheduled)
+                    {
+                        var appointment = _unitOfWork.Appointment.GetAll().Where(x => x.ProviderAvailabilityId == availability.Id).FirstOrDefault();
+                        var clientName = _unitOfWork.AppUser.GetAll().Where(x => x.Id == appointment.ClientId).Select(x => x.FullName).FirstOrDefault();
+
+                        CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle + ": " + clientName, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Appointment" });
+                    }
+                    else
+                    {
+                        CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Availability" });
+                    }
+                }
+            }
             return Page();
         }
 
