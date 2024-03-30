@@ -1,4 +1,6 @@
 using DataAccess;
+using Infrastructure.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,18 +21,20 @@ namespace SteamboatWillieWeb.Pages.Appointment
         }
 
         private readonly UnitOfWork _unitOfWork;
-        public IndexModel(UnitOfWork unitOfWork)
+        private readonly UserManager<AppUser> _userManager;
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
             CalendarObj = new List<Calendar>();
         }
         public IActionResult OnGet(string? type = null)
         {
-
             if (!User.Identity!.IsAuthenticated)
             {
                 return RedirectToPage("/Account/Login", new { ReturnUrl = "/Appointment/Index", Area = "Identity" });
             }
+            var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
             if (!User.IsInRole(SD.CLIENT_ROLE))
             {
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
@@ -43,7 +47,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
 
             if (type.Equals("Tutoring"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor") && !p.Scheduled);
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor") && !p.Scheduled && !(p.Provider.AppUserId == user.Id));
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar

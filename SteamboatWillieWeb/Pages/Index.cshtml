@@ -54,7 +54,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                 @foreach (var obj in Model.CalendarObj)
                 {
                     <text>
-                                                                    var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
+                        var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
                         calendar.addEvent(e);
                     </text>
                 }
@@ -74,45 +74,59 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
         <div class="text-center">
             <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
         </div>
-
-        <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
-            <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
-                <div class="card custom-card">
-                    <div class="card-header" style="background-color: red;">Tutor Appointment</div>
-                    <div class="card-body">
-                        Tutor Name <br />
-                        Start Time <br />
-                        End Time <br />
-                        Location
+        <div class="row">
+            <div class="col-md-3">
+                <a class="no-decoration" href="">
+                    <div class="card">
+                        <div class="card-header" style="background-color: red;">Tutor Appointment</div>
+                        <div class="card-body">
+                            Tutor Name <br />
+                            Start Time <br />
+                            End Time <br />
+                            Location
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
-            <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
-                <div class="card custom-card">
-                    <div class="card-header" style="background-color: blue;">Instructor Appointment</div>
-                    <div class="card-body">
-                        Instructor Name <br />
-                        Start Time <br />
-                        End Time <br />
-                        Location
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a class="no-decoration" href="">
+                    <div class="card">
+                        <div class="card-header" style="background-color: red;">Tutor Appointment</div>
+                        <div class="card-body">
+                            Tutor Name <br />
+                            Start Time <br />
+                            End Time <br />
+                            Location
+                        </div>
                     </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
-            <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
-                <div class="card custom-card">
-                    <div class="card-header" style="background-color: green;">Advising Appointment</div>
-                    <div class="card-body">
-                        Advisor Name <br />
-                        Start Time <br />
-                        End Time <br />
-                        Location
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a class="no-decoration" href="">
+                    <div class="card">
+                        <div class="card-header" style="background-color: green;">Advisor Appointment</div>
+                        <div class="card-body">
+                            Tutor Name <br />
+                            Start Time <br />
+                            End Time <br />
+                            Location
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a class="no-decoration" href="">
+                    <div class="card">
+                        <div class="card-header" style="background-color: blue;">Instructor Appointment</div>
+                        <div class="card-body">
+                            Tutor Name <br />
+                            Start Time <br />
+                            End Time <br />
+                            Location
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 }
@@ -141,7 +155,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
             @foreach (var obj in Model.CalendarObj)
             {
                 <text>
-                                                var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
+                    var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
                     calendar.addEvent(e);
                 </text>
             }
@@ -161,46 +175,36 @@ else if (User.IsInRole(SD.CLIENT_ROLE))
     <div class="text-center">
         <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
     </div>
+    <br />
 
-    <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
-        <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
-            <div class="card custom-card">
-                <div class="card-header" style="background-color: red;">Tutor Appointment</div>
-                <div class="card-body">
-                    Tutor Name <br />
-                    Start Time <br />
-                    End Time <br />
-                    Location
-                </div>
+    @if (!Model.Appointments.Any())
+    {
+        <div class="text-center">
+            <p>Scheduled appointments will appear here!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row align-content-center">
+        @foreach (var app in Model.Appointments)
+        {
+            <div class="col-md-3">
+                <a class="no-decoration" asp-page="" asp-route-id="@app.Id">
+                    <div class="card">
+                        <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
+                        <div class="card-body">
+                                <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
+                                <strong>When:</strong>
+                                @app.Date <br />
+                                <pre>       @app.StartTime - @app.EndTime</pre>
+                                <strong>Where:</strong> @app.Location
+                        </div>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
-    <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
-        <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
-            <div class="card custom-card">
-                <div class="card-header" style="background-color: blue;">Instructor Appointment</div>
-                <div class="card-body">
-                    Instructor Name <br />
-                    Start Time <br />
-                    End Time <br />
-                    Location
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
-        <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
-            <div class="card custom-card">
-                <div class="card-header" style="background-color: green;">Advising Appointment</div>
-                <div class="card-body">
-                    Advisor Name <br />
-                    Start Time <br />
-                    End Time <br />
-                    Location
-                </div>
-            </div>
-        </a>
-    </div>
+        }
+        </div>
+    }
 }
 else
 {
@@ -217,7 +221,7 @@ else
 
         function tutorSlider(){
             if (slider.checked) {
-                client.style.display = "contents";
+                client.style.display = "block";
                 provider.style.display = "none";
             }
             else{
