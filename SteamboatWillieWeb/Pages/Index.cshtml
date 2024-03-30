@@ -14,6 +14,108 @@
         <p class="display-4 login-signup">Please, <a asp-page="/Account/Login" asp-area="Identity">log in</a> or <a asp-page="/Account/Register" asp-area="Identity">sign up</a> to continue</p>
     </div>
 }
+else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
+{
+    <div class="text-center row">
+        <div class="tutor-slider-inner col-md-4 provider-view"> 
+            <label>Provider View</label>
+        </div>
+        <div class="tutor-slider-div col">
+        <label class="switch">
+            <input type="checkbox" id="tutor-slider" onchange="tutorSlider()">
+            <span class="slider round"></span>
+        </label>
+        </div>
+        <div class="tutor-slider-inner col-md-4 student-view">
+            <label>Student View</label>
+        </div>
+    </div>
+    <div id="tutor-provider-view" style="display: contents">
+        <head>
+            <meta charset='utf-8' />
+            <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var calendarEl = document.getElementById('calendar');
+                    var calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        slotMinTime: '07:00:00',
+                        slotMaxTime: '19:00:00',
+                        height: 'auto',
+                        headerToolbar: {
+                            left: 'prev,next',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek' // user can switch between the two
+                        },
+                        eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
+                            alert('event:' + info.event.title);
+                        }
+                    });
+                @foreach (var obj in Model.CalendarObj)
+                {
+                    <text>
+                                                                    var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
+                        calendar.addEvent(e);
+                    </text>
+                }
+                        calendar.render();
+                });
+            </script>
+        </head>
+        <body>
+            <div class="text-end">
+                <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
+            </div>
+            <div id='calendar'></div>
+        </body>
+    </div>
+
+    <div id="tutor-student-view" style="display: none;">
+        <div class="text-center">
+            <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
+        </div>
+
+        <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
+            <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
+                <div class="card custom-card">
+                    <div class="card-header" style="background-color: red;">Tutor Appointment</div>
+                    <div class="card-body">
+                        Tutor Name <br />
+                        Start Time <br />
+                        End Time <br />
+                        Location
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
+            <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
+                <div class="card custom-card">
+                    <div class="card-header" style="background-color: blue;">Instructor Appointment</div>
+                    <div class="card-body">
+                        Instructor Name <br />
+                        Start Time <br />
+                        End Time <br />
+                        Location
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-1" style="margin-right: 240px; margin-bottom: 15px">
+            <a class="no-decoration" asp-controller="Class" asp-action="Assignments">
+                <div class="card custom-card">
+                    <div class="card-header" style="background-color: green;">Advising Appointment</div>
+                    <div class="card-body">
+                        Advisor Name <br />
+                        Start Time <br />
+                        End Time <br />
+                        Location
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+}
 else if (User.IsInRole(SD.PROVIDER_ROLE))
 {
     <head>
@@ -36,24 +138,21 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                         alert('event:' + info.event.title);
                     }
                 });
-            @foreach(var obj in Model.CalendarObj)
+            @foreach (var obj in Model.CalendarObj)
             {
                 <text>
-                var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
-                calendar.addEvent(e);
+                                                var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Date.ToString()' };
+                    calendar.addEvent(e);
                 </text>
             }
-            calendar.render();
+                    calendar.render();
             });
         </script>
     </head>
     <body>
-        @if (User.IsInRole(SD.PROVIDER_ROLE))
-        {
-            <div class="text-end">
-                <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
-            </div>
-        }
+        <div class="text-end">
+            <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
+        </div>
         <div id='calendar'></div>
     </body>
 }
@@ -108,4 +207,23 @@ else
     <div class="text-center">
         <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
     </div>
+}
+
+@section Scripts {
+    <script>
+        var slider = document.getElementById('tutor-slider');
+        var provider = document.getElementById('tutor-provider-view');
+        var client = document.getElementById('tutor-student-view');
+
+        function tutorSlider(){
+            if (slider.checked) {
+                client.style.display = "contents";
+                provider.style.display = "none";
+            }
+            else{
+                provider.style.display = "contents";
+                client.style.display = "none";
+            }
+        }
+    </script>
 }

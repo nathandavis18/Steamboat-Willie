@@ -118,7 +118,7 @@ namespace SteamboatWillieWeb.Pages.Appointment
 
         public void OnPost()
         {
-            string n = String.Format("{0}", !(Request.Form["availabilityId"].IsNullOrEmpty()) ? Request.Form["availabilityId"] : "");
+            string n = Request.Form["availabilityId"];
         }
     }
 }
