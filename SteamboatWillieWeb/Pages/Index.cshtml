@@ -76,60 +76,34 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
         <div class="text-center">
             <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
         </div>
-        <div class="row">
-            <div class="col-md-3">
-                <a class="no-decoration" href="">
-                    <div class="card">
-                        <div class="card-header" style="background-color: red;">Tutor Appointment</div>
-                        <div class="card-body">
-                            Tutor Name <br />
-                            Start Time <br />
-                            End Time <br />
-                            Location
-                        </div>
-                    </div>
-                </a>
+        @if (!Model.Appointments.Any())
+        {
+            <div class="text-center">
+                <p>Scheduled appointments will appear here!</p>
             </div>
-            <div class="col-md-3">
-                <a class="no-decoration" href="">
-                    <div class="card">
-                        <div class="card-header" style="background-color: red;">Tutor Appointment</div>
-                        <div class="card-body">
-                            Tutor Name <br />
-                            Start Time <br />
-                            End Time <br />
-                            Location
-                        </div>
+        }
+        else
+        {
+            <div class="row align-content-center">
+                @foreach (var app in Model.Appointments)
+                {
+                    <div class="col-md-3">
+                        <a class="no-decoration" asp-page="" asp-route-id="@app.Id">
+                            <div class="card">
+                                <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
+                                <div class="card-body">
+                                    <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
+                                    <strong>When:</strong>
+                                    @app.Date <br />
+                                    <pre>       @app.StartTime - @app.EndTime</pre>
+                                    <strong>Where:</strong> @app.Location
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </a>
+                }
             </div>
-            <div class="col-md-3">
-                <a class="no-decoration" href="">
-                    <div class="card">
-                        <div class="card-header" style="background-color: green;">Advisor Appointment</div>
-                        <div class="card-body">
-                            Tutor Name <br />
-                            Start Time <br />
-                            End Time <br />
-                            Location
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-3">
-                <a class="no-decoration" href="">
-                    <div class="card">
-                        <div class="card-header" style="background-color: blue;">Instructor Appointment</div>
-                        <div class="card-body">
-                            Tutor Name <br />
-                            Start Time <br />
-                            End Time <br />
-                            Location
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
+        }
     </div>
 }
 else if (User.IsInRole(SD.PROVIDER_ROLE))
