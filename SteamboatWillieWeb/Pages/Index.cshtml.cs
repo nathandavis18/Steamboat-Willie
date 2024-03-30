@@ -3,12 +3,6 @@ using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json.Converters;
-using System.ComponentModel;
-using System.Drawing;
-using System.Dynamic;
-using System.Security.Claims;
 using Utility;
 
 namespace SteamboatWillieWeb.Pages
@@ -77,7 +71,7 @@ namespace SteamboatWillieWeb.Pages
                         var x = Appointments.Last();
                         x.Color = GetColor(x.AppointmentType);
                     }
-                    Appointments.Add(new AppointmentCard
+                    /*Appointments.Add(new AppointmentCard
                     {
                         Id = "3",
                         ProviderName = "Test Tutor",
@@ -98,12 +92,12 @@ namespace SteamboatWillieWeb.Pages
                         EndTime = "2:00 PM",
                         Location = "Other Place",
                         Color = GetColor("Advisor")
-                    });
+                    });*/
                 }
             }
             else if (User.IsInRole(SD.PROVIDER_ROLE))
             {
-                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var currentUserId = _userManager.GetUserId(User);
                 providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == currentUserId && x.StartTime > DateTime.Now.AddDays(-1));
                 var ProviderTitle = _unitOfWork.Provider.GetAll().Where(x => x.AppUserId == currentUserId).Select(x => x.Title).FirstOrDefault();
                 string scheduleTitle;
