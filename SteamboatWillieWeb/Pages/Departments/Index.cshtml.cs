@@ -10,13 +10,11 @@ namespace SteamboatWillieWeb.Pages.Departments
     public class IndexModel : PageModel
     {
         private readonly UnitOfWork _unitOfWork;
-        private readonly IConfiguration _configuration;
         public PaginatedList<Department> Departments { get; set; }
 
-        public IndexModel(UnitOfWork unitOfWork, IConfiguration configuration)
+        public IndexModel(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _configuration = configuration;
         }
 
         public async Task<IActionResult> OnGet(int? pageIndex)
