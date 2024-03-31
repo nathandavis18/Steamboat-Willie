@@ -2,6 +2,7 @@ using DataAccess;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Utility;
 
 namespace SteamboatWillieWeb.Pages.Departments
@@ -9,14 +10,16 @@ namespace SteamboatWillieWeb.Pages.Departments
     public class IndexModel : PageModel
     {
         private readonly UnitOfWork _unitOfWork;
-        public List<Department> Departments { get; set; }
+        private readonly IConfiguration _configuration;
+        public PaginatedList<Department> Departments { get; set; }
 
-        public IndexModel(UnitOfWork unitOfWork)
+        public IndexModel(UnitOfWork unitOfWork, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
-            Departments = new List<Department>();
+            _configuration = configuration;
         }
-        public IActionResult OnGet()
+
+        public async Task<IActionResult> OnGet(int? pageIndex)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -27,8 +30,10 @@ namespace SteamboatWillieWeb.Pages.Departments
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
+            List<Department> departmentsList = _unitOfWork.Department.GetAll().ToList();
 
-            Departments = _unitOfWork.Department.GetAll().ToList();
+            int pageSize = 10;
+            Departments = PaginatedList<Department>.Create(departmentsList, pageIndex ?? 1, pageSize);
 
             return Page();
         }

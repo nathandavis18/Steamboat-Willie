@@ -43,4 +43,21 @@
 
         </tbody>
     </table>
+
+    @{
+        var prevDisabled = !Model.Departments.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.Departments.HasNextPage ? "disabled" : "";
+    }
+    <a asp-page="./Index" asp-route-pageIndex="1" class="btn btn-primary @prevDisabled">
+        First
+    </a>
+    <a asp-page="./Index" asp-route-pageIndex="@(Model.Departments.PageIndex - 1)" class="btn btn-primary @prevDisabled">
+        Previous
+    </a>
+    <a asp-page="./Index" asp-route-pageIndex="@(Model.Departments.PageIndex + 1)" class="btn btn-primary @nextDisabled">
+        Next
+    </a>
+    <a asp-page="./Index" asp-route-pageIndex="@(Model.Departments.TotalPages)" class="btn btn-primary @nextDisabled">
+        Last
+    </a>
 </div>
