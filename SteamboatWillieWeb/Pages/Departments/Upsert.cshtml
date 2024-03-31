@@ -1,0 +1,35 @@
+﻿@page
+@model SteamboatWillieWeb.Pages.Departments.UpsertModel
+@{
+}
+
+<div class="text-center">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="department-form">
+                <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <input asp-for="@Model.Department.Id" hidden/>
+                    <div class="department-form-label">
+                        @if(Model.Department != null)
+                        {
+                            <label>Edit Department</label>
+                        }
+                        else
+                        {
+                            <label>Add New Department</label>
+                        }
+                    </div>
+                    <div class="form-floating mb-12 department-form-input">
+                        <input asp-for="@Model.Department.DepartmentName" class="form-control"/>
+                        <label asp-for="@Model.Department.DepartmentName" class="form-label"></label>
+                        <span asp-validation-for="@Model.Department.DepartmentName" class="text-danger"></span>
+                    </div>
+
+                    <div class="department-submit">
+                        <input type="submit" class="w-100 btn btn-lg btn-primary" value="@(Model.Department != null ? "Save" : "Create") Department" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

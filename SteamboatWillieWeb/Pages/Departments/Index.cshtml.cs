@@ -1,0 +1,48 @@
+using DataAccess;
+using Infrastructure.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Utility;
+
+namespace SteamboatWillieWeb.Pages.Departments
+{
+    public class IndexModel : PageModel
+    {
+        private readonly UnitOfWork _unitOfWork;
+        public List<Department> Departments { get; set; }
+
+        public IndexModel(UnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+            Departments = new List<Department>();
+        }
+        public IActionResult OnGet()
+        {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return RedirectToPage("/Account/Login", new { ReturnUrl = "/Availability/Index", Area = "Identity" });
+            }
+            if (!User.IsInRole(SD.ADMIN_ROLE))
+            {
+                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                return RedirectToPage("../Index");
+            }
+
+            Departments = _unitOfWork.Department.GetAll().ToList();
+
+            return Page();
+        }
+        public IActionResult OnPost(int id)
+        {
+            var department = _unitOfWork.Department.GetById(id);
+            if (department == null)
+            {
+                return RedirectToPage();
+            }
+
+            _unitOfWork.Department.Delete(department);
+            _unitOfWork.Commit();
+            return RedirectToPage();
+        }
+    }
+}
