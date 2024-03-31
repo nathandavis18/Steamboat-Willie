@@ -2,7 +2,6 @@ using DataAccess;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using Utility;
 
 namespace SteamboatWillieWeb.Pages.Departments
@@ -10,14 +9,14 @@ namespace SteamboatWillieWeb.Pages.Departments
     public class IndexModel : PageModel
     {
         private readonly UnitOfWork _unitOfWork;
-        public PaginatedList<Department> Departments { get; set; }
+        public PaginatedList<Department>? Departments { get; set; }
 
         public IndexModel(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IActionResult> OnGet(int? pageIndex)
+        public IActionResult OnGet(int? pageIndex)
         {
             if (!User.Identity!.IsAuthenticated)
             {
