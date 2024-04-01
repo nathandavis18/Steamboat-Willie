@@ -12,6 +12,27 @@
         </div>
     </div>
     <br /><br />
+
+    <form asp-page="./Index" method="get">
+        <div class="form-actions no-color">
+            <p>
+                Find by name:
+                <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+                <input type="submit" value="Search" class="btn btn-primary" />
+            </p>
+        </div>
+    </form>
+    <form asp-page="./Index" method="get" id="roleForm">
+        <div class="form-actions no-color">
+            <p>
+                Find by Role:
+                <select asp-for="@Model.CurrentRole" asp-items="@Model.Roles" name="RoleSort" id="roleFilter">
+                    <option value="@String.Empty" selected>All Roles</option>
+                </select>
+            </p>
+        </div>
+    </form>
+
     <table class="table table-striped table-bordered" style="width:100%">
         <thead>
             <tr>
@@ -27,53 +48,77 @@
             @{
                 foreach (var user in Model.ApplicationUsers)
                 {
-                    <tr>
-                        <td>@user.FullName</td>
-                        <td>@user.Email</td>
-                        <td>
-                            @{
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                @{
                                 if (Model.UserRoles[user.Id].Count() == 1)
                                 {
-                                    @Model.UserRoles[user.Id].First()
+                                            @Model.UserRoles[user.Id].First()
                                 }
                                 else
                                 {
-                                    <ul>
-                                        @{
+                                            <ul>
+                                                @{
                                             foreach (var r in Model.UserRoles[user.Id])
                                             {
-                                                <li>
-                                                    @r
-                                                </li>
+                                                            <li>
+                                                                @r
+                                                            </li>
                                             }
-                                        }
-                                    </ul>
+                                                }
+                                            </ul>
                                 }
-                            }
+                                }
 
-                        </td>
-                        <td>
-                            <form method="post">
-                                @{
+                            </td>
+                            <td>
+                                <form method="post">
+                                    @{
                                     if (user.LockoutEnd > DateTime.Now)
                                     {
-                                        <button type="submit" class="btn btn-outline-warning" asp-page-handler="lockUnlock" asp-route-id="@user.Id"><i class="fas fa-lock-open"></i> Unlock</button>
+                                                <button type="submit" class="btn btn-outline-warning" asp-page-handler="lockUnlock" asp-route-id="@user.Id"><i class="fas fa-lock-open"></i> Unlock</button>
                                     }
                                     else
                                     {
-                                        <button type="submit" class="btn btn-outline-warning" asp-page-handler="lockUnlock" asp-route-id="@user.Id"><i class="fas fa-lock"></i> Lock</button>
+                                                <button type="submit" class="btn btn-outline-warning" asp-page-handler="lockUnlock" asp-route-id="@user.Id"><i class="fas fa-lock"></i> Lock</button>
                                     }
-                                }
-                            </form>
-                        </td>
-                        <td>
-                            <a class="btn btn-outline-success" asp-page="/Users/Update" asp-route-id="@user.Id">Update</a>
+                                    }
+                                </form>
+                            </td>
+                            <td>
+                                <a class="btn btn-outline-success" asp-page="/Users/Update" asp-route-id="@user.Id">Update</a>
 
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
                 }
             }
 
         </tbody>
     </table>
+    @{
+        var prevDisabled = !Model.ApplicationUsers.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.ApplicationUsers.HasNextPage ? "disabled" : "";
+    }
+    <a asp-page="./Index" asp-route-pageIndex="1" class="btn btn-primary @prevDisabled">
+        First
+    </a>
+    <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.PageIndex - 1)" class="btn btn-primary @prevDisabled">
+        Previous
+    </a>
+    <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.PageIndex + 1)" class="btn btn-primary @nextDisabled">
+        Next
+    </a>
+    <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.TotalPages)" class="btn btn-primary @nextDisabled">
+        Last
+    </a>
 </div>
+
+@section Scripts{
+    <script>
+        document.getElementById('roleFilter').addEventListener('change', function () {
+            $('#roleForm').submit();
+        });
+    </script>
+}
