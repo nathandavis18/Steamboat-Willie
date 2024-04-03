@@ -6,7 +6,7 @@
         {
             string returnString = ""; //The final string
             var dts = dt.ToString(); //Date Time String initial
-            var split = dts.Split(" "); //Splitting the segments
+            var split = dts.Split(' ', ' '); //Splitting the segments
 
             //All of the date parsing stuff
             var dateStrings = split[0].Split("/");

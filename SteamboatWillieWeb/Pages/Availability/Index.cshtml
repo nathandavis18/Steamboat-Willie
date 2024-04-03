@@ -7,8 +7,8 @@
 
 <h2>Availability</h2>
 <form method="post" enctype="multipart/form-data" id="form" onsubmit="return validateForm()">
-    <input asp-for="objAvailability.Id" hidden />
-    <input asp-for="objAvailability.LocationId" hidden/>
+    <input asp-for="objAvailability.ProviderId" hidden />
+    <input asp-for="objAvailability.LocationId" hidden />
     <div class="form-control bg-black">
         <div class="form-group mb-3">
             <label for="startDate" class="text-white">Start: </label>
@@ -24,7 +24,7 @@
             <div>
                 <label for="appointmentDuration" class="text-white">Appointment Duration: </label>
                 <select asp-for="objAvailability.Duration" name="objAvailability.Duration" id="appointmentDuration" class="form-select bg-secondary text-white">
-                    <option selected>Select:</option>
+                    <option>Select:</option>
                     <option value="00:15:00">15 Min</option>
                     <option value="00:30:00">30 Min</option>
                     <option value="01:00:00">60 Min</option>
@@ -51,6 +51,24 @@
         </div>
         <div class="form-group mb-3">
             <div>
+                <input type="radio" name="locationType" id="chooseLocation" value="chooseLocation" checked>
+                <label class="text-white" for="chooseLocation">Choose Location</label>
+                <input class="ms-3" type="radio" name="locationType" id="makeLocation" value="makeLocation">
+                <label class="text-white" for="makeLocation">Make Location</label>
+            </div>
+        </div>
+        <div class="form-group mb-3">
+            <div id="chooseLocationDiv">
+                <label for="dropdownOptions" class="text-white">Location: </label>
+                <select asp-for="objAvailability.LocationId" name="objAvailability.LocationId" class="form-select bg-secondary text-white" id="dropdownOptions">
+                    <option>Select: </option>
+                    @foreach (var option in Model.DropdownOptions)
+                    {
+                        <option value="@option.Value">@option.Text</option>
+                    }
+                </select>
+            </div>
+            <div id="makeLocationDiv" style="display:none;">
                 <label for="location" class="text-white">Location: </label>
                 <input asp-for="objLocation.LocationValue" id="location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" />
             </div>
@@ -133,7 +151,7 @@
         </div>
     </div>
     <div class="text-end">
-        <button type="submit" class="btn btn-secondary">Set Availability</button>
+        <button type="submit" class="btn btn-secondary" name="return">Set Availability</button>
     </div>
 </form>
 
@@ -180,109 +198,17 @@
         });
     });
 
-    document.getElementById("form").addEventListener("submit", function (event) {
-        // Prevent form submission if any validation fails
-        if (!validateForm()) {
-            event.preventDefault();
-        }
-    });
-
-    function validateForm() {
-        var isValid = true;
-
-        // 1. StartDate is not before today
-        var startDate = new Date(document.getElementById("startDate").value);
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (startDate < today) {
-            displayErrorMessage("startDate", "Start date cannot be before today.");
-            TempData["error_message"] = "Start date cannot be before today.";
-            isValid = false;
-        } else {
-            hideErrorMessage("startDate");
-        }
-
-        // 2. End Date is not before today AND not before start
-        var endDate = new Date(document.getElementById("endDate").value);
-        if (endDate < today) {
-            displayErrorMessage("endDate", "End date cannot be before today.");
-            TempData["error_message"] = "End date cannot be before today.";
-            isValid = false;
-        } else {
-            hideErrorMessage("endDate");
-        }
-
-        // 3. If recurrence checkbox is checked, then at least the weekly checkbox is checked OR at least one day is selected in the weekday dropdown
-        var recurrenceCheckbox = document.getElementById("recurrence");
-        if (recurrenceCheckbox.checked) {
-            var weeklyCheckbox = document.getElementById("weekly");
-            var weekDaysCheckboxes = document.querySelectorAll('input[name="weekDays[]"]:checked');
-            if (!weeklyCheckbox.checked && weekDaysCheckboxes.length === 0) {
-                displayErrorMessage("recurrenceError", "If recurrence is selected, either the Weekly checkbox must be checked or at least one day must be selected.");
-                TempData["error_message"] = "If recurrence is selected, either the Weekly checkbox must be checked or at least one day must be selected.";
-                isValid = false;
+    $(document).ready(function () {
+        $("input[name='locationType']").change(function () {
+            if ($("#chooseLocation").is(":checked")) {
+                $("#chooseLocationDiv").show();
+                $("#makeLocationDiv").hide();
             } else {
-                hideErrorMessage("recurrenceError");
+                $("#chooseLocationDiv").hide();
+                $("#makeLocationDiv").show();
             }
-        } else {
-            hideErrorMessage("recurrenceError");
-        }
-
-        // 4. Time is in intervals of 15 minutes
-        var startTime = document.getElementById("startTime").value;
-        if (!validateTime(startTime)) {
-            displayErrorMessage("startTime", "Start time must be in intervals of 15 minutes.");
-            TempData["error_message"] = "Start time must be in intervals of 15 minutes.";
-            isValid = false;
-        } else {
-            hideErrorMessage("startTime");
-        }
-
-        // 5. An appointment duration is selected
-        var appointmentDuration = document.getElementById("appointmentDuration").value;
-        if (appointmentDuration === "Select:") {
-            displayErrorMessage("appointmentDuration", "Please select an appointment duration.");
-            TempData["error_message"] = "Please select an appointment duration.";
-            isValid = false;
-        } else {
-            hideErrorMessage("appointmentDuration");
-        }
-
-        // 6. Number of appointments is a whole number AND is at least 1, but no more than 10
-        var numAppointments = parseInt(document.getElementById("numAppointments").value);
-        if (isNaN(numAppointments) || numAppointments < 1 || numAppointments > 10 || numAppointments % 1 !== 0) {
-            displayErrorMessage("numAppointments", "Number of appointments must be a whole number between 1 and 10.");
-            TempData["error_message"] = "Number of appointments must be a whole number between 1 and 10.";
-            isValid = false;
-        } else {
-            hideErrorMessage("numAppointments");
-        }
-
-        if (!isValid) {
-            console.log("Validation failed. Error message:", TempData["error_message"]);
-        }
-
-        return isValid;
-    }
-
-    function validateTime(time) {
-        var parts = time.split(":");
-        var minutes = parseInt(parts[1]);
-        return minutes % 15 === 0;
-    }
-
-    function displayErrorMessage(inputId, message) {
-        var errorMessageElement = document.getElementById(inputId + "Error");
-        errorMessageElement.textContent = message;
-        errorMessageElement.style.color = "red";
-        errorMessageElement.style.display = "block"; // Show the error message
-    }
-
-    function hideErrorMessage(inputId) {
-        var errorMessageElement = document.getElementById(inputId + "Error");
-        errorMessageElement.textContent = "";
-        errorMessageElement.style.display = "none"; // Hide the error message
-    }
+        });
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         var today = new Date().toISOString().split('T')[0];

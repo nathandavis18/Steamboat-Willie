@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,13 +20,14 @@ namespace SteamboatWillieWeb.Pages.Availability
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        public List<SelectListItem> DropdownOptions { get; set; }
 
         [BindProperty]
         public ProviderAvailability objAvailability { get; set; }
         [BindProperty]
         public Location objLocation { get; set; }
         public IEnumerable<SelectListItem> ProviderList { get; set; }
-        public IEnumerable<Location> locations { get; set; }
+        public IEnumerable<int> Locations { get; set; }
 
         public IndexModel(UnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, UserManager<AppUser> userManager)
         {
@@ -35,7 +37,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             objAvailability = new ProviderAvailability();
             objLocation = new Location();
             ProviderList = new List<SelectListItem>();
-            locations = unitOfWork.Location.GetAll();
+            Locations = new List<int>();
         }
 
         public IActionResult OnGet(int? id)
@@ -50,17 +52,32 @@ namespace SteamboatWillieWeb.Pages.Availability
                 return RedirectToPage("../Index");
             }
 
+            var currentUserId = _userManager.GetUserId(User);
+
+            Locations = _unitOfWork.ProviderAvailability
+                .GetAll()
+                .Where(pa => pa.ProviderId == currentUserId)
+                .Select(pa => pa.LocationId)
+                .Distinct()
+                .ToList();
+
+            var locationValues = _unitOfWork.Location
+                .GetAll()
+                .Where(l => Locations.Contains(l.Id))
+                .Select(l => l.LocationValue)
+                .ToList();
+
+            DropdownOptions = _unitOfWork.Location
+                .GetAll()
+                .Where(l => Locations.Contains(l.Id))
+                .Select(selector: l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
+                .ToList();
+
             return Page();
         }
 
         public IActionResult OnPost(int? id)
         {
-            if (TempData.ContainsKey("error_message"))
-            {
-                // Error message exists, return the page without executing further logic
-                return Page();
-            }
-
             if (!ModelState.IsValid)
             {
                 // Log or debug model state errors
@@ -76,8 +93,41 @@ namespace SteamboatWillieWeb.Pages.Availability
             {
                 bool isRecurrenceChecked = Request.Form["recurrence"].Count > 0;
                 bool isWeeklyChecked = Request.Form["weekly"].Count > 0;
-                int count = 0;
+                bool chooseLocationChecked = Request.Form["locationType"] == "chooseLocation";
+                bool makeLocationChecked = Request.Form["locationType"] == "makeLocation";
+                int count = 1;
                 int weekCount = 0;
+                int locationId = -1;
+
+                if(makeLocationChecked)
+                {
+                    string locationValue = Request.Form["objLocation.LocationValue"];
+                    Location newLocation = new Location
+                    {
+                        LocationValue = locationValue
+                    };
+                    _unitOfWork.Location.Add(newLocation);
+                    _unitOfWork.Commit();
+                    locationId = newLocation.Id;
+                    objAvailability.LocationId = locationId;
+                }
+                else
+                {
+                    string location = Request.Form["objAvailability.LocationId"];
+                    var split = location.Split(',');
+                    if (int.TryParse(split[1], out locationId))
+                    {
+                        objAvailability.LocationId = locationId;
+                    }
+                    else
+                    {
+                        // Handle the case where parsing fails
+                        // This could happen if the form value is not a valid integer
+                        // You may want to log an error or provide feedback to the user
+                        Console.WriteLine("Failed to parse LocationId as an integer.");
+                        return Page(); // or return an error page
+                    }
+                }
 
                 if (isRecurrenceChecked)
                 {
@@ -113,7 +163,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                             EndTime = endTime,
                             Duration = duration,
                             Scheduled = false,
-                            LocationId = 1
+                            LocationId = objAvailability.LocationId
                         };
 
                         _unitOfWork.ProviderAvailability.Add(availabilitySlot);
@@ -130,7 +180,7 @@ namespace SteamboatWillieWeb.Pages.Availability
 
                     if (selectedDaysList.Any())
                     {
-                        var endSelectedDate = reccurentDateTime.AddDays(6);
+                        var endSelectedDate = reccurentDateTime.AddDays(5);
                         while (reccurentDateTime <= endSelectedDate)
                         {
                             count++;
@@ -145,7 +195,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                                         EndTime = endTime,
                                         Duration = duration,
                                         Scheduled = false,
-                                        LocationId = 1
+                                        LocationId = objAvailability.LocationId
                                     };
 
                                     _unitOfWork.ProviderAvailability.Add(availabilitySlot);
@@ -187,7 +237,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                                             EndTime = endTime,
                                             Duration = duration,
                                             Scheduled = false,
-                                            LocationId = 1
+                                            LocationId = objAvailability.LocationId
                                         };
 
                                         _unitOfWork.ProviderAvailability.Add(availabilitySlot);
@@ -216,7 +266,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                                         EndTime = endTime,
                                         Duration = duration,
                                         Scheduled = false,
-                                        LocationId = 1
+                                        LocationId = objAvailability.LocationId
                                     };
 
                                     _unitOfWork.ProviderAvailability.Add(availabilitySlot);
@@ -253,7 +303,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                             EndTime = endTime,
                             Duration = duration,
                             Scheduled = false,
-                            LocationId = 1
+                            LocationId = objAvailability.LocationId
                         };
 
                         _unitOfWork.ProviderAvailability.Add(availabilitySlot);
@@ -266,7 +316,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             }
 
             _unitOfWork.Commit();
-            return RedirectToPage("./Index");
+            return RedirectToPage("../Index");
 
         }
     }
