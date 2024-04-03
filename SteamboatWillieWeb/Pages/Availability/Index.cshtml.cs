@@ -28,6 +28,7 @@ namespace SteamboatWillieWeb.Pages.Availability
         public Location objLocation { get; set; }
         public IEnumerable<SelectListItem> ProviderList { get; set; }
         public IEnumerable<int> Locations { get; set; }
+        public string PassedDate { get; set; }
 
         public IndexModel(UnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, UserManager<AppUser> userManager)
         {
@@ -40,7 +41,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             Locations = new List<int>();
         }
 
-        public IActionResult OnGet(int? id)
+        public IActionResult OnGet(int? id, string? date)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -50,6 +51,11 @@ namespace SteamboatWillieWeb.Pages.Availability
             {
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
+            }
+
+            if (date != null)
+            {
+                PassedDate = date;
             }
 
             var currentUserId = _userManager.GetUserId(User);

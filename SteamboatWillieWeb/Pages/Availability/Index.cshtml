@@ -241,6 +241,18 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
+        if ('@Model.PassedDate' != '') {
+            console.log(@Model.PassedDate);
+            document.getElementById('startDate').value = '@Model.PassedDate';
+            document.getElementById('endDate').value = '@Model.PassedDate';
+        }
+        else {
+            var today = new Date().toISOString().split('T')[0];
+            console.log(today)
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+        }
+    });
         var today = new Date()
         today.setDate(today.getDate() - 1);
         today.toISOString().split('T')[0];
