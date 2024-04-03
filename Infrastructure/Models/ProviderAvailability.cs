@@ -27,6 +27,7 @@ namespace Infrastructure.Models
         [Display(Name = "End Time")]
         public DateTime EndTime { get; set; }
 
+        [Required]
         public DateTime Duration { get; set; }
 
         public int LocationId { get; set; }
