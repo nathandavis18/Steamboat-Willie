@@ -211,7 +211,15 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-        var today = new Date().toISOString().split('T')[0];
-        document.getElementById('startDate').value = today;
-        document.getElementById('endDate').value = today;
+        if ('@Model.PassedDate' != '') {
+            console.log(@Model.PassedDate);
+            document.getElementById('startDate').value = '@Model.PassedDate';
+            document.getElementById('endDate').value = '@Model.PassedDate';
+        }
+        else {
+            var today = new Date().toISOString().split('T')[0];
+            console.log(today)
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+        }
     });</script>

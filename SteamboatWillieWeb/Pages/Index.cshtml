@@ -47,6 +47,20 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                             center: 'title',
                             right: 'dayGridMonth,timeGridWeek' // user can switch between the two
                         },
+                        navLinks: true,
+                        navLinkDayClick: function (date) {
+                            var currentDate = new Date();
+                            currentDate = currentDate.setDate(currentDate.getDate() - 1);
+                            if (date < currentDate) {
+                                return;
+                            }
+                            var year = date.getFullYear();
+                            var month = String(date.getMonth() + 1).padStart(2, '0');
+                            var day = String(date.getDate()).padStart(2, '0');
+                            var formattedDate = year + '-' + month + '-' + day;
+                            var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
+                            window.location.href = redirectTo;
+                        }
                         // eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
                         //     alert('event:' + info.event.title);
                         // }
@@ -125,6 +139,20 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek' // user can switch between the two
                     },
+                    navLinks: true,
+                    navLinkDayClick: function (date) {
+                        var currentDate = new Date();
+                        currentDate = currentDate.setDate(currentDate.getDate() - 1);
+                        if (date < currentDate) {
+                            return;
+                        }
+                        var year = date.getFullYear();
+                        var month = String(date.getMonth() + 1).padStart(2, '0');
+                        var day = String(date.getDate()).padStart(2, '0');
+                        var formattedDate = year + '-' + month + '-' + day;
+                        var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
+                        window.location.href = redirectTo;
+                    }
                     // eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
                     //     alert('event:' + info.event.title);
                     // }
