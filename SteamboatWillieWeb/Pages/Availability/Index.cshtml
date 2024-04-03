@@ -249,7 +249,7 @@
         else {
             var today = new Date()
             today.setDate(today.getDate() - 1);
-            today.toISOString().split('T')[0];
+            today = today.toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('endDate').value = today;
         }
