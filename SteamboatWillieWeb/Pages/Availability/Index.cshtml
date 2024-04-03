@@ -6,7 +6,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 
 <h2>Availability</h2>
-<form method="post" enctype="multipart/form-data" id="form" onsubmit="return validateForm()">
+<form method="post" enctype="multipart/form-data" id="form">
     <input asp-for="objAvailability.ProviderId" hidden />
     <input asp-for="objAvailability.LocationId" hidden />
     <div class="form-control bg-black">
@@ -18,7 +18,7 @@
                     <i class="bi bi-calendar-week-fill"></i>
                 </span>
             </div>
-            <span id="startDateError"></span>
+            <span id="startDateError" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
             <div>
@@ -30,14 +30,14 @@
                     <option value="01:00:00">60 Min</option>
                 </select>
             </div>
-            <span id="appointmentDurationError"></span>
+            <span id="appointmentDurationError" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
             <div>
                 <label for="numAppointments" class="text-white">Number of Appointments: </label>
                 <input name="numAppointments" id="numAppointments" class="form-control bg-secondary text-white" type="number" />
             </div>
-            <span id="numAppointmentsError"></span>
+            <span id="numAppointmentsError" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
             <label for="startTime" class="text-white">Start Time: </label>
@@ -47,7 +47,7 @@
                     <i class="bi bi-clock-fill"></i>
                 </span>
             </div>
-            <span id="startTimeError"></span>
+            <span id="startTimeError" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
             <div>
@@ -61,7 +61,7 @@
             <div id="chooseLocationDiv">
                 <label for="dropdownOptions" class="text-white">Location: </label>
                 <select asp-for="objAvailability.LocationId" name="objAvailability.LocationId" class="form-select bg-secondary text-white" id="dropdownOptions">
-                    <option>Select: </option>
+                    <option>Select:</option>
                     @foreach (var option in Model.DropdownOptions)
                     {
                         <option value="@option.Value">@option.Text</option>
@@ -73,12 +73,13 @@
                 <input asp-for="objLocation.LocationValue" id="location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" />
             </div>
         </div>
+        <span id="locationError" class="text-danger"></span>
         <div class="form-group mb-3">
             <div>
                 <label for="recurrence" class="text-white">Recurrence: </label>
                 <input id="recurrence" name="recurrence" class="bg-secondary text-white" type="checkbox" />
             </div>
-            <span id="recurrenceError"></span>
+            <span id="recurrenceError" class="text-danger"></span>
         </div>
         <div class="form-group mb-3" id="otherThings" style="display: none">
             <div>
@@ -173,15 +174,16 @@
                             <i class="bi bi-calendar-week-fill"></i>
                         </span>
                     </div>
-                    <span id="endDateError"></span>
+                    <span id="otherErrors" class="text-danger"></span>
                 </div>
             </div>
         </div>
     </div>
-    <div class="text-end">
-        <button type="submit" class="btn btn-secondary" name="return">Set Availability</button>
-    </div>
 </form>
+
+<div class="text-end">
+    <button class="btn btn-secondary" name="return" onclick="submitForm()">Set Availability</button>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -239,7 +241,113 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-        var today = new Date().toISOString().split('T')[0];
+        var today = new Date()
+        today.setDate(today.getDate() - 1);
+        today.toISOString().split('T')[0];
         document.getElementById('startDate').value = today;
         document.getElementById('endDate').value = today;
-    });</script>
+    });
+
+    function submitForm() {
+        var startDate = new Date(document.getElementById('startDate').value);
+        var duration = document.getElementById('appointmentDuration').value;
+        var numAppointments = parseInt(document.getElementById('numAppointments').value);
+        var startTime = document.getElementById('startTime').value;
+        var locationType = document.querySelector('input[name="locationType"]:checked').value;
+        var locationValue = document.getElementById('location').value;
+        var locationId = document.getElementById('dropdownOptions').value;
+        var recurrenceChecked = document.getElementById('recurrence').checked;
+        var weekDays = document.querySelectorAll('input[name="weekDays[]"]:checked');
+        var weeklyChecked = document.getElementById('weekly').checked;
+        var endDate = new Date(document.getElementById('endDate').value);
+
+        var errors = [];
+
+        // Start Date
+        var today = new Date();
+        today.setDate(today.getDate() - 2);
+        if (startDate < today)
+        {
+            errors.push("Start date cannot be before today.");
+        }
+
+        // Duration
+        if (duration === "Select:")
+        {
+            errors.push("Please select a valid duration.");
+        }
+
+        // Number of appointments
+        if (numAppointments <= 0 || numAppointments > 10 || isNaN(numAppointments))
+        {
+            errors.push("Number of appointments must be between 1 and 10.");
+        }
+
+        // Start time
+        var timeParts = startTime.split(':');
+        var minutes = parseInt(timeParts[1]);
+        if (minutes % 15 !== 0)
+        {
+            errors.push("Start time must be in 15-minute intervals.");
+        }
+
+        // Location
+        if (locationType === "chooseLocation" && locationId === "Select:")
+        {
+            errors.push("Please select a location.");
+        }
+        else if (locationType === "makeLocation" && (locationValue === "" || locationValue.length > 200))
+        {
+            errors.push("Please input a location (max 200 characters).");
+        }
+
+        // Recurrence
+        if (recurrenceChecked)
+        {
+            if (weekDays.length === 0 && !weeklyChecked)
+            {
+                errors.push("Please select at least one day for recurrence or check weekly.");
+            }
+            else
+            {
+                var oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000;
+                var differenceInMilliseconds = endDate.getTime() - startDate.getTime();
+                if (endDate <= startDate) {
+                    errors.push("Weekly end date cannot be before start date.");
+                }
+                else if (differenceInMilliseconds < oneWeekInMilliseconds)
+                {
+                    errors.push("Weekly end date must be at least a week out from start date.");
+                }
+            }
+        }
+
+
+        if (errors.length > 0)
+        {
+            document.getElementById("startDateError").innerHTML = errors.includes("Start date cannot be before today.") ? errors[errors.indexOf("Start date cannot be before today.")] : "";
+            document.getElementById("appointmentDurationError").innerHTML = errors.includes("Please select a valid duration.") ? errors[errors.indexOf("Please select a valid duration.")] : "";
+            document.getElementById("numAppointmentsError").innerHTML = errors.includes("Number of appointments must be between 1 and 10.") ? errors[errors.indexOf("Number of appointments must be between 1 and 10.")] : "";
+            document.getElementById("startTimeError").innerHTML = errors.includes("Start time must be in 15-minute intervals.") ? errors[errors.indexOf("Start time must be in 15-minute intervals.")] : "";
+            document.getElementById("locationError").innerHTML = (errors.includes("Please select a location.") || errors.includes("Please input a location (max 200 characters).")) ? (errors.includes("Please select a location.") ? errors[errors.indexOf("Please select a location.")] : errors[errors.indexOf("Please input a location (max 200 characters).")]) : "";
+            document.getElementById("recurrenceError").innerHTML = errors.includes("Please select at least one day for recurrence or check weekly.") ? errors[errors.indexOf("Please select at least one day for recurrence or check weekly.")] : (errors.includes("Weekly end date must be at least a week out from start date.") ? errors[errors.indexOf("Weekly end date must be at least a week out from start date.")] : (errors.includes("Weekly end date cannot be before start date.") ? errors[errors.indexOf("Weekly end date cannot be before start date.")] : ""));
+            document.getElementById("otherErrors").innerHTML = errors.filter(error => ![
+                "Start date cannot be before today.",
+                "Please select a valid duration.",
+                "Number of appointments must be between 1 and 10.",
+                "Start time must be in 15-minute intervals.",
+                "Please select a location.",
+                "Please input a location (max 200 characters).",
+                "Please select at least one day for recurrence or check weekly.",
+                "Weekly end date must be at least a week out from start date.",
+                "Weekly end date cannot be before start date."
+            ].includes(error)).join("<br>");
+        }
+        else
+        {
+            $('#form').submit();
+        }
+
+    }
+
+    </script>
