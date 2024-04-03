@@ -12,6 +12,8 @@ namespace SteamboatWillieWeb.Pages
         private readonly ILogger<IndexModel> _logger;
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        public string CurrentUserStartTime { get; set; }
+        public string CurrentUserEndTime { get; set; }
 
         public List<AppointmentCard> Appointments { get; set; }
         private IEnumerable<ProviderAvailability> providerAvailabilities;
@@ -107,6 +109,13 @@ namespace SteamboatWillieWeb.Pages
                     scheduleTitle = "Office Hours";
                 else scheduleTitle = "Tutoring";
 
+                var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId, false, "Department");
+                if (currentUser != null)
+                {
+                    CurrentUserStartTime = currentUser.StartTime?.ToString("HH:mm:ss") ?? "07:00:00"; // Default to 07:00:00 if start time is null
+                    CurrentUserEndTime = currentUser.EndTime?.ToString("HH:mm:ss") ?? "19:00:00"; // Default to 19:00:00 if end time is null
+                }
+
                 foreach (var availability in providerAvailabilities)
                 {
                     if (availability.Scheduled)
@@ -121,6 +130,7 @@ namespace SteamboatWillieWeb.Pages
                         CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Availability" });
                     }
                 }
+
             }
             return Page();
         }

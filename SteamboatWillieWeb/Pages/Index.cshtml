@@ -7,6 +7,9 @@
 }
 @using Utility
 
+<input type="hidden" id="currentUserStartTime" value="@Model.CurrentUserStartTime" />
+<input type="hidden" id="currentUserEndTime" value="@Model.CurrentUserEndTime" />
+
 @if (!User.Identity.IsAuthenticated)
 {
     <div class="text-center">
@@ -17,14 +20,14 @@
 else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
 {
     <div class="text-center row">
-        <div class="tutor-slider-inner col-md-4 provider-view"> 
+        <div class="tutor-slider-inner col-md-4 provider-view">
             <label>Provider View</label>
         </div>
         <div class="tutor-slider-div col">
-        <label class="switch">
-            <input type="checkbox" id="tutor-slider" onchange="tutorSlider()">
-            <span class="slider round"></span>
-        </label>
+            <label class="switch">
+                <input type="checkbox" id="tutor-slider" onchange="tutorSlider()">
+                <span class="slider round"></span>
+            </label>
         </div>
         <div class="tutor-slider-inner col-md-4 student-view">
             <label>Student View</label>
@@ -36,11 +39,13 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
             <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
+                    var currentUserStartTime = document.getElementById('currentUserStartTime').value;
+                    var currentUserEndTime = document.getElementById('currentUserEndTime').value;
                     var calendarEl = document.getElementById('calendar');
                     var calendar = new FullCalendar.Calendar(calendarEl, {
                         initialView: 'dayGridMonth',
-                        slotMinTime: '07:00:00',
-                        slotMaxTime: '19:00:00',
+                        slotMinTime: '@Model.CurrentUserStartTime',
+                        slotMaxTime: '@Model.CurrentUserEndTime',
                         height: 'auto',
                         headerToolbar: {
                             left: 'prev,next',
@@ -131,8 +136,8 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                 var calendarEl = document.getElementById('calendar');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
-                    slotMinTime: '07:00:00',
-                    slotMaxTime: '19:00:00',
+                    slotMinTime: '@Model.CurrentUserStartTime',
+                    slotMaxTime: '@Model.CurrentUserEndTime',
                     height: 'auto',
                     headerToolbar: {
                         left: 'prev,next',
@@ -192,23 +197,23 @@ else if (User.IsInRole(SD.CLIENT_ROLE))
     else
     {
         <div class="row align-content-center">
-        @foreach (var app in Model.Appointments)
-        {
-            <div class="col-md-3">
-                <a class="no-decoration" asp-page="" asp-route-id="@app.Id">
-                    <div class="card">
-                        <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
-                        <div class="card-body">
+            @foreach (var app in Model.Appointments)
+            {
+                <div class="col-md-3">
+                    <a class="no-decoration" asp-page="" asp-route-id="@app.Id">
+                        <div class="card">
+                            <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
+                            <div class="card-body">
                                 <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
                                 <strong>When:</strong>
                                 @app.Date <br />
                                 <pre>       @app.StartTime - @app.EndTime</pre>
                                 <strong>Where:</strong> @app.Location
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </div>
-        }
+                    </a>
+                </div>
+            }
         </div>
     }
 }
@@ -220,20 +225,18 @@ else
 }
 
 @section Scripts {
-    <script>
-        var slider = document.getElementById('tutor-slider');
+    <script>var slider = document.getElementById('tutor-slider');
         var provider = document.getElementById('tutor-provider-view');
         var client = document.getElementById('tutor-student-view');
 
-        function tutorSlider(){
+        function tutorSlider() {
             if (slider.checked) {
                 client.style.display = "block";
                 provider.style.display = "none";
             }
-            else{
+            else {
                 provider.style.display = "contents";
                 client.style.display = "none";
             }
-        }
-    </script>
+        }</script>
 }

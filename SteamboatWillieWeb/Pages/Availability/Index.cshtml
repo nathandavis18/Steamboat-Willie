@@ -249,7 +249,7 @@
         else {
             var today = new Date()
             today.setDate(today.getDate() - 1);
-            today.toISOString().split('T')[0];
+            today = today.toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('endDate').value = today;
         }
@@ -267,6 +267,8 @@
         var weekDays = document.querySelectorAll('input[name="weekDays[]"]:checked');
         var weeklyChecked = document.getElementById('weekly').checked;
         var endDate = new Date(document.getElementById('endDate').value);
+        var officeStart = "@Model.CurrentUserStartTime";
+        var officeEnd = "@Model.CurrentUserEndTime";
 
         var errors = [];
 
@@ -296,6 +298,28 @@
         if (minutes % 15 !== 0)
         {
             errors.push("Start time must be in 15-minute intervals.");
+        }
+
+        // Start time before or after office start
+        if (startTime < officeStart)
+        {
+            errors.push("Start time cannot be before office start time.");
+        }
+
+        if (startTime > officeEnd)
+        {
+            errors.push("Start time cannot be after office end time.")
+        }
+
+        // End time
+        var startTimeInMinutes = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+        var durationParts = duration.split(':');
+        var durationInMinutes = durationParts.length === 3 ? parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]) : parseInt(durationParts[0]);
+        var endTimeInMinutes = startTimeInMinutes + numAppointments * durationInMinutes;
+        var officeEndInMinutes = parseInt(officeEnd.split(':')[0]) * 60 + parseInt(officeEnd.split(':')[1]);
+
+        if (endTimeInMinutes > officeEndInMinutes) {
+            errors.push("End time exceeds office end time.");
         }
 
         // Location
@@ -329,13 +353,11 @@
             }
         }
 
-
-        if (errors.length > 0)
-        {
+        if (errors.length > 0) {
             document.getElementById("startDateError").innerHTML = errors.includes("Start date cannot be before today.") ? errors[errors.indexOf("Start date cannot be before today.")] : "";
             document.getElementById("appointmentDurationError").innerHTML = errors.includes("Please select a valid duration.") ? errors[errors.indexOf("Please select a valid duration.")] : "";
             document.getElementById("numAppointmentsError").innerHTML = errors.includes("Number of appointments must be between 1 and 10.") ? errors[errors.indexOf("Number of appointments must be between 1 and 10.")] : "";
-            document.getElementById("startTimeError").innerHTML = errors.includes("Start time must be in 15-minute intervals.") ? errors[errors.indexOf("Start time must be in 15-minute intervals.")] : "";
+            document.getElementById("startTimeError").innerHTML = errors.includes("Start time must be in 15-minute intervals.") ? errors[errors.indexOf("Start time must be in 15-minute intervals.")] : (errors.includes("Start time cannot be before office start time.") ? errors[errors.indexOf("Start time cannot be before office start time.")] : (errors.includes("Start time cannot be after office end time.") ? errors[errors.indexOf("Start time cannot be after office end time.")] : (errors.includes("End time exceeds office end time.") ? errors[errors.indexOf("End time exceeds office end time.")] : "")));
             document.getElementById("locationError").innerHTML = (errors.includes("Please select a location.") || errors.includes("Please input a location (max 200 characters).")) ? (errors.includes("Please select a location.") ? errors[errors.indexOf("Please select a location.")] : errors[errors.indexOf("Please input a location (max 200 characters).")]) : "";
             document.getElementById("recurrenceError").innerHTML = errors.includes("Please select at least one day for recurrence or check weekly.") ? errors[errors.indexOf("Please select at least one day for recurrence or check weekly.")] : (errors.includes("Weekly end date must be at least a week out from start date.") ? errors[errors.indexOf("Weekly end date must be at least a week out from start date.")] : (errors.includes("Weekly end date cannot be before start date.") ? errors[errors.indexOf("Weekly end date cannot be before start date.")] : ""));
             document.getElementById("otherErrors").innerHTML = errors.filter(error => ![
@@ -343,18 +365,20 @@
                 "Please select a valid duration.",
                 "Number of appointments must be between 1 and 10.",
                 "Start time must be in 15-minute intervals.",
+                "Start time cannot be before office start time.",
+                "Start time cannot be after office end time.",
+                "End time exceeds office end time.",
                 "Please select a location.",
                 "Please input a location (max 200 characters).",
                 "Please select at least one day for recurrence or check weekly.",
                 "Weekly end date must be at least a week out from start date.",
                 "Weekly end date cannot be before start date."
             ].includes(error)).join("<br>");
-        }
-        else
-        {
+        } else {
             $('#form').submit();
         }
 
+
     }
 
-    </script>
+</script>
