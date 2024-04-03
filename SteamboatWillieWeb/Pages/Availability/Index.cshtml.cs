@@ -21,6 +21,8 @@ namespace SteamboatWillieWeb.Pages.Availability
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
         public List<SelectListItem> DropdownOptions { get; set; }
+        public string CurrentUserStartTime { get; set; }
+        public string CurrentUserEndTime { get; set; }
 
         [BindProperty]
         public ProviderAvailability objAvailability { get; set; }
@@ -78,6 +80,13 @@ namespace SteamboatWillieWeb.Pages.Availability
                 .Where(l => Locations.Contains(l.Id))
                 .Select(selector: l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
                 .ToList();
+
+            var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId, false, "Department");
+            if (currentUser != null)
+            {
+                CurrentUserStartTime = currentUser.StartTime?.ToString("HH:mm:ss") ?? "07:00:00"; // Default to 07:00:00 if start time is null
+                CurrentUserEndTime = currentUser.EndTime?.ToString("HH:mm:ss") ?? "19:00:00"; // Default to 19:00:00 if end time is null
+            }
 
             return Page();
         }
