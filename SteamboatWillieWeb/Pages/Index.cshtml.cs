@@ -95,7 +95,7 @@ namespace SteamboatWillieWeb.Pages
                     });*/
                 }
             }
-            else if (User.IsInRole(SD.PROVIDER_ROLE))
+            if(User.IsInRole(SD.PROVIDER_ROLE))
             {
                 var currentUserId = _userManager.GetUserId(User);
                 providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == currentUserId && x.StartTime > DateTime.Now.AddDays(-1));
