@@ -1,0 +1,59 @@
+﻿@page
+@model SteamboatWillieWeb.Pages.Appointments.RegisterAppointmentModel
+@{
+}
+
+<div class="text-center">
+    <h2>Appointment Details</h2>
+    <form method="post">
+        <input asp-for="AppointmentInput.AvailabilityId" value="@Model.AppointmentInput.AvailabilityId" hidden/>
+        <table class="table table-striped table-bordered">
+            <tbody>
+                <tr>
+                    <td>Date: @Model.AppointmentInput.Date</td>
+                </tr>
+                <tr>
+                    <td>Time: @Model.AppointmentInput.Time</td>
+                </tr>
+                <tr>
+                    <td>@(Model.AppointmentInput.ProviderType): @Model.AppointmentInput.ProviderName</td>
+                </tr>
+                <tr>
+                    <td>Location: @Model.AppointmentInput.Location</td>
+                </tr>
+                <tr>
+                    <td>
+                        Comments: <br />
+                        <textarea asp-for="AppointmentInput.Comments" class="form-control" rows="3" id="commentsBox"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    @if (Model.AppointmentInput.IsScheduled)
+                    {
+                        <td>
+                            <input type="submit" class="btn btn-danger" value="Cancel Appointment" asp-route-cancel="@true"/>
+                            <input type="submit" class="btn btn-primary" value="Save Changes" asp-route-update="@true"/>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            <a asp-page="/Appointments/Index" asp-route-type="@Model.AppointmentInput.CancelReturn" class="btn btn-danger">Cancel</a>
+                            <input type="submit" class="btn btn-primary" value="Register Appointment" />
+                        </td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+
+@section Scripts{
+    <script>
+        /*tinymce.init({
+            selector: 'textarea',
+            plugins: "lists",
+            menubar: "file edit format"
+        });*/
+    </script>
+}

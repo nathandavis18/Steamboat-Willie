@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utility;
 
-namespace SteamboatWillieWeb.Pages.Appointment
+namespace SteamboatWillieWeb.Pages.Appointments
 {
     public class AdvisingNeedModel : PageModel
     {

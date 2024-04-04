@@ -30,9 +30,9 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" asp-area="" asp-page="">Schedule Appointment</a>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" asp-area="" asp-route-type="Tutoring" asp-page="/Appointment/Index">Tutoring</a>
-                                    <a class="dropdown-item" asp-area="" asp-route-type="Advisment" asp-page="/Appointment/AdvisingNeed">Advising</a>
-                                    <a class="dropdown-item" asp-area="" asp-route-type="Instructing" asp-page="/Appointment/Index">Instructor</a>
+                                    <a class="dropdown-item" asp-area="" asp-route-type="Tutoring" asp-page="/Appointments/Index">Tutoring</a>
+                                    <a class="dropdown-item" asp-area="" asp-route-type="Advisment" asp-page="/Appointments/AdvisingNeed">Advising</a>
+                                    <a class="dropdown-item" asp-area="" asp-route-type="Instructing" asp-page="/Appointments/Index">Instructor</a>
                                 </div>
                             </li>
                         }
@@ -85,11 +85,12 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>tinymce.init({
+    <script>
+        /*tinymce.init({
             selector: 'textarea',
             plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-        });</script>
+        });*/</script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
