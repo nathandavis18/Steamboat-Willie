@@ -10,7 +10,7 @@
                 <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
                     <input asp-for="@Model.Department.Id" hidden/>
                     <div class="department-form-label">
-                        @if(Model.Department != null)
+                        @if(Model.Department.DepartmentName != null)
                         {
                             <label>Edit Department</label>
                         }
