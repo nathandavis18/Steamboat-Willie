@@ -44,6 +44,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                     var calendarEl = document.getElementById('calendar');
                     var calendar = new FullCalendar.Calendar(calendarEl, {
                         initialView: 'dayGridMonth',
+                        allDaySlot: false,
                         slotMinTime: '@Model.CurrentUserStartTime',
                         slotMaxTime: '@Model.CurrentUserEndTime',
                         height: 'auto',
@@ -136,6 +137,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                 var calendarEl = document.getElementById('calendar');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
+                    allDaySlot: false,
                     slotMinTime: '@Model.CurrentUserStartTime',
                     slotMaxTime: '@Model.CurrentUserEndTime',
                     height: 'auto',
