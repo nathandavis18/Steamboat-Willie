@@ -47,7 +47,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
             if (type.Equals("Tutoring"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor") && !p.Scheduled && !(p.Provider.AppUserId == user.Id));
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor") && !p.Scheduled && !(p.Provider.AppUserId == user.Id) && p.StartTime >= DateTime.Now);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -62,7 +62,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             }
             else if (type.Equals("NewStudent"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("NewStudent") && !p.Scheduled);
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("NewStudent") && !p.Scheduled && p.StartTime >= DateTime.Now);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -76,7 +76,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             }
             else if (type.Equals("ExistingStudent"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("ExistingStudent") && !p.Scheduled);
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("ExistingStudent") && !p.Scheduled && p.StartTime >= DateTime.Now);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -90,7 +90,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             }
             else if (type.Equals("FlexStudent"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("FlexStudent") && !p.Scheduled);
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("FlexStudent") && !p.Scheduled && p.StartTime >= DateTime.Now);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -104,7 +104,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             }
             else if (type.Equals("Instructing"))
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Instructor") && !p.Scheduled);
+                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Instructor") && !p.Scheduled && p.StartTime >= DateTime.Now);
                 foreach (var a in availabilities)
                 {
                     CalendarObj.Add(new Calendar
@@ -116,6 +116,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
                     });
                 }
             }
+
+            
 
             return Page();
         }
