@@ -1,8 +1,10 @@
 using DataAccess;
 using Infrastructure.Interfaces;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using Utility;
 using AppUser = Infrastructure.Models.AppUser;
@@ -13,17 +15,23 @@ namespace SteamboatWillieWeb.Pages.Users
     {
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public IndexModel(UnitOfWork unit, UserManager<AppUser> userManager)
+        public IndexModel(UnitOfWork unit, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _unitOfWork = unit;
+            _roleManager = roleManager;
         }
 
-        public IEnumerable<AppUser> ApplicationUsers { get; set; }
-        public Dictionary<string, List<string>> UserRoles { get; set; }
+        public PaginatedList<AppUser>? ApplicationUsers { get; set; }
+        public Dictionary<string, List<string>>? UserRoles { get; set; }
+        public List<SelectListItem> Roles {  get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
+        public string CurrentFilter { get; set; }
+        public string CurrentRole { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(int? pageIndex, string searchString, string roleSort)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -34,8 +42,26 @@ namespace SteamboatWillieWeb.Pages.Users
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
+            CurrentFilter = searchString;
+            CurrentRole = roleSort;
+            Roles = _roleManager.Roles.Select(x => new SelectListItem
+            {
+                Text = x.Name,
+                Value = x.Name
+            }).ToList()!;
+
             UserRoles = new Dictionary<string, List<string>>();
-            ApplicationUsers = (IEnumerable<AppUser>)_unitOfWork.AppUser.GetAll();
+            int pageSize = 10;
+            var appUsers = (await _unitOfWork.AppUser.GetAllAsync()).ToList();
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                appUsers = appUsers.Where(a => a.FullName.Contains(searchString)).ToList();
+            }
+            if (!String.IsNullOrEmpty(roleSort))
+            {
+                appUsers = appUsers.Where(a => _userManager.GetRolesAsync(a).GetAwaiter().GetResult().Contains(roleSort)).ToList();
+            }
+            ApplicationUsers = PaginatedList<AppUser>.Create(appUsers, pageIndex ?? 1, pageSize);
             foreach (var user in ApplicationUsers)
             {
                 var userRole = await _userManager.GetRolesAsync(user);

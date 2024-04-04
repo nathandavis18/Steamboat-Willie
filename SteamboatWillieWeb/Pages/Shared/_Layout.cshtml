@@ -39,7 +39,7 @@
 
                         @if (User.IsInRole(SD.PROVIDER_ROLE))
                         {
-                            <li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-page="/Availability/Index">Availablity</a>
                             </li>
                         }
@@ -47,15 +47,11 @@
 
                         @if (User.IsInRole(SD.ADMIN_ROLE))
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" asp-area="" asp-page="">User Managment</a> @* Ignore the asp stuff. Color wouldn't work without them *@
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" asp-area="" asp-page="/Users/Index">Users</a>
-                                    <a class="dropdown-item" asp-area="" asp-page="/Roles/Index">Roles</a>
-                                </div>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Users/Index">User Management</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/Departments/Index">Departments</a>
+                                <a class="nav-link" asp-area="" asp-page="/Departments/Index">Department Management</a>
                             </li>
                         }
 
