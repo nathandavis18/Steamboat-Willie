@@ -24,7 +24,23 @@
                             <td>Client Email: @Model.details.clientEmail</td>
                         </tr>
                         <tr>
-                            <td>Location: @Model.details.location</td>
+                            <td>
+                                Location: @if ((Model.details.location.Contains("www") || Model.details.location.Contains("http") || Model.details.location.Contains(".com") || Model.details.location.Contains(".edu") || Model.details.location.Contains(".org") || Model.details.location.Contains(".gov") || Model.details.location.Contains(".gg")|| Model.details.location.Contains(".net")))
+                                {
+                                    @if (Model.details.location.Contains("http"))
+                                    {
+                                        <a href="@Model.details.location" target="_blank">@Model.details.location</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="http://@Model.details.location" target="_blank">@Model.details.location</a>
+                                    }
+                                }
+                                else
+                                {
+                                    @Model.details.location
+                                }
+                            </td>
                         </tr>
                         <tr>
                             <td>Student Comments: @Model.details.studentComments</td>
@@ -54,7 +70,23 @@
                             <td>Availability Time: @Model.details.time</td>
                         </tr>
                         <tr>
-                            <td>Location: @Model.details.location</td>
+                            <td>
+                                Location: @if ((Model.details.location.Contains("www") || Model.details.location.Contains("http") || Model.details.location.Contains(".com") || Model.details.location.Contains(".edu") || Model.details.location.Contains(".org") || Model.details.location.Contains(".gov") || Model.details.location.Contains(".gg") || Model.details.location.Contains(".net")))
+                                {
+                                    @if(Model.details.location.Contains("http"))
+                                    {
+                                        <a href="@Model.details.location" target="_blank">@Model.details.location</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="http://@Model.details.location" target="_blank">@Model.details.location</a>
+                                    }
+                                }
+                                else
+                                {
+                                    @Model.details.location
+                                }
+                            </td>
                         </tr>
                         <tr>
                             <td>

@@ -19,7 +19,23 @@
                     <td>@(Model.AppointmentInput.ProviderType): @Model.AppointmentInput.ProviderName</td>
                 </tr>
                 <tr>
-                    <td>Location: @Model.AppointmentInput.Location</td>
+                    <td>
+                        Location: @if ((Model.AppointmentInput.Location.Contains("www") || Model.AppointmentInput.Location.Contains("http") || Model.AppointmentInput.Location.Contains(".com") || Model.AppointmentInput.Location.Contains(".edu") || Model.AppointmentInput.Location.Contains(".org") || Model.AppointmentInput.Location.Contains(".gov") || Model.AppointmentInput.Location.Contains(".gg") || Model.AppointmentInput.Location.Contains(".net") || Model.AppointmentInput.Location.Contains(".us") || Model.AppointmentInput.Location.Contains("zoom."))) //Dw about it
+                        {
+                            @if (Model.AppointmentInput.Location.Contains("http"))
+                            {
+                                <a href="@Model.AppointmentInput.Location" target="_blank">@Model.AppointmentInput.Location</a>
+                            }
+                            else
+                            {
+                                <a href="http://@Model.AppointmentInput.Location" target="_blank">@Model.AppointmentInput.Location</a>
+                            }
+                        }
+                        else
+                        {
+                            @Model.AppointmentInput.Location
+                        }
+                    </td>
                 </tr>
                 <tr>
                     <td>

@@ -117,7 +117,21 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                                     <strong>When:</strong>
                                     @app.Date <br />
                                     <pre>       @app.StartTime - @app.EndTime</pre>
-                                    <strong>Where:</strong> @app.Location
+                                    <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net")))
+                                    {
+                                        @if (app.Location.Contains("http"))
+                                        {
+                                            <a href="@app.Location" target="_blank">@app.Location</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="http://@app.Location" target="_blank">@app.Location</a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @app.Location
+                                    }
                                 </div>
                             </div>
                         </a>
@@ -210,7 +224,21 @@ else if (User.IsInRole(SD.CLIENT_ROLE))
                                 <strong>When:</strong>
                                 @app.Date <br />
                                 <pre>       @app.StartTime - @app.EndTime</pre>
-                                <strong>Where:</strong> @app.Location
+                                <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net") || app.Location.Contains(".us") || app.Location.Contains("zoom.")))
+                                {
+                                    @if (app.Location.Contains("http"))
+                                    {
+                                        <a href="@app.Location" target="_blank">@app.Location</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="http://@app.Location" target="_blank">@app.Location</a>
+                                    }
+                                }
+                                else
+                                {
+                                    @app.Location
+                                }
                             </div>
                         </div>
                     </a>
