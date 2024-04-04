@@ -56,7 +56,7 @@ namespace SteamboatWillieWeb.Pages.Users
             var appUsers = (await _unitOfWork.AppUser.GetAllAsync()).ToList();
             if (!String.IsNullOrEmpty(searchString))
             {
-                appUsers = appUsers.Where(a => a.FullName.Contains(searchString)).ToList();
+                appUsers = appUsers.Where(a => a.FullName.ToUpper().Contains(searchString.ToUpper())).ToList();
             }
             if (!String.IsNullOrEmpty(roleSort))
             {
