@@ -1,12 +1,12 @@
 ﻿@page
-@model SteamboatWillieWeb.Pages.Appointment.IndexModel
+@model SteamboatWillieWeb.Pages.Appointments.IndexModel
 @{
 }
 <h1>Appointments</h1>
 
 
 <head>
-    <form asp-page="./EventDetails" method="post" id="detailsForm">
+    <form method="post" id="detailsForm">
     </form>
     <meta charset='utf-8' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
@@ -24,7 +24,6 @@
                     right: 'dayGridMonth,timeGridWeek' // user can switch between the two
                 },
                 eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
-                    alert('event:' + info.event.title);
                     var input = $("<input>")
                         .attr("type", "hidden")
                         .attr("name", "availabilityId").val(info.event.id);

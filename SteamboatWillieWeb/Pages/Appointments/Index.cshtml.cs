@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
 using Utility;
 
-namespace SteamboatWillieWeb.Pages.Appointment
+namespace SteamboatWillieWeb.Pages.Appointments
 {
     public class IndexModel : PageModel
     {
@@ -120,9 +120,11 @@ namespace SteamboatWillieWeb.Pages.Appointment
             return Page();
         }
 
-        public void OnPost()
+        public IActionResult OnPost()
         {
-            string n = Request.Form["availabilityId"];
+            string id = Request.Form["availabilityId"];
+
+            return RedirectToPage("./Details", new { id = id } );
         }
     }
 }

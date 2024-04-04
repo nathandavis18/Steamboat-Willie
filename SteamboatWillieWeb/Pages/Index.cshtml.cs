@@ -57,7 +57,7 @@ namespace SteamboatWillieWeb.Pages
                 var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
                 if (user != null)
                 {
-                    var clientAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability").Where(a => a.ClientId == user.Id);
+                    var clientAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability").Where(a => a.ClientId == user.Id).ToList();
                     foreach(var app in clientAppointments)
                     {
                         Appointments.Add(new AppointmentCard
@@ -73,6 +73,9 @@ namespace SteamboatWillieWeb.Pages
                         var x = Appointments.Last();
                         x.Color = GetColor(x.AppointmentType);
                     }
+                    Appointments.Sort((x, y) =>
+                        DateTime.Parse(y.StartTime).CompareTo(DateTime.Parse(x.StartTime))
+                    );
                     /*Appointments.Add(new AppointmentCard
                     {
                         Id = "3",
