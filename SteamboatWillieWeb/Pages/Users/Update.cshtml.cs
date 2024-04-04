@@ -57,6 +57,8 @@ namespace SteamboatWillieWeb.Pages.Users
             user.FName = AppUser.FName;
             user.LName = AppUser.LName;
             user.Email = AppUser.Email;
+            user.UserName = AppUser.Email;
+            user.NormalizedUserName = AppUser.Email.ToUpper();
             _unitOfWork.AppUser.Update(user);
             _unitOfWork.Commit();
 

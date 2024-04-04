@@ -51,7 +51,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                         headerToolbar: {
                             left: 'prev,next',
                             center: 'title',
-                            right: 'dayGridMonth,timeGridWeek' // user can switch between the two
+                            right: 'today dayGridMonth,timeGridWeek' // user can switch between the two
                         },
                         navLinks: true,
                         navLinkDayClick: function (date) {
@@ -144,7 +144,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                     headerToolbar: {
                         left: 'prev,next',
                         center: 'title',
-                        right: 'dayGridMonth,timeGridWeek' // user can switch between the two
+                        right: 'today dayGridMonth,timeGridWeek' // user can switch between the two
                     },
                     navLinks: true,
                     navLinkDayClick: function (date) {
@@ -201,7 +201,7 @@ else if (User.IsInRole(SD.CLIENT_ROLE))
         <div class="row align-content-center">
             @foreach (var app in Model.Appointments)
             {
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
                     <a class="no-decoration" asp-page="/Appointments/Details" asp-route-id="@app.Id">
                         <div class="card">
                             <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
