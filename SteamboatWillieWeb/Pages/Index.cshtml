@@ -66,7 +66,13 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                             var formattedDate = year + '-' + month + '-' + day;
                             var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
                             window.location.href = redirectTo;
-                        }
+                        },
+                        views: {
+                            dayGridMonth: {
+                                dayMaxEvents: 5,
+                                moreLinkClick: 'timeGridDay'
+                            },
+                        },
                         // eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
                         //     alert('event:' + info.event.title);
                         // }
@@ -173,7 +179,13 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                         var formattedDate = year + '-' + month + '-' + day;
                         var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
                         window.location.href = redirectTo;
-                    }
+                    },
+                    views: {
+                        dayGridMonth: {
+                            dayMaxEvents: 5,
+                            moreLinkClick: 'timeGridDay'
+                        },
+                    },
                     // eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
                     //     alert('event:' + info.event.title);
                     // }
@@ -186,7 +198,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                 calendar.addEvent(e);
                 </text>
             }
-                    calendar.render();
+                calendar.render();
             });
         </script>
     </head>

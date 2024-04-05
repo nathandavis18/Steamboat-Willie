@@ -24,6 +24,12 @@
                     center: 'title',
                     right: 'today dayGridMonth,timeGridWeek' // user can switch between the two
                 },
+                views: {
+                    dayGridMonth: {
+                        dayMaxEvents: 5,
+                        moreLinkClick: 'timeGridDay'
+                    },
+                },
                 eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
                     var input = $("<input>")
                         .attr("type", "hidden")

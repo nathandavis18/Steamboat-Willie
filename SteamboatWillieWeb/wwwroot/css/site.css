@@ -326,3 +326,9 @@ input:checked + .slider:before {
     height: 3em !important;
     border-bottom: 0 !important;
 }
+
+.fc-daygrid-more-link {
+    text-decoration: none !important;
+    font-size: 15px;
+    color: white;
+}
