@@ -22,27 +22,15 @@ namespace SteamboatWillieWeb.Pages.Availability
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        public List<SelectListItem> DropdownOptions { get; set; }
-        public string CurrentUserStartTime { get; set; }
-        public string CurrentUserEndTime { get; set; }
 
         [BindProperty]
-        public ProviderAvailability objAvailability { get; set; }
-        [BindProperty]
-        public Location objLocation { get; set; }
-        public IEnumerable<SelectListItem> ProviderList { get; set; }
-        public IEnumerable<int> Locations { get; set; }
-        public string PassedDate { get; set; }
+        public IEnumerable<SelectListItem>? Locations { get; set; }
 
         public IndexModel(UnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
             _userManager = userManager;
-            objAvailability = new ProviderAvailability();
-            objLocation = new Location();
-            ProviderList = new List<SelectListItem>();
-            Locations = new List<int>();
         }
         [BindProperty]
         public Test TestInput { get; set; }
@@ -67,7 +55,7 @@ namespace SteamboatWillieWeb.Pages.Availability
 
             [Required]
             [Display(Name = "Number of Appointments")]
-            [Range(1.0, 10.0, ErrorMessage = "Minimum 1, Max 10")]
+            [Range(1, 10, ErrorMessage = "Minimum 1, Max 10")]
             public short NumAppointments {  get; set; }
 
             [Required]
@@ -81,7 +69,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             public string LocationId {  get; set; }
             public string Location { get; set; }
 
-            public IEnumerable<SelectListItem>? Locations { get; set; }
+            public bool NewLocation { get; set; }
         }
 
         public class Test
@@ -126,49 +114,45 @@ namespace SteamboatWillieWeb.Pages.Availability
                 return RedirectToPage("../Index");
             }
 
-            if (date != null)
-            {
-                PassedDate = date;
-            }
-
-            var currentUserId = _userManager.GetUserId(User);
-            TestInput = new Test()
-            {
-                EndDate = DateTime.Now.AddDays(8)
-            };
-            TestDateInput = new TestDate()
-            {
-                StartDate = DateTime.Now.AddDays(1),
-                ProviderId = currentUserId
-            };
-                
-
-            Locations = _unitOfWork.ProviderAvailability
+            var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
+            var providerLocations = _unitOfWork.ProviderAvailability
                 .GetAll()
-                .Where(pa => pa.ProviderId == currentUserId)
+                .Where(pa => pa.ProviderId == user.Id)
                 .Select(pa => pa.LocationId)
                 .Distinct()
                 .ToList();
-
-            TestDateInput.Locations = _unitOfWork.Location
+            Locations = _unitOfWork.Location
                 .GetAll()
-                .Where(l => Locations.Contains(l.Id))
-                .Select(selector: l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
+                .Where(l => providerLocations.Contains(l.Id))
+                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
                 .ToList();
 
-
-            var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId, false, "Department");
-            if (currentUser != null)
+            DateTime startDate = DateTime.Now.AddDays(1);
+            if(date != null)
             {
-                CurrentUserStartTime = currentUser.StartTime?.AddSeconds(-1).ToString("HH:mm:ss") ?? "07:00:00"; // Default to 07:00:00 if start time is null
-                CurrentUserEndTime = currentUser.EndTime?.ToString("HH:mm:ss") ?? "19:00:00"; // Default to 19:00:00 if end time is null
+                startDate = DateTime.Parse(date);
             }
+
+            TestInput = new Test()
+            {
+                EndDate = startDate.AddDays(7)
+            };
+            TestDateInput = new TestDate()
+            {
+                StartDate = startDate,
+                StartTime = _unitOfWork.Provider.Get(p => p.AppUserId == user.Id).StartTime.Value.TimeOfDay,
+                ProviderId = user.Id,
+                NumAppointments = 1,
+                NewLocation = true
+            };
 
             return Page();
         }
 
         public IActionResult OnPost(int? id)
         {
+            var y = Request.Form["locationType"];
+            TestDateInput.NewLocation = y.Equals("makeLocation");
             var currentUserId = _userManager.GetUserId(User);
             var provider = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
             if (TestDateInput.StartTime < provider.StartTime.Value.TimeOfDay)
@@ -187,7 +171,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                 }
             }
 
-            if(int.Parse(TestDateInput.LocationId) == 0)
+            if(TestDateInput.NewLocation)
             {
                 if (TestDateInput.Location.IsNullOrEmpty())
                 {
@@ -219,22 +203,31 @@ namespace SteamboatWillieWeb.Pages.Availability
                     Console.WriteLine($"Validation Error: {error.ErrorMessage}");
                 }
 
-                Locations = _unitOfWork.ProviderAvailability
-                   .GetAll()
-                   .Where(pa => pa.ProviderId == currentUserId)
-                   .Select(pa => pa.LocationId)
-                   .Distinct()
-                   .ToList();
-
-                TestDateInput.Locations = _unitOfWork.Location
+                var providerLocations = _unitOfWork.ProviderAvailability
                     .GetAll()
-                    .Where(l => Locations.Contains(l.Id))
-                    .Select(selector: l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
+                    .Where(pa => pa.ProviderId == currentUserId)
+                    .Select(pa => pa.LocationId)
+                    .Distinct()
+                    .ToList();
+                Locations = _unitOfWork.Location
+                    .GetAll()
+                    .Where(l => providerLocations.Contains(l.Id))
+                    .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
                     .ToList();
 
                 return Page();
             }
 
+            if (TestDateInput.NewLocation)
+            {
+                Location newLocation = new Location()
+                {
+                    LocationValue = TestDateInput.Location
+                };
+                _unitOfWork.Location.Add(newLocation);
+                _unitOfWork.Commit();
+                TestDateInput.LocationId = newLocation.Id.ToString();
+            }
 
             DateTime startDate = TestDateInput.StartDate + TestDateInput.StartTime;
             if (!TestInput.Recurrence)
