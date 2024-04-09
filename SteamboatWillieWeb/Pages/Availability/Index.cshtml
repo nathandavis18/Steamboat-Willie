@@ -7,33 +7,33 @@
 
 <h2>Availability</h2>
 <form method="post" id="form">
-    <input asp-for="TestDateInput.ProviderId" hidden />
+    <input asp-for="AvailabilityModelInput.ProviderId" hidden />
     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
     <div class="form-control bg-black">
         <div class="form-group mb-3">
-            <label asp-for="TestDateInput.StartDate" class="text-white"></label>
-            <input asp-for="TestDateInput.StartDate" class="form-control bg-secondary text-white" />
-            <span asp-validation-for="TestDateInput.StartDate" class="text-danger"></span>
+            <label asp-for="AvailabilityModelInput.StartDate" class="text-white"></label>
+            <input asp-for="AvailabilityModelInput.StartDate" class="form-control bg-secondary text-white" />
+            <span asp-validation-for="AvailabilityModelInput.StartDate" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <label asp-for="TestDateInput.Duration" class="text-white"></label>
-            <select asp-for="TestDateInput.Duration" class="form-select bg-secondary text-white">
+            <label asp-for="AvailabilityModelInput.Duration" class="text-white"></label>
+            <select asp-for="AvailabilityModelInput.Duration" class="form-select bg-secondary text-white">
                 <option disabled selected>Select:</option>
                 <option value="00:15:00">15 Min</option>
                 <option value="00:30:00">30 Min</option>
                 <option value="01:00:00">60 Min</option>
             </select>
-            <span asp-validation-for="TestDateInput.Duration" class="text-danger"></span>
+            <span asp-validation-for="AvailabilityModelInput.Duration" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <label asp-for="TestDateInput.NumAppointments" class="text-white"></label>
-            <input asp-for="TestDateInput.NumAppointments" class="form-control bg-secondary text-white" onkeypress="return (event.charCode >= 48 && event.charCode <= 57 && this.value <= 10)" />
-            <span asp-validation-for="TestDateInput.NumAppointments" class="text-danger"></span>
+            <label asp-for="AvailabilityModelInput.NumAppointments" class="text-white"></label>
+            <input asp-for="AvailabilityModelInput.NumAppointments" class="form-control bg-secondary text-white" onkeypress="return (event.charCode >= 48 && event.charCode <= 57 && this.value <= 10)" />
+            <span asp-validation-for="AvailabilityModelInput.NumAppointments" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <label asp-for="TestDateInput.StartTime" class="text-white"></label>
-            <input asp-for="TestDateInput.StartTime" class="form-control bg-secondary text-white" />
-            <span asp-validation-for="TestDateInput.StartTime" class="text-danger"></span>
+            <label asp-for="AvailabilityModelInput.StartTime" class="text-white"></label>
+            <input asp-for="AvailabilityModelInput.StartTime" class="form-control bg-secondary text-white" />
+            <span asp-validation-for="AvailabilityModelInput.StartTime" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
             <div>
@@ -45,23 +45,23 @@
         </div>
         <div class="form-group mb-3">
             <div id="chooseLocationDiv">
-                <label asp-for="TestDateInput.LocationId" class="text-white"></label>
-                <select asp-for="TestDateInput.LocationId" asp-items="Model.Locations" class="form-select bg-secondary text-white">
+                <label asp-for="AvailabilityModelInput.LocationId" class="text-white"></label>
+                <select asp-for="AvailabilityModelInput.LocationId" asp-items="Model.Locations" class="form-select bg-secondary text-white">
                     <option disabled selected>Select:</option>
                 </select>
-                <span asp-validation-for="TestDateInput.LocationId" class="text-danger"></span>
+                <span asp-validation-for="AvailabilityModelInput.LocationId" class="text-danger"></span>
             </div>
             <div id="makeLocationDiv" style="display:none;">
                 <label class="text-white">Create New Location: </label>
-                <input asp-for="TestDateInput.Location" value="@Model.TestDateInput.Location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" id="newLocationInput"/>
-                <input asp-for="TestDateInput.LocationId" value="0" hidden />
-                <span asp-validation-for="TestDateInput.Location" class="text-danger"></span>
+                <input asp-for="AvailabilityModelInput.Location" value="@Model.AvailabilityModelInput.Location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" id="newLocationInput"/>
+                <input asp-for="AvailabilityModelInput.LocationId" value="0" hidden />
+                <span asp-validation-for="AvailabilityModelInput.Location" class="text-danger"></span>
             </div>
         </div>
         <div class="form-group mb-3">
             <div>
-                <label asp-for="TestInput.Recurrence" class="text-white"></label>
-                <input id="recurrence" asp-for="TestInput.Recurrence" class="bg-secondary text-white" />
+                <label asp-for="RecurrenceModelInput.Recurrence" class="text-white"></label>
+                <input id="recurrence" asp-for="RecurrenceModelInput.Recurrence" class="bg-secondary text-white" />
             </div>
         </div>
         <div class="form-group mb-3" id="otherThings" style="display: none">
@@ -74,58 +74,58 @@
                     <ul class="dropdown-menu" id="select-days">
                         <li>
                             <div class="form-check">
-                                <label class="form-check-label" asp-for="TestInput.Sunday"></label>
-                                <input class="form-check-input" type="checkbox" asp-for="TestInput.Sunday">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Sunday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Sunday">
                             </div>
                         </li>
                         <li>
                             <div class="form-check">
-                                <label class="form-check-label" asp-for="TestInput.Monday"></label>
-                                <input class="form-check-input" type="checkbox" asp-for="TestInput.Monday">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Monday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Monday">
                             </div>
                         </li>
                         <li>
                             <div class="form-check">
-                                <label class="form-check-label" asp-for="TestInput.Tuesday"></label>
-                                <input class="form-check-input" type="checkbox" asp-for="TestInput.Tuesday">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Tuesday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Tuesday">
                             </div>
                         </li>
                         <li>
                             <div class="form-check">
-                                <label class="form-check-label" asp-for="TestInput.Wednesday"></label>
-                                <input class="form-check-input" type="checkbox" asp-for="TestInput.Wednesday">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Wednesday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Wednesday">
                             </div>
                         </li>
                         <li>
                             <div class="form-check">
-                                <label class="form-check-label" asp-for="TestInput.Thursday"></label>
-                                <input class="form-check-input" type="checkbox" asp-for="TestInput.Thursday">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Thursday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Thursday">
                             </div>
                         </li>
                         <li>
                             <div class="form-check">
-                                <label class="form-check-label" asp-for="TestInput.Friday"></label>
-                                <input class="form-check-input" type="checkbox" asp-for="TestInput.Friday">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Friday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Friday">
                             </div>
                         </li>
                         <li>
                             <div class="form-check">
-                                <label class="form-check-label" asp-for="TestInput.Saturday"></label>
-                                <input class="form-check-input" type="checkbox" asp-for="TestInput.Saturday">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Saturday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Saturday">
                             </div>
                         </li>
                     </ul>
-                    <span asp-validation-for="TestInput.Recurrence" class="text-danger"></span>
+                    <span asp-validation-for="RecurrenceModelInput.Recurrence" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-3">
-                    <label asp-for="TestInput.IsWeekly" class="text-white"></label>
-                    <input asp-for="TestInput.IsWeekly" class="bg-secondary text-white" id="isWeekly"/>
+                    <label asp-for="RecurrenceModelInput.IsWeekly" class="text-white"></label>
+                    <input asp-for="RecurrenceModelInput.IsWeekly" class="bg-secondary text-white" id="isWeekly"/>
                 </div>
 
                 <div class="form-group mb-3" style="display: none" id="weeklyEnd">
-                    <label asp-for="TestInput.EndDate" class="text-white"></label>
-                    <input asp-for="TestInput.EndDate" class="form-control bg-secondary text-white" />
-                    <span asp-validation-for="TestInput.EndDate" class="text-danger"></span>
+                    <label asp-for="RecurrenceModelInput.EndDate" class="text-white"></label>
+                    <input asp-for="RecurrenceModelInput.EndDate" class="form-control bg-secondary text-white" />
+                    <span asp-validation-for="RecurrenceModelInput.EndDate" class="text-danger"></span>
                 </div>
             </div>
         </div>

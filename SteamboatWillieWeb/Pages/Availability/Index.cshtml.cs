@@ -33,12 +33,12 @@ namespace SteamboatWillieWeb.Pages.Availability
             _userManager = userManager;
         }
         [BindProperty]
-        public Test TestInput { get; set; }
+        public RecurrenceModel RecurrenceModelInput { get; set; }
 
         [BindProperty]
-        public TestDate TestDateInput { get; set; }
+        public AvailabilityModel AvailabilityModelInput { get; set; }
 
-        public class TestDate
+        public class AvailabilityModel
         {
             [Required]
             public string ProviderId {  get; set; }
@@ -72,7 +72,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             public bool NewLocation { get; set; }
         }
 
-        public class Test
+        public class RecurrenceModel
         {
 
             [Required(ErrorMessage = "One or more days must be selected")]
@@ -133,11 +133,11 @@ namespace SteamboatWillieWeb.Pages.Availability
                 startDate = DateTime.Parse(date);
             }
 
-            TestInput = new Test()
+            RecurrenceModelInput = new RecurrenceModel()
             {
                 EndDate = startDate.AddDays(7)
             };
-            TestDateInput = new TestDate()
+            AvailabilityModelInput = new AvailabilityModel()
             {
                 StartDate = startDate,
                 StartTime = _unitOfWork.Provider.Get(p => p.AppUserId == user.Id).StartTime.Value.TimeOfDay,
@@ -154,27 +154,27 @@ namespace SteamboatWillieWeb.Pages.Availability
             bool makeLocation = false;
             var currentUserId = _userManager.GetUserId(User);
             var provider = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
-            if (TestDateInput.StartTime < provider.StartTime.Value.TimeOfDay)
+            if (AvailabilityModelInput.StartTime < provider.StartTime.Value.TimeOfDay)
             {
-                ModelState.AddModelError("TestDateInput.StartTime", "Start Time cannot be before office hours start");
+                ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time cannot be before office hours start");
             }
             else
             {
-                for (int i = 1; i <= TestDateInput.NumAppointments; ++i)
+                for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
                 {
-                    TimeSpan meetingEnd = new TimeSpan(TestDateInput.StartTime.Ticks + (TestDateInput.Duration.TimeOfDay.Ticks * i));
+                    TimeSpan meetingEnd = new TimeSpan(AvailabilityModelInput.StartTime.Ticks + (AvailabilityModelInput.Duration.TimeOfDay.Ticks * i));
                     if (meetingEnd > provider.EndTime.Value.TimeOfDay)
                     {
-                        ModelState.AddModelError("TestDateInput.StartTime", "All meetings must end before office hours end");
+                        ModelState.AddModelError("AvailabilityModelInput.StartTime", "All meetings must end before office hours end");
                     }
                 }
             }
 
-            if(int.Parse(TestDateInput.LocationId) == 0)
+            if(int.Parse(AvailabilityModelInput.LocationId) == 0)
             {
-                if (TestDateInput.Location.IsNullOrEmpty())
+                if (AvailabilityModelInput.Location.IsNullOrEmpty())
                 {
-                    ModelState.AddModelError("TestDateInput.Location", "You must enter a value for the new location");
+                    ModelState.AddModelError("AvailabilityModelInput.Location", "You must enter a value for the new location");
                 }
                 else
                 {
@@ -182,17 +182,17 @@ namespace SteamboatWillieWeb.Pages.Availability
                 }
             }
 
-            if (TestInput.Recurrence)
+            if (RecurrenceModelInput.Recurrence)
             {
-                if(!(TestInput.Monday || TestInput.Tuesday || TestInput.Wednesday || TestInput.Thursday || TestInput.Friday || TestInput.Saturday || TestInput.Sunday))
+                if(!(RecurrenceModelInput.Monday || RecurrenceModelInput.Tuesday || RecurrenceModelInput.Wednesday || RecurrenceModelInput.Thursday || RecurrenceModelInput.Friday || RecurrenceModelInput.Saturday || RecurrenceModelInput.Sunday))
                 {
-                    ModelState.AddModelError("TestInput.Recurrence", "At least one day must be selected");
+                    ModelState.AddModelError("RecurrenceModelInput.Recurrence", "At least one day must be selected");
                 }
-                else if(TestInput.IsWeekly)
+                else if(RecurrenceModelInput.IsWeekly)
                 {
-                    if(TestInput.EndDate < TestDateInput.StartDate.AddDays(7))
+                    if(RecurrenceModelInput.EndDate < AvailabilityModelInput.StartDate.AddDays(7))
                     {
-                        ModelState.AddModelError("TestInput.EndDate", "End Date must be at least a week after start date");
+                        ModelState.AddModelError("RecurrenceModelInput.EndDate", "End Date must be at least a week after start date");
                     }
                 }
 
@@ -225,25 +225,25 @@ namespace SteamboatWillieWeb.Pages.Availability
             {
                 Location newLocation = new Location()
                 {
-                    LocationValue = TestDateInput.Location
+                    LocationValue = AvailabilityModelInput.Location
                 };
                 _unitOfWork.Location.Add(newLocation);
                 _unitOfWork.Commit();
-                TestDateInput.LocationId = newLocation.Id.ToString();
+                AvailabilityModelInput.LocationId = newLocation.Id.ToString();
             }
 
-            DateTime startDate = TestDateInput.StartDate + TestDateInput.StartTime;
-            if (!TestInput.Recurrence)
+            DateTime startDate = AvailabilityModelInput.StartDate + AvailabilityModelInput.StartTime;
+            if (!RecurrenceModelInput.Recurrence)
             {
-                for (int i = 1; i <= TestDateInput.NumAppointments; ++i)
+                for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
                 {
                     ProviderAvailability pa = new ProviderAvailability
                     {
-                        ProviderId = TestDateInput.ProviderId,
-                        LocationId = int.Parse(TestDateInput.LocationId),
-                        StartTime = startDate + (TestDateInput.Duration.TimeOfDay * (i - 1)),
-                        EndTime = startDate.AddHours(startDate.Hour).AddMinutes(startDate.Minute) + (TestDateInput.Duration.TimeOfDay * (i - 1)),
-                        Duration = TestDateInput.Duration,
+                        ProviderId = AvailabilityModelInput.ProviderId,
+                        LocationId = int.Parse(AvailabilityModelInput.LocationId),
+                        StartTime = startDate + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                        EndTime = startDate.AddHours(startDate.Hour).AddMinutes(startDate.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                        Duration = AvailabilityModelInput.Duration,
                         Scheduled = false
                     };
                     _unitOfWork.ProviderAvailability.Add(pa);
@@ -252,21 +252,21 @@ namespace SteamboatWillieWeb.Pages.Availability
             else
             {
                 List<string> daysOfWeek = DaysOfWeek();
-                if (TestInput.IsWeekly)
+                if (RecurrenceModelInput.IsWeekly)
                 {
-                    for (var x = startDate; x <= TestInput.EndDate; x = x.AddDays(1))
+                    for (var x = startDate; x <= RecurrenceModelInput.EndDate; x = x.AddDays(1))
                     {
                         if (daysOfWeek.Contains(x.DayOfWeek.ToString()))
                         {
-                            for (int i = 1; i <= TestDateInput.NumAppointments; ++i)
+                            for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
                             {
                                 ProviderAvailability pa = new ProviderAvailability
                                 {
-                                    ProviderId = TestDateInput.ProviderId,
-                                    LocationId = int.Parse(TestDateInput.LocationId),
-                                    StartTime = x + (TestDateInput.Duration.TimeOfDay * (i - 1)),
-                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (TestDateInput.Duration.TimeOfDay * (i - 1)),
-                                    Duration = TestDateInput.Duration,
+                                    ProviderId = AvailabilityModelInput.ProviderId,
+                                    LocationId = int.Parse(AvailabilityModelInput.LocationId),
+                                    StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    Duration = AvailabilityModelInput.Duration,
                                     Scheduled = false
                                 };
                                 _unitOfWork.ProviderAvailability.Add(pa);
@@ -280,15 +280,15 @@ namespace SteamboatWillieWeb.Pages.Availability
                     {
                         if (daysOfWeek.Contains(x.DayOfWeek.ToString()))
                         {
-                            for (int i = 1; i <= TestDateInput.NumAppointments; ++i)
+                            for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
                             {
                                 ProviderAvailability pa = new ProviderAvailability
                                 {
-                                    ProviderId = TestDateInput.ProviderId,
-                                    LocationId = int.Parse(TestDateInput.LocationId),
-                                    StartTime = x + (TestDateInput.Duration.TimeOfDay * (i - 1)),
-                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (TestDateInput.Duration.TimeOfDay * (i - 1)),
-                                    Duration = TestDateInput.Duration,
+                                    ProviderId = AvailabilityModelInput.ProviderId,
+                                    LocationId = int.Parse(AvailabilityModelInput.LocationId),
+                                    StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    Duration = AvailabilityModelInput.Duration,
                                     Scheduled = false
                                 };
                                 _unitOfWork.ProviderAvailability.Add(pa);
@@ -492,31 +492,31 @@ namespace SteamboatWillieWeb.Pages.Availability
         private List<string> DaysOfWeek()
         {
             List<string> daysOfWeek = new List<string>();
-            if (TestInput.Monday)
+            if (RecurrenceModelInput.Monday)
             {
                 daysOfWeek.Add("Monday");
             }
-            if (TestInput.Tuesday)
+            if (RecurrenceModelInput.Tuesday)
             {
                 daysOfWeek.Add("Tuesday");
             }
-            if (TestInput.Wednesday)
+            if (RecurrenceModelInput.Wednesday)
             {
                 daysOfWeek.Add("Wednesday");
             }
-            if (TestInput.Thursday)
+            if (RecurrenceModelInput.Thursday)
             {
                 daysOfWeek.Add("Thursday");
             }
-            if (TestInput.Friday)
+            if (RecurrenceModelInput.Friday)
             {
                 daysOfWeek.Add("Friday");
             }
-            if (TestInput.Saturday)
+            if (RecurrenceModelInput.Saturday)
             {
                 daysOfWeek.Add("Saturday");
             }
-            if (TestInput.Sunday)
+            if (RecurrenceModelInput.Sunday)
             {
                 daysOfWeek.Add("Sunday");
             }
