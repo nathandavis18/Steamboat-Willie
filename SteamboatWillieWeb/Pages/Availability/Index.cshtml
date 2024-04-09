@@ -6,48 +6,34 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 
 <h2>Availability</h2>
-<form method="post" enctype="multipart/form-data" id="form">
-    <input asp-for="objAvailability.ProviderId" hidden />
-    <input asp-for="objAvailability.LocationId" hidden />
+<form method="post" id="form">
+    <input asp-for="AvailabilityModelInput.ProviderId" hidden />
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
     <div class="form-control bg-black">
         <div class="form-group mb-3">
-            <label for="startDate" class="text-white">Start: </label>
-            <div class="input-group">
-                <input asp-for="objAvailability.StartTime" name="startDate" id="startDate" class="form-control bg-secondary text-white" type="date" />
-                <span id="startCalendarIcon" class="input-group-text bg-secondary">
-                    <i class="bi bi-calendar-week-fill"></i>
-                </span>
-            </div>
-            <span id="startDateError" class="text-danger"></span>
+            <label asp-for="AvailabilityModelInput.StartDate" class="text-white"></label>
+            <input asp-for="AvailabilityModelInput.StartDate" class="form-control bg-secondary text-white" />
+            <span asp-validation-for="AvailabilityModelInput.StartDate" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <div>
-                <label for="appointmentDuration" class="text-white">Appointment Duration: </label>
-                <select asp-for="objAvailability.Duration" name="objAvailability.Duration" id="appointmentDuration" class="form-select bg-secondary text-white">
-                    <option>Select:</option>
-                    <option value="00:15:00">15 Min</option>
-                    <option value="00:30:00">30 Min</option>
-                    <option value="01:00:00">60 Min</option>
-                </select>
-            </div>
-            <span id="appointmentDurationError" class="text-danger"></span>
+            <label asp-for="AvailabilityModelInput.Duration" class="text-white"></label>
+            <select asp-for="AvailabilityModelInput.Duration" class="form-select bg-secondary text-white">
+                <option disabled selected>Select:</option>
+                <option value="00:15:00">15 Min</option>
+                <option value="00:30:00">30 Min</option>
+                <option value="01:00:00">60 Min</option>
+            </select>
+            <span asp-validation-for="AvailabilityModelInput.Duration" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <div>
-                <label for="numAppointments" class="text-white">Number of Appointments: </label>
-                <input name="numAppointments" id="numAppointments" class="form-control bg-secondary text-white" type="number" />
-            </div>
-            <span id="numAppointmentsError" class="text-danger"></span>
+            <label asp-for="AvailabilityModelInput.NumAppointments" class="text-white"></label>
+            <input asp-for="AvailabilityModelInput.NumAppointments" class="form-control bg-secondary text-white" onkeypress="return (event.charCode >= 48 && event.charCode <= 57 && this.value <= 10)" />
+            <span asp-validation-for="AvailabilityModelInput.NumAppointments" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <label for="startTime" class="text-white">Start Time: </label>
-            <div class="input-group">
-                <input asp-for="objAvailability.StartTime" name="startTime" id="startTime" class="form-control bg-secondary text-white" type="time" />
-                <span id="clockIcon" class="input-group-text bg-secondary">
-                    <i class="bi bi-clock-fill"></i>
-                </span>
-            </div>
-            <span id="startTimeError" class="text-danger"></span>
+            <label asp-for="AvailabilityModelInput.StartTime" class="text-white"></label>
+            <input asp-for="AvailabilityModelInput.StartTime" class="form-control bg-secondary text-white" />
+            <span asp-validation-for="AvailabilityModelInput.StartTime" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
             <div>
@@ -59,310 +45,153 @@
         </div>
         <div class="form-group mb-3">
             <div id="chooseLocationDiv">
-                <label for="dropdownOptions" class="text-white">Location: </label>
-                <select asp-for="objAvailability.LocationId" name="objAvailability.LocationId" class="form-select bg-secondary text-white" id="dropdownOptions">
-                    <option>Select:</option>
-                    @foreach (var option in Model.DropdownOptions)
-                    {
-                        <option value="@option.Value">@option.Text</option>
-                    }
+                <label asp-for="AvailabilityModelInput.LocationId" class="text-white"></label>
+                <select asp-for="AvailabilityModelInput.LocationId" asp-items="Model.Locations" class="form-select bg-secondary text-white">
+                    <option disabled selected>Select:</option>
                 </select>
+                <span asp-validation-for="AvailabilityModelInput.LocationId" class="text-danger"></span>
             </div>
             <div id="makeLocationDiv" style="display:none;">
-                <label for="location" class="text-white">Location: </label>
-                <input asp-for="objLocation.LocationValue" id="location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" />
+                <label class="text-white">Create New Location: </label>
+                <input asp-for="AvailabilityModelInput.Location" value="@Model.AvailabilityModelInput.Location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" id="newLocationInput"/>
+                <input asp-for="AvailabilityModelInput.LocationId" value="0" hidden />
+                <span asp-validation-for="AvailabilityModelInput.Location" class="text-danger"></span>
             </div>
         </div>
-        <span id="locationError" class="text-danger"></span>
         <div class="form-group mb-3">
             <div>
-                <label for="recurrence" class="text-white">Recurrence: </label>
-                <input id="recurrence" name="recurrence" class="bg-secondary text-white" type="checkbox" />
+                <label asp-for="RecurrenceModelInput.Recurrence" class="text-white"></label>
+                <input id="recurrence" asp-for="RecurrenceModelInput.Recurrence" class="bg-secondary text-white" />
             </div>
-            <span id="recurrenceError" class="text-danger"></span>
         </div>
         <div class="form-group mb-3" id="otherThings" style="display: none">
             <div>
-                <label for="weekDays" class="text-white">Days of the Week: </label>
+                <label class="text-white">Days of the Week: </label>
                 <div class="mb-3">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" onclick="testSelect()" id="showBtn">
                         Select Options
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <ul class="dropdown-menu" id="select-days">
                         <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Sunday" id="checkbox1" name="weekDays[]">
-                                    <label class="form-check-label" for="checkbox1">
-                                        Sunday
-                                    </label>
-                                </div>
-                            </a>
+                            <div class="form-check">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Sunday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Sunday">
+                            </div>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Monday" id="checkbox1" name="weekDays[]">
-                                    <label class="form-check-label" for="checkbox1">
-                                        Monday
-                                    </label>
-                                </div>
-                            </a>
+                            <div class="form-check">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Monday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Monday">
+                            </div>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Tuesday" id="checkbox1" name="weekDays[]">
-                                    <label class="form-check-label" for="checkbox1">
-                                        Tuesday
-                                    </label>
-                                </div>
-                            </a>
+                            <div class="form-check">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Tuesday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Tuesday">
+                            </div>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Wednesday" id="checkbox1" name="weekDays[]">
-                                    <label class="form-check-label" for="checkbox1">
-                                        Wednesday
-                                    </label>
-                                </div>
-                            </a>
+                            <div class="form-check">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Wednesday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Wednesday">
+                            </div>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Thursday" id="checkbox1" name="weekDays[]">
-                                    <label class="form-check-label" for="checkbox1">
-                                        Thursday
-                                    </label>
-                                </div>
-                            </a>
+                            <div class="form-check">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Thursday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Thursday">
+                            </div>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Friday" id="checkbox1" name="weekDays[]">
-                                    <label class="form-check-label" for="checkbox1">
-                                        Friday
-                                    </label>
-                                </div>
-                            </a>
+                            <div class="form-check">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Friday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Friday">
+                            </div>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Saturday" id="checkbox1" name="weekDays[]">
-                                    <label class="form-check-label" for="checkbox1">
-                                        Saturday
-                                    </label>
-                                </div>
-                            </a>
+                            <div class="form-check">
+                                <label class="form-check-label" asp-for="RecurrenceModelInput.Saturday"></label>
+                                <input class="form-check-input" type="checkbox" asp-for="RecurrenceModelInput.Saturday">
+                            </div>
                         </li>
                     </ul>
+                    <span asp-validation-for="RecurrenceModelInput.Recurrence" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="weekly" class="text-white">Weekly: </label>
-                    <input id="weekly" name="weekly" class="bg-secondary text-white" type="checkbox" />
+                    <label asp-for="RecurrenceModelInput.IsWeekly" class="text-white"></label>
+                    <input asp-for="RecurrenceModelInput.IsWeekly" class="bg-secondary text-white" id="isWeekly"/>
                 </div>
 
-                <div class="form-group mb-3">
-                    <label for="endDate" class="text-white">Until: </label>
-                    <div class="input-group">
-                        <input id="endDate" name="endDate" class="form-control bg-secondary text-white" type="date" />
-                        <span id="endCalendarIcon" class="input-group-text bg-secondary">
-                            <i class="bi bi-calendar-week-fill"></i>
-                        </span>
-                    </div>
-                    <span id="otherErrors" class="text-danger"></span>
+                <div class="form-group mb-3" style="display: none" id="weeklyEnd">
+                    <label asp-for="RecurrenceModelInput.EndDate" class="text-white"></label>
+                    <input asp-for="RecurrenceModelInput.EndDate" class="form-control bg-secondary text-white" />
+                    <span asp-validation-for="RecurrenceModelInput.EndDate" class="text-danger"></span>
                 </div>
             </div>
         </div>
     </div>
+    <div class="text-end">
+        <input type="submit" class="btn btn-secondary"/>
+    </div>
 </form>
 
-<div class="text-end">
-    <button class="btn btn-secondary" name="return" onclick="submitForm()">Set Availability</button>
-</div>
-
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>document.getElementById('startCalendarIcon').addEventListener('click', function () {
-        document.getElementById('startDate').click();
+<script>
+    document.getElementById('recurrence').addEventListener('click', function () {
+        $('#otherThings').toggle();
     });
 
-    document.getElementById('endCalendarIcon').addEventListener('click', function () {
-        document.getElementById('endDate').click();
+    $('#isWeekly').click(function () {
+        $('#weeklyEnd').toggle();
     });
 
-    document.getElementById('clockIcon').addEventListener('click', function () {
-        document.getElementById('startTime').focus();
-    });
-
-    document.getElementById('startDate').addEventListener('change', function () {
-        document.getElementById('startDate').blur(); // Blur to close date picker
-    });
-
-    document.getElementById("recurrence").addEventListener("change", function () {
-        var otherThings = document.getElementById("otherThings");
-        if (this.checked) {
-            otherThings.style.display = "block";
+    $('input[name="locationType"]').change(function () {
+        if ($('#makeLocation').is(':checked')) {
+            $('#chooseLocationDiv').hide();
+            $('#makeLocationDiv').show();
+            sessionStorage.setItem('location', 'checked');
         } else {
-            otherThings.style.display = "none";
+            $('#chooseLocationDiv').show();
+            $('#makeLocationDiv').hide();
+            sessionStorage.setItem('location', 'clear');
         }
     });
 
     $(document).ready(function () {
-        $("input[name='locationType']").change(function () {
-            if ($("#chooseLocation").is(":checked")) {
-                $("#chooseLocationDiv").show();
-                $("#makeLocationDiv").hide();
-            } else {
-                $("#chooseLocationDiv").hide();
-                $("#makeLocationDiv").show();
-            }
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        if ('@Model.PassedDate' != '') {
-            console.log(@Model.PassedDate);
-            document.getElementById('startDate').value = '@Model.PassedDate';
-            document.getElementById('endDate').value = '@Model.PassedDate';
+        if (document.getElementById('recurrence').checked) {
+            $('#otherThings').show();
         }
-        else {
-            var today = new Date()
-            today.setDate(today.getDate() - 1);
-            today = today.toISOString().split('T')[0];
-            document.getElementById('startDate').value = today;
-            document.getElementById('endDate').value = today;
-        }
-    });
-
-    function submitForm() {
-        var startDate = new Date(document.getElementById('startDate').value);
-        var duration = document.getElementById('appointmentDuration').value;
-        var numAppointments = parseInt(document.getElementById('numAppointments').value);
-        var startTime = document.getElementById('startTime').value;
-        var locationType = document.querySelector('input[name="locationType"]:checked').value;
-        var locationValue = document.getElementById('location').value;
-        var locationId = document.getElementById('dropdownOptions').value;
-        var recurrenceChecked = document.getElementById('recurrence').checked;
-        var weekDays = document.querySelectorAll('input[name="weekDays[]"]:checked');
-        var weeklyChecked = document.getElementById('weekly').checked;
-        var endDate = new Date(document.getElementById('endDate').value);
-        var officeStart = "@Model.CurrentUserStartTime";
-        var officeEnd = "@Model.CurrentUserEndTime";
-
-        var errors = [];
-
-        // Start Date
-        var today = new Date();
-        today.setDate(today.getDate() - 2);
-        if (startDate < today)
-        {
-            errors.push("Start date cannot be before today.");
-        }
-
-        // Duration
-        if (duration === "Select:")
-        {
-            errors.push("Please select a valid duration.");
-        }
-
-        // Number of appointments
-        if (numAppointments <= 0 || numAppointments > 10 || isNaN(numAppointments))
-        {
-            errors.push("Number of appointments must be between 1 and 10.");
-        }
-
-        // Start time
-        var timeParts = startTime.split(':');
-        var minutes = parseInt(timeParts[1]);
-        if (minutes % 15 !== 0)
-        {
-            errors.push("Start time must be in 15-minute intervals.");
-        }
-
-        // Start time before or after office start
-        if (startTime < officeStart)
-        {
-            errors.push("Start time cannot be before office start time.");
-        }
-
-        if (startTime > officeEnd)
-        {
-            errors.push("Start time cannot be after office end time.")
-        }
-
-        // End time
-        var startTimeInMinutes = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
-        var durationParts = duration.split(':');
-        var durationInMinutes = durationParts.length === 3 ? parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]) : parseInt(durationParts[0]);
-        var endTimeInMinutes = startTimeInMinutes + numAppointments * durationInMinutes;
-        var officeEndInMinutes = parseInt(officeEnd.split(':')[0]) * 60 + parseInt(officeEnd.split(':')[1]);
-
-        if (endTimeInMinutes > officeEndInMinutes) {
-            errors.push("End time exceeds office end time.");
-        }
-
-        // Location
-        if (locationType === "chooseLocation" && locationId === "Select:")
-        {
-            errors.push("Please select a location.");
-        }
-        else if (locationType === "makeLocation" && (locationValue === "" || locationValue.length > 200))
-        {
-            errors.push("Please input a location (max 200 characters).");
-        }
-
-        // Recurrence
-        if (recurrenceChecked)
-        {
-            if (weekDays.length === 0 && !weeklyChecked)
-            {
-                errors.push("Please select at least one day for recurrence or check weekly.");
-            }
-            else
-            {
-                var oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000;
-                var differenceInMilliseconds = endDate.getTime() - startDate.getTime();
-                if (endDate <= startDate) {
-                    errors.push("Weekly end date cannot be before start date.");
-                }
-                else if (differenceInMilliseconds < oneWeekInMilliseconds)
-                {
-                    errors.push("Weekly end date must be at least a week out from start date.");
-                }
-            }
-        }
-
-        if (errors.length > 0) {
-            document.getElementById("startDateError").innerHTML = errors.includes("Start date cannot be before today.") ? errors[errors.indexOf("Start date cannot be before today.")] : "";
-            document.getElementById("appointmentDurationError").innerHTML = errors.includes("Please select a valid duration.") ? errors[errors.indexOf("Please select a valid duration.")] : "";
-            document.getElementById("numAppointmentsError").innerHTML = errors.includes("Number of appointments must be between 1 and 10.") ? errors[errors.indexOf("Number of appointments must be between 1 and 10.")] : "";
-            document.getElementById("startTimeError").innerHTML = errors.includes("Start time must be in 15-minute intervals.") ? errors[errors.indexOf("Start time must be in 15-minute intervals.")] : (errors.includes("Start time cannot be before office start time.") ? errors[errors.indexOf("Start time cannot be before office start time.")] : (errors.includes("Start time cannot be after office end time.") ? errors[errors.indexOf("Start time cannot be after office end time.")] : (errors.includes("End time exceeds office end time.") ? errors[errors.indexOf("End time exceeds office end time.")] : "")));
-            document.getElementById("locationError").innerHTML = (errors.includes("Please select a location.") || errors.includes("Please input a location (max 200 characters).")) ? (errors.includes("Please select a location.") ? errors[errors.indexOf("Please select a location.")] : errors[errors.indexOf("Please input a location (max 200 characters).")]) : "";
-            document.getElementById("recurrenceError").innerHTML = errors.includes("Please select at least one day for recurrence or check weekly.") ? errors[errors.indexOf("Please select at least one day for recurrence or check weekly.")] : (errors.includes("Weekly end date must be at least a week out from start date.") ? errors[errors.indexOf("Weekly end date must be at least a week out from start date.")] : (errors.includes("Weekly end date cannot be before start date.") ? errors[errors.indexOf("Weekly end date cannot be before start date.")] : ""));
-            document.getElementById("otherErrors").innerHTML = errors.filter(error => ![
-                "Start date cannot be before today.",
-                "Please select a valid duration.",
-                "Number of appointments must be between 1 and 10.",
-                "Start time must be in 15-minute intervals.",
-                "Start time cannot be before office start time.",
-                "Start time cannot be after office end time.",
-                "End time exceeds office end time.",
-                "Please select a location.",
-                "Please input a location (max 200 characters).",
-                "Please select at least one day for recurrence or check weekly.",
-                "Weekly end date must be at least a week out from start date.",
-                "Weekly end date cannot be before start date."
-            ].includes(error)).join("<br>");
+        if (document.getElementById('isWeekly').checked) {
+            $('#weeklyEnd').show();
         } else {
-            $('#form').submit();
+            $('#weeklyEnd').hide();
         }
 
+        if (sessionStorage.getItem('location') == 'checked') {
+            document.getElementById('makeLocation').checked = true;
+            $('#chooseLocationDiv').hide();
+            $('#makeLocationDiv').show();
+        } else {
+            document.getElementById('chooseLocation').checked = true;
+            $('#makeLocationDiv').hide();
+            $('#chooseLocationDiv').show();
+        }   
+    });
 
+
+    
+    function testSelect() {
+        $('#select-days').toggle();
     }
+
+    window.addEventListener('click', function (e) {
+        if (!(document.getElementById('select-days').contains(e.target) || document.getElementById('showBtn').contains(e.target))) {
+            $('#select-days').hide();
+        }
+    });
 
 </script>

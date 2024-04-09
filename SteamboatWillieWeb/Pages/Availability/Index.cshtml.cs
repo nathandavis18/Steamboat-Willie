@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.IdentityModel.Tokens;
 using Utility;
 
 namespace SteamboatWillieWeb.Pages.Availability
@@ -20,27 +22,84 @@ namespace SteamboatWillieWeb.Pages.Availability
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        public List<SelectListItem> DropdownOptions { get; set; }
-        public string CurrentUserStartTime { get; set; }
-        public string CurrentUserEndTime { get; set; }
 
         [BindProperty]
-        public ProviderAvailability objAvailability { get; set; }
-        [BindProperty]
-        public Location objLocation { get; set; }
-        public IEnumerable<SelectListItem> ProviderList { get; set; }
-        public IEnumerable<int> Locations { get; set; }
-        public string PassedDate { get; set; }
+        public IEnumerable<SelectListItem>? Locations { get; set; }
 
         public IndexModel(UnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
             _userManager = userManager;
-            objAvailability = new ProviderAvailability();
-            objLocation = new Location();
-            ProviderList = new List<SelectListItem>();
-            Locations = new List<int>();
+        }
+        [BindProperty]
+        public RecurrenceModel RecurrenceModelInput { get; set; }
+
+        [BindProperty]
+        public AvailabilityModel AvailabilityModelInput { get; set; }
+
+        public class AvailabilityModel
+        {
+            [Required]
+            public string ProviderId {  get; set; }
+
+            [Required]
+            [Display(Name = "Start Date")]
+            [DataType(DataType.Date)]
+            [DateValidator(ErrorMessage = "The Date must be later than today")]
+            public DateTime StartDate { get; set; }
+
+            [Required]
+            [Display(Name = "Appointment Duration")]
+            public DateTime Duration { get; set; }
+
+            [Required]
+            [Display(Name = "Number of Appointments")]
+            [Range(1, 10, ErrorMessage = "Minimum 1, Max 10")]
+            public short NumAppointments {  get; set; }
+
+            [Required]
+            [Display(Name = "Start Time")]
+            [DataType(DataType.Time)]
+            public TimeSpan StartTime { get; set; }
+
+
+            [Required]
+            [Display(Name = "Location")]
+            public string LocationId {  get; set; }
+            public string? Location { get; set; }
+
+            public bool NewLocation { get; set; }
+        }
+
+        public class RecurrenceModel
+        {
+
+            [Required(ErrorMessage = "One or more days must be selected")]
+            [Display(Name = "Recurrence")]
+            public bool Recurrence { get; set; }
+
+            [Display(Name = "Sunday")]
+            public bool Sunday {  get; set; }
+            [Display(Name = "Monday")]
+            public bool Monday { get; set; }
+            [Display(Name = "Tuesday")]
+            public bool Tuesday {  get; set; }
+            [Display(Name = "Wednesday")]
+            public bool Wednesday { get; set; }
+            [Display(Name = "Thursday")]
+            public bool Thursday { get; set; }
+            [Display(Name = "Friday")]
+            public bool Friday { get; set; }
+            [Display(Name = "Saturday")]
+            public bool Saturday { get; set; }
+
+            [Display(Name = "Recurrence End")]
+            [DataType(DataType.Date)]
+            public DateTime EndDate { get; set; }
+
+            [Display(Name = "Weekly: ")]
+            public bool IsWeekly {  get; set; }
         }
 
         public IActionResult OnGet(int? id, string? date)
@@ -55,44 +114,89 @@ namespace SteamboatWillieWeb.Pages.Availability
                 return RedirectToPage("../Index");
             }
 
-            if (date != null)
-            {
-                PassedDate = date;
-            }
-
-            var currentUserId = _userManager.GetUserId(User);
-
-            Locations = _unitOfWork.ProviderAvailability
+            var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
+            var providerLocations = _unitOfWork.ProviderAvailability
                 .GetAll()
-                .Where(pa => pa.ProviderId == currentUserId)
+                .Where(pa => pa.ProviderId == user.Id)
                 .Select(pa => pa.LocationId)
                 .Distinct()
                 .ToList();
-
-            var locationValues = _unitOfWork.Location
+            Locations = _unitOfWork.Location
                 .GetAll()
-                .Where(l => Locations.Contains(l.Id))
-                .Select(l => l.LocationValue)
+                .Where(l => providerLocations.Contains(l.Id))
+                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
                 .ToList();
 
-            DropdownOptions = _unitOfWork.Location
-                .GetAll()
-                .Where(l => Locations.Contains(l.Id))
-                .Select(selector: l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
-                .ToList();
-
-            var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId, false, "Department");
-            if (currentUser != null)
+            DateTime startDate = DateTime.Now.AddDays(1);
+            if(date != null)
             {
-                CurrentUserStartTime = currentUser.StartTime?.AddSeconds(-1).ToString("HH:mm:ss") ?? "07:00:00"; // Default to 07:00:00 if start time is null
-                CurrentUserEndTime = currentUser.EndTime?.ToString("HH:mm:ss") ?? "19:00:00"; // Default to 19:00:00 if end time is null
+                startDate = DateTime.Parse(date);
             }
+
+            RecurrenceModelInput = new RecurrenceModel()
+            {
+                EndDate = startDate.AddDays(7)
+            };
+            AvailabilityModelInput = new AvailabilityModel()
+            {
+                StartDate = startDate,
+                StartTime = _unitOfWork.Provider.Get(p => p.AppUserId == user.Id).StartTime.Value.TimeOfDay,
+                ProviderId = user.Id,
+                NumAppointments = 1,
+                NewLocation = true
+            };
 
             return Page();
         }
 
         public IActionResult OnPost(int? id)
         {
+            bool makeLocation = false;
+            var currentUserId = _userManager.GetUserId(User);
+            var provider = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
+            if (AvailabilityModelInput.StartTime < provider.StartTime.Value.TimeOfDay)
+            {
+                ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time cannot be before office hours start");
+            }
+            else
+            {
+                for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
+                {
+                    TimeSpan meetingEnd = new TimeSpan(AvailabilityModelInput.StartTime.Ticks + (AvailabilityModelInput.Duration.TimeOfDay.Ticks * i));
+                    if (meetingEnd > provider.EndTime.Value.TimeOfDay)
+                    {
+                        ModelState.AddModelError("AvailabilityModelInput.StartTime", "All meetings must end before office hours end");
+                    }
+                }
+            }
+
+            if(int.Parse(AvailabilityModelInput.LocationId) == 0)
+            {
+                if (AvailabilityModelInput.Location.IsNullOrEmpty())
+                {
+                    ModelState.AddModelError("AvailabilityModelInput.Location", "You must enter a value for the new location");
+                }
+                else
+                {
+                    makeLocation = true;
+                }
+            }
+
+            if (RecurrenceModelInput.Recurrence)
+            {
+                if(!(RecurrenceModelInput.Monday || RecurrenceModelInput.Tuesday || RecurrenceModelInput.Wednesday || RecurrenceModelInput.Thursday || RecurrenceModelInput.Friday || RecurrenceModelInput.Saturday || RecurrenceModelInput.Sunday))
+                {
+                    ModelState.AddModelError("RecurrenceModelInput.Recurrence", "At least one day must be selected");
+                }
+                else if(RecurrenceModelInput.IsWeekly)
+                {
+                    if(RecurrenceModelInput.EndDate < AvailabilityModelInput.StartDate.AddDays(7))
+                    {
+                        ModelState.AddModelError("RecurrenceModelInput.EndDate", "End Date must be at least a week after start date");
+                    }
+                }
+
+            }
             if (!ModelState.IsValid)
             {
                 // Log or debug model state errors
@@ -101,103 +205,197 @@ namespace SteamboatWillieWeb.Pages.Availability
                 {
                     Console.WriteLine($"Validation Error: {error.ErrorMessage}");
                 }
+
+                var providerLocations = _unitOfWork.ProviderAvailability
+                    .GetAll()
+                    .Where(pa => pa.ProviderId == currentUserId)
+                    .Select(pa => pa.LocationId)
+                    .Distinct()
+                    .ToList();
+                Locations = _unitOfWork.Location
+                    .GetAll()
+                    .Where(l => providerLocations.Contains(l.Id))
+                    .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
+                    .ToList();
+
                 return Page();
             }
 
-            if (ModelState.IsValid)
+            if (makeLocation)
             {
-                bool isRecurrenceChecked = Request.Form["recurrence"].Count > 0;
-                bool isWeeklyChecked = Request.Form["weekly"].Count > 0;
-                bool chooseLocationChecked = Request.Form["locationType"] == "chooseLocation";
-                bool makeLocationChecked = Request.Form["locationType"] == "makeLocation";
-                int count = 1;
-                int weekCount = 0;
-                int locationId = -1;
-
-                if(makeLocationChecked)
+                Location newLocation = new Location()
                 {
-                    string locationValue = Request.Form["objLocation.LocationValue"];
-                    Location newLocation = new Location
+                    LocationValue = AvailabilityModelInput.Location
+                };
+                _unitOfWork.Location.Add(newLocation);
+                _unitOfWork.Commit();
+                AvailabilityModelInput.LocationId = newLocation.Id.ToString();
+            }
+
+            DateTime startDate = AvailabilityModelInput.StartDate + AvailabilityModelInput.StartTime;
+            if (!RecurrenceModelInput.Recurrence)
+            {
+                for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
+                {
+                    ProviderAvailability pa = new ProviderAvailability
                     {
-                        LocationValue = locationValue
+                        ProviderId = AvailabilityModelInput.ProviderId,
+                        LocationId = int.Parse(AvailabilityModelInput.LocationId),
+                        StartTime = startDate + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                        EndTime = startDate.AddHours(startDate.Hour).AddMinutes(startDate.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                        Duration = AvailabilityModelInput.Duration,
+                        Scheduled = false
                     };
-                    _unitOfWork.Location.Add(newLocation);
-                    _unitOfWork.Commit();
-                    locationId = newLocation.Id;
-                    objAvailability.LocationId = locationId;
+                    _unitOfWork.ProviderAvailability.Add(pa);
+                }
+            }
+            else
+            {
+                List<string> daysOfWeek = DaysOfWeek();
+                if (RecurrenceModelInput.IsWeekly)
+                {
+                    for (var x = startDate; x <= RecurrenceModelInput.EndDate.AddDays(1); x = x.AddDays(1))
+                    {
+                        if (daysOfWeek.Contains(x.DayOfWeek.ToString()))
+                        {
+                            for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
+                            {
+                                ProviderAvailability pa = new ProviderAvailability
+                                {
+                                    ProviderId = AvailabilityModelInput.ProviderId,
+                                    LocationId = int.Parse(AvailabilityModelInput.LocationId),
+                                    StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    Duration = AvailabilityModelInput.Duration,
+                                    Scheduled = false
+                                };
+                                _unitOfWork.ProviderAvailability.Add(pa);
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    string location = Request.Form["objAvailability.LocationId"];
-                    var split = location.Split(',');
-                    if (int.TryParse(split[1], out locationId))
+                    for(var x = startDate; x <= startDate.AddDays(6); x = x.AddDays(1))
                     {
-                        objAvailability.LocationId = locationId;
+                        if (daysOfWeek.Contains(x.DayOfWeek.ToString()))
+                        {
+                            for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
+                            {
+                                ProviderAvailability pa = new ProviderAvailability
+                                {
+                                    ProviderId = AvailabilityModelInput.ProviderId,
+                                    LocationId = int.Parse(AvailabilityModelInput.LocationId),
+                                    StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    Duration = AvailabilityModelInput.Duration,
+                                    Scheduled = false
+                                };
+                                _unitOfWork.ProviderAvailability.Add(pa);
+                            }
+                        }
                     }
-                    else
+                }
+            }
+
+            _unitOfWork.Commit();
+            return RedirectToPage("../Index");
+
+            /*if (isRecurrenceChecked)
+            {
+                var selectedDays = Request.Form["weekDays[]"];
+                List<string> selectedDaysList = new List<string>();
+
+                if (selectedDays.Any())
+                {
+                    foreach (var day in selectedDays)
                     {
-                        // Handle the case where parsing fails
-                        // This could happen if the form value is not a valid integer
-                        // You may want to log an error or provide feedback to the user
-                        Console.WriteLine("Failed to parse LocationId as an integer.");
-                        return Page(); // or return an error page
+                        selectedDaysList.Add(day);
                     }
                 }
 
-                if (isRecurrenceChecked)
+                DateTime startDate = DateTime.Parse(Request.Form["startDate"]);
+                DateTime startTime = DateTime.Parse(Request.Form["startTime"]);
+                DateTime combinedDateTime = startDate.Date + startTime.TimeOfDay;
+                DateTime reccurentDateTime = combinedDateTime;
+                DateTime duration = DateTime.Parse(Request.Form["objAvailability.Duration"]);
+                int numAppointments = int.Parse(Request.Form["numAppointments"]);
+                DateTime endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+                DateTime endDate = DateTime.Parse(Request.Form["endDate"]);
+                string weekDay = reccurentDateTime.DayOfWeek.ToString();
+                string location = Request.Form["location"];
+
+                for (int i = 0; i < numAppointments; i++)
                 {
-                    var selectedDays = Request.Form["weekDays[]"];
-                    List<string> selectedDaysList = new List<string>();
-
-                    if (selectedDays.Any())
+                    ProviderAvailability availabilitySlot = new ProviderAvailability
                     {
-                        foreach (var day in selectedDays)
+                        ProviderId = currentUserId,
+                        StartTime = reccurentDateTime,
+                        EndTime = endTime,
+                        Duration = duration,
+                        Scheduled = false,
+                        LocationId = objAvailability.LocationId
+                    };
+
+                    _unitOfWork.ProviderAvailability.Add(availabilitySlot);
+
+                    // Update start and end time for the next appointment
+                    reccurentDateTime = endTime;
+                    endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+                }
+
+                reccurentDateTime = combinedDateTime;
+                reccurentDateTime = reccurentDateTime.AddDays(1);
+                weekDay = reccurentDateTime.DayOfWeek.ToString();
+                endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+
+                if (selectedDaysList.Any())
+                {
+                    var endSelectedDate = reccurentDateTime.AddDays(5);
+                    while (reccurentDateTime <= endSelectedDate)
+                    {
+                        count++;
+                        if (selectedDaysList.Contains(weekDay))
                         {
-                            selectedDaysList.Add(day);
+                            for (int i = 0; i < numAppointments; i++)
+                            {
+                                ProviderAvailability availabilitySlot = new ProviderAvailability
+                                {
+                                    ProviderId = currentUserId,
+                                    StartTime = reccurentDateTime,
+                                    EndTime = endTime,
+                                    Duration = duration,
+                                    Scheduled = false,
+                                    LocationId = objAvailability.LocationId
+                                };
+
+                                _unitOfWork.ProviderAvailability.Add(availabilitySlot);
+
+                                // Update start and end time for the next appointment
+                                reccurentDateTime = endTime;
+                                endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+                            }
                         }
-                    }
-
-                    var currentUserId = _userManager.GetUserId(User);
-                    DateTime startDate = DateTime.Parse(Request.Form["startDate"]);
-                    DateTime startTime = DateTime.Parse(Request.Form["startTime"]);
-                    DateTime combinedDateTime = startDate.Date + startTime.TimeOfDay;
-                    DateTime reccurentDateTime = combinedDateTime;
-                    DateTime duration = DateTime.Parse(Request.Form["objAvailability.Duration"]);
-                    int numAppointments = int.Parse(Request.Form["numAppointments"]);
-                    DateTime endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-                    DateTime endDate = DateTime.Parse(Request.Form["endDate"]);
-                    string weekDay = reccurentDateTime.DayOfWeek.ToString();
-                    string location = Request.Form["location"];
-
-                    for (int i = 0; i < numAppointments; i++)
-                    {
-                        ProviderAvailability availabilitySlot = new ProviderAvailability
-                        {
-                            ProviderId = currentUserId,
-                            StartTime = reccurentDateTime,
-                            EndTime = endTime,
-                            Duration = duration,
-                            Scheduled = false,
-                            LocationId = objAvailability.LocationId
-                        };
-
-                        _unitOfWork.ProviderAvailability.Add(availabilitySlot);
-
-                        // Update start and end time for the next appointment
-                        reccurentDateTime = endTime;
+                        reccurentDateTime = combinedDateTime.AddDays(count);
+                        reccurentDateTime.AddDays(1);
+                        weekDay = reccurentDateTime.DayOfWeek.ToString();
                         endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
                     }
+                }
 
-                    reccurentDateTime = combinedDateTime;
-                    reccurentDateTime = reccurentDateTime.AddDays(1);
-                    weekDay = reccurentDateTime.DayOfWeek.ToString();
+                if (isWeeklyChecked)
+                {
+                    weekCount = 7;
+                    reccurentDateTime = combinedDateTime.AddDays(weekCount);
                     endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+
 
                     if (selectedDaysList.Any())
                     {
-                        var endSelectedDate = reccurentDateTime.AddDays(5);
-                        while (reccurentDateTime <= endSelectedDate)
+                        while (reccurentDateTime <= endDate)
                         {
+                            reccurentDateTime = combinedDateTime.AddDays(count);
+                            endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
                             count++;
                             if (selectedDaysList.Contains(weekDay))
                             {
@@ -226,113 +424,103 @@ namespace SteamboatWillieWeb.Pages.Availability
                             endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
                         }
                     }
-
-                    if (isWeeklyChecked)
+                    else
                     {
-                        weekCount = 7;
-                        reccurentDateTime = combinedDateTime.AddDays(weekCount);
-                        endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-
-
-                        if (selectedDaysList.Any())
+                        while (reccurentDateTime <= endDate)
                         {
-                            while (reccurentDateTime <= endDate)
+                            for (int i = 0; i < numAppointments; i++)
                             {
-                                reccurentDateTime = combinedDateTime.AddDays(count);
-                                endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-                                count++;
-                                if (selectedDaysList.Contains(weekDay))
+                                ProviderAvailability availabilitySlot = new ProviderAvailability
                                 {
-                                    for (int i = 0; i < numAppointments; i++)
-                                    {
-                                        ProviderAvailability availabilitySlot = new ProviderAvailability
-                                        {
-                                            ProviderId = currentUserId,
-                                            StartTime = reccurentDateTime,
-                                            EndTime = endTime,
-                                            Duration = duration,
-                                            Scheduled = false,
-                                            LocationId = objAvailability.LocationId
-                                        };
+                                    ProviderId = currentUserId,
+                                    StartTime = reccurentDateTime,
+                                    EndTime = endTime,
+                                    Duration = duration,
+                                    Scheduled = false,
+                                    LocationId = objAvailability.LocationId
+                                };
 
-                                        _unitOfWork.ProviderAvailability.Add(availabilitySlot);
+                                _unitOfWork.ProviderAvailability.Add(availabilitySlot);
 
-                                        // Update start and end time for the next appointment
-                                        reccurentDateTime = endTime;
-                                        endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-                                    }
-                                }
-                                reccurentDateTime = combinedDateTime.AddDays(count);
-                                reccurentDateTime.AddDays(1);
-                                weekDay = reccurentDateTime.DayOfWeek.ToString();
+                                // Update start and end time for the next appointment
+                                reccurentDateTime = endTime;
                                 endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
                             }
+
+                            weekCount += 7;
+                            reccurentDateTime = combinedDateTime.AddDays(weekCount);
+                            endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
                         }
-                        else
-                        {
-                            while (reccurentDateTime <= endDate)
-                            {
-                                for (int i = 0; i < numAppointments; i++)
-                                {
-                                    ProviderAvailability availabilitySlot = new ProviderAvailability
-                                    {
-                                        ProviderId = currentUserId,
-                                        StartTime = reccurentDateTime,
-                                        EndTime = endTime,
-                                        Duration = duration,
-                                        Scheduled = false,
-                                        LocationId = objAvailability.LocationId
-                                    };
-
-                                    _unitOfWork.ProviderAvailability.Add(availabilitySlot);
-
-                                    // Update start and end time for the next appointment
-                                    reccurentDateTime = endTime;
-                                    endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-                                }
-
-                                weekCount += 7;
-                                reccurentDateTime = combinedDateTime.AddDays(weekCount);
-                                endTime = reccurentDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    var currentUserId = _userManager.GetUserId(User);
-                    DateTime startDate = DateTime.Parse(Request.Form["startDate"]);
-                    DateTime startTime = DateTime.Parse(Request.Form["startTime"]);
-                    DateTime combinedDateTime = startDate.Date + startTime.TimeOfDay;
-                    DateTime duration = DateTime.Parse(Request.Form["objAvailability.Duration"]);
-
-                    int numAppointments = int.Parse(Request.Form["numAppointments"]);
-                    DateTime endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
-
-                    for (int i = 0; i < numAppointments; i++)
-                    {
-                        ProviderAvailability availabilitySlot = new ProviderAvailability
-                        {
-                            ProviderId = currentUserId,
-                            StartTime = combinedDateTime,
-                            EndTime = endTime,
-                            Duration = duration,
-                            Scheduled = false,
-                            LocationId = objAvailability.LocationId
-                        };
-
-                        _unitOfWork.ProviderAvailability.Add(availabilitySlot);
-
-                        // Update start and end time for the next appointment
-                        combinedDateTime = endTime;
-                        endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
                     }
                 }
             }
+            else
+            {
+                DateTime startDate = DateTime.Parse(Request.Form["startDate"]);
+                DateTime startTime = DateTime.Parse(Request.Form["startTime"]);
+                DateTime combinedDateTime = startDate.Date + startTime.TimeOfDay;
+                DateTime duration = DateTime.Parse(Request.Form["objAvailability.Duration"]);
 
-            _unitOfWork.Commit();
-            return RedirectToPage("../Index");
+                int numAppointments = int.Parse(Request.Form["numAppointments"]);
+                DateTime endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
 
+                for (int i = 0; i < numAppointments; i++)
+                {
+                    ProviderAvailability availabilitySlot = new ProviderAvailability
+                    {
+                        ProviderId = currentUserId,
+                        StartTime = combinedDateTime,
+                        EndTime = endTime,
+                        Duration = duration,
+                        Scheduled = false,
+                        LocationId = objAvailability.LocationId
+                    };
+
+                    _unitOfWork.ProviderAvailability.Add(availabilitySlot);
+
+                    // Update start and end time for the next appointment
+                    combinedDateTime = endTime;
+                    endTime = combinedDateTime.AddHours(duration.Hour).AddMinutes(duration.Minute);
+                }
+            }
+
+        _unitOfWork.Commit();
+        return RedirectToPage("../Index");*/
+
+        }
+
+        private List<string> DaysOfWeek()
+        {
+            List<string> daysOfWeek = new List<string>();
+            if (RecurrenceModelInput.Monday)
+            {
+                daysOfWeek.Add("Monday");
+            }
+            if (RecurrenceModelInput.Tuesday)
+            {
+                daysOfWeek.Add("Tuesday");
+            }
+            if (RecurrenceModelInput.Wednesday)
+            {
+                daysOfWeek.Add("Wednesday");
+            }
+            if (RecurrenceModelInput.Thursday)
+            {
+                daysOfWeek.Add("Thursday");
+            }
+            if (RecurrenceModelInput.Friday)
+            {
+                daysOfWeek.Add("Friday");
+            }
+            if (RecurrenceModelInput.Saturday)
+            {
+                daysOfWeek.Add("Saturday");
+            }
+            if (RecurrenceModelInput.Sunday)
+            {
+                daysOfWeek.Add("Sunday");
+            }
+            return daysOfWeek;
         }
     }
 }

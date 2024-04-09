@@ -42,7 +42,7 @@
             foreach (var obj in Model.CalendarObj)
             {
                 <text>
-                    var e = { id: '@obj.Id.ToString()', title: '@obj.Name.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()'};
+                    var e = { id: '@obj.Id.ToString()', title: '@obj.Name.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()', url: ''};
                     calendar.addEvent(e);
                 </text>
             }
