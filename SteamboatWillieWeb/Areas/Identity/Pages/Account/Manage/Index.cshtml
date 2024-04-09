@@ -13,46 +13,46 @@
         <form id="profile-form" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.FName" class="form-control" autocomplete="First Name" aria-required="true" placeholder="John" />
+                <input asp-for="Input.FName" class="form-control bg-secondary text-white" autocomplete="First Name" aria-required="true" placeholder="John" />
                 <label asp-for="Input.FName">First Name</label>
                 <span asp-validation-for="Input.FName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.LName" class="form-control" autocomplete="Last Name" aria-required="true" placeholder="Doe" />
+                <input asp-for="Input.LName" class="form-control bg-secondary text-white" autocomplete="Last Name" aria-required="true" placeholder="Doe" />
                 <label asp-for="Input.LName">Last Name</label>
                 <span asp-validation-for="Input.LName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.WNumber" class="form-control" autocomplete="wnumber" aria-required="true" placeholder="W#" />
+                <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" />
                 <label asp-for="Input.WNumber">W#</label>
                 <span asp-validation-for="Input.WNumber" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
             @if (User.IsInRole(SD.CLIENT_ROLE))
             {
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
+                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
                 <label asp-for="ClientInput.DepartmentId" class="form-label"></label>
             }
             else if (User.IsInRole(SD.PROVIDER_ROLE))
             {
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
+                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
                 <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
             }
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.DateOfBirth" class="form-control" autocomplete="date of birth" aria-required="true" placeholder="@DateOnly.FromDateTime(DateTime.Now)" />
+                <input asp-for="Input.DateOfBirth" class="form-control bg-secondary text-white" autocomplete="date of birth" aria-required="true" placeholder="@DateOnly.FromDateTime(DateTime.Now)" />
                 <label asp-for="Input.DateOfBirth">Birthdate</label>
                 <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
+                <input asp-for="Input.PhoneNumber" class="form-control bg-secondary text-white" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
                 <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
             @if(User.IsInRole(SD.CLIENT_ROLE) && User.IsInRole(SD.PROVIDER_ROLE))
             {
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
+                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
                         <option>Freshman</option>
                         <option>Sophomore</option>
                         <option>Junior</option>
@@ -62,7 +62,7 @@
                     <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select" placeholder="Flex, Regular">
+                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
                         <option>Full-Time Student</option>
                         <option>Part-Time Student</option>
                         <option>Flex Student</option>
@@ -72,12 +72,12 @@
                 </div>
                 <input asp-for="ProviderInput.Title" value="Tutor" hidden />
                 <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.StartTime" class="form-control" required />
+                    <input asp-for="ProviderInput.StartTime" class="form-control bg-secondary text-white" required />
                     <label asp-for="ProviderInput.StartTime" class="form-label"></label>
                     <span asp-validation-for="ProviderInput.StartTime" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.EndTime" class="form-control" required />
+                    <input asp-for="ProviderInput.EndTime" class="form-control bg-secondary text-white" required />
                     <label asp-for="ProviderInput.EndTime" class="form-label"></label>
                     <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
                 </div>
@@ -85,7 +85,7 @@
             else if (User.IsInRole(SD.CLIENT_ROLE))
             {
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
+                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
                         <option>Freshman</option>
                         <option>Sophomore</option>
                         <option>Junior</option>
@@ -95,7 +95,7 @@
                     <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select" placeholder="Flex, Regular">
+                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
                         <option>Full-Time Student</option>
                         <option>Part-Time Student</option>
                         <option>Flex Student</option>
@@ -111,7 +111,7 @@
             else if (User.IsInRole(SD.PROVIDER_ROLE))
             {
                 <div class="form-floating mb-3" id="TitleSelector">
-                    <select asp-for="ProviderInput.Title" class="form-select" placeholder="Choose the best title for this advisor" id="providerTitle" onchange="titleChange(this.value)">
+                    <select asp-for="ProviderInput.Title" class="form-select bg-secondary text-white" placeholder="Choose the best title for this advisor" id="providerTitle" onchange="titleChange(this.value)">
                         <option>Advisor</option>
                         <option>Instructor</option>
                         <option>Tutor</option>
@@ -124,24 +124,24 @@
                     </div>
                     <div class="form-check">
                     <label asp-for="ProviderInput.NewStudent" class="form-check-label"></label>
-                    <input asp-for="ProviderInput.NewStudent" class="form-check-input" />
+                    <input asp-for="ProviderInput.NewStudent" class="form-check-input bg-secondary text-white" />
                     </div>
                     <div class="form-check">
                     <label asp-for="ProviderInput.ExistingStudent" class="form-check-label"></label>
-                    <input asp-for="ProviderInput.ExistingStudent" class="form-check-input" />
+                    <input asp-for="ProviderInput.ExistingStudent" class="form-check-input bg-secondary text-white" />
                     </div>
                     <div class="form-check">
                     <label asp-for="ProviderInput.FlexStudent" class="form-check-label"></label>
-                    <input asp-for="ProviderInput.FlexStudent" class="form-check-input" />
+                    <input asp-for="ProviderInput.FlexStudent" class="form-check-input bg-secondary text-white" />
                     </div>
                 </div>
                 <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.StartTime" class="form-control" required/>
+                    <input asp-for="ProviderInput.StartTime" class="form-control bg-secondary text-white" required/>
                     <label asp-for="ProviderInput.StartTime" class="form-label"></label>
                     <span asp-validation-for="ProviderInput.StartTime" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.EndTime" class="form-control" required/>
+                    <input asp-for="ProviderInput.EndTime" class="form-control bg-secondary text-white" required/>
                     <label asp-for="ProviderInput.EndTime" class="form-label"></label>
                     <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
                 </div>
