@@ -22,6 +22,10 @@ namespace DataAccess
 
         public DbSet<ProviderAvailability> ProviderAvailability { get; set; }
 
+        public DbSet<Class> Classes { get; set; }
+
+        public DbSet<ProviderClass> ProviderClasses { get; set; }
+
 
 
     }

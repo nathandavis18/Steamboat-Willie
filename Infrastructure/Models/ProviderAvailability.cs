@@ -34,6 +34,8 @@ namespace Infrastructure.Models
 
         public bool Scheduled { get; set; }
 
+        public string? AppointmentType { get; set; }
+
         [ForeignKey(nameof(ProviderId))]
         public Provider? Provider { get; set; }
 

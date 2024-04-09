@@ -98,10 +98,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [DisplayName("Last Name")]
             public string LName { get; set; }
 
-            [Required]
-            [DisplayName("Birthdate")]
-            [DataType(DataType.Date)]
-            public DateTime DateOfBirth { get; set; }
 
             [Phone]
             [Display(Name = "Phone number")]
@@ -195,7 +191,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     Text = x.DepartmentName,
                     Value = x.Id.ToString()
                 }),
-                DateOfBirth = DateTime.Now.AddYears(-16),
                 Role = "",
             };
             if (!creatingProvider)
@@ -220,7 +215,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 var user = CreateUser();
                 user.FName = Input.FName;
                 user.LName = Input.LName;
-                user.DateOfBirth = Input.DateOfBirth;
                 user.PhoneNumber = Input.PhoneNumber;
                 user.WNumber = Input.WNumber;
                 user.ProfilePictureURL = "default.png";

@@ -103,6 +103,32 @@ namespace DataAccess
             }
         }
 
+        private IGenericRepository<Class> _Class;
+        public IGenericRepository<Class> Class
+        {
+            get
+            {
+                if (_Class == null)
+                {
+                    _Class = new GenericRepository<Class>(_context);
+                }
+                return _Class;
+            }
+        }
+
+        private IGenericRepository<ProviderClass> _ProviderClass;
+        public IGenericRepository<ProviderClass> ProviderClass
+        {
+            get
+            {
+                if (_ProviderClass == null)
+                {
+                    _ProviderClass = new GenericRepository<ProviderClass>(_context);
+                }
+                return _ProviderClass;
+            }
+        }
+
         public int Commit()
         {
             return _context.SaveChanges();

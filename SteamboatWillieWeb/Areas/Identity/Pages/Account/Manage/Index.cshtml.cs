@@ -171,7 +171,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             {
                 FName = user.FName,
                 LName = user.LName,
-                DateOfBirth = user.DateOfBirth,
                 WNumber = user.WNumber,
                 Departments = departments.Select(x => new SelectListItem()
                 {
@@ -244,7 +243,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             }
             user.FName = Input.FName;
             user.LName = Input.LName;
-            user.DateOfBirth = Input.DateOfBirth;
             user.WNumber = Input.WNumber;
             var client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == user.Id);
             if (client != null)

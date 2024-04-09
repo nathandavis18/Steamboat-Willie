@@ -20,6 +20,8 @@ namespace Infrastructure.Models
         [Display(Name = "Student Type")]
         public string? StudentType { get; set; }
 
+        public bool? IsWeberStudent { get; set; }
+
         [ForeignKey(nameof(AppUserId))]
         public AppUser? AppUser { get; set; }
 

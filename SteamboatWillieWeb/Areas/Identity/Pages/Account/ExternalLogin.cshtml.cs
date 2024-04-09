@@ -104,10 +104,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             [DisplayName("Last Name")]
             public string LName { get; set; }
 
-            [Required]
-            [DisplayName("Birthdate")]
-            [DataType(DataType.Date)]
-            public DateTime DateOfBirth { get; set; }
 
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
@@ -212,14 +208,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 {
                     Input.PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.OtherPhone);
                 }
-                if(info.Principal.HasClaim(c => c.Type == ClaimTypes.DateOfBirth))
-                {
-                    Input.DateOfBirth = DateTime.ParseExact(info.Principal.FindFirstValue(ClaimTypes.DateOfBirth), "D", new CultureInfo("en-US"));
-                }
-                else
-                {
-                    Input.DateOfBirth = DateTime.Now.AddYears(-16);
-                }
+
                 Input.Departments = _unitOfWork.Department.GetAll().Select(d => new SelectListItem
                 {
                     Text = d.DepartmentName,
@@ -289,7 +278,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
                         user.FName = Input.FName;
                         user.LName = Input.LName;
-                        user.DateOfBirth = Input.DateOfBirth;
                         user.WNumber = Input.WNumber;
                         user.ProfilePictureURL = "default.png";
                         _unitOfWork.AppUser.Update(user);

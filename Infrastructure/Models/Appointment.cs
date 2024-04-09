@@ -19,6 +19,12 @@ namespace Infrastructure.Models
 
         public string? StudentComments { get; set; }
 
+        public bool StudentNoShow { get; set; }
+
+        public string? StudentAttachment {  get; set; }
+
+        public string? ProviderAttachment {  get; set; }
+
         //navigational stuff
         
         [ForeignKey(nameof(ProviderAvailabilityId))]

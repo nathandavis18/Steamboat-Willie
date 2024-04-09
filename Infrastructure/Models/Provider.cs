@@ -13,11 +13,13 @@ namespace Infrastructure.Models
         [Key]
         public string? AppUserId { get; set; }
 
-        public int DepartmentId { get; set; }
+        public int? DepartmentId { get; set; }
 
         public string? Title { get; set; }
 
         public string? AdvisementTypes {  get; set; } 
+
+        public string? HexColor { get; set; }
 
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
