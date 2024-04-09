@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utility;
+using static SteamboatWillieWeb.Pages.Appointments.RegisterAppointmentModel;
 
 namespace SteamboatWillieWeb.Pages
 {
@@ -14,6 +15,7 @@ namespace SteamboatWillieWeb.Pages
         private readonly UserManager<AppUser> _userManager;
         public string CurrentUserStartTime { get; set; }
         public string CurrentUserEndTime { get; set; }
+        public AppointmentModel AppointmentModelInput {  get; set; }
 
         public List<AppointmentCard> Appointments { get; set; }
         private IEnumerable<ProviderAvailability> providerAvailabilities;
@@ -138,7 +140,39 @@ namespace SteamboatWillieWeb.Pages
             return Page();
         }
 
-        string GetColor(string type)
+        public PartialViewResult OnGetAppointmentCancel(string? id)
+        {
+
+            var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id, includes: "ProviderAvailability");
+            var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
+            AppointmentModelInput = new AppointmentModel
+            {
+                AvailabilityId = id,
+                Date = appointment.ProviderAvailability.StartTime.ToLongDateString(),
+                Time = appointment.ProviderAvailability.StartTime.ToShortTimeString(),
+                Location = _unitOfWork.Location.Get(l => l.Id == appointment.ProviderAvailability.LocationId).LocationValue,
+                ProviderType = provider.Title,
+                ProviderName = _unitOfWork.AppUser.Get(a => a.Id == provider.AppUserId).FullName,
+                Comments = appointment.StudentComments,
+                IsScheduled = appointment.ProviderAvailability.Scheduled
+            };
+            return Partial("_CancelAppointmentPartial", this);
+        }
+
+        public IActionResult OnPostCancel(string? id)
+        {
+            var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id);
+            _unitOfWork.Appointment.Delete(appointment);
+            var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id);
+            availability.Scheduled = false;
+            _unitOfWork.ProviderAvailability.Update(availability);
+
+            _unitOfWork.Commit();
+
+            return RedirectToPage("./Index");
+        }
+
+        private string GetColor(string type)
         {
             switch(type)
             {

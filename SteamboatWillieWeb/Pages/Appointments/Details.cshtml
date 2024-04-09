@@ -47,7 +47,6 @@
                     @if (Model.AppointmentInput.IsScheduled)
                     {
                         <td>
-                            <input type="submit" class="btn btn-danger" value="Cancel Appointment" asp-route-cancel="@true"/>
                             <input type="submit" class="btn btn-primary" value="Save Changes" asp-route-update="@true"/>
                         </td>
                     }

@@ -109,22 +109,10 @@ namespace SteamboatWillieWeb.Pages.Appointments
             return Page();
         }
 
-        public async Task<IActionResult> OnPost(bool cancel = false, bool update = false)
+        public async Task<IActionResult> OnPost(bool update = false)
         {
             var user = await _userManager.GetUserAsync(User);
             var availability = _unitOfWork.ProviderAvailability.Get(p => p.Id == AppointmentInput.AvailabilityId);
-
-            if (cancel)
-            {
-                var app = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == AppointmentInput.AvailabilityId);
-                _unitOfWork.Appointment.Delete(app);
-                
-                availability.Scheduled = false;
-                _unitOfWork.ProviderAvailability.Update(availability);
-
-                await _unitOfWork.CommitAsync();
-                return RedirectToPage("../Index");
-            }
 
             if (update)
             {

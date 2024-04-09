@@ -354,3 +354,14 @@ input:checked + .slider:before {
 .form-floating > select + label:after {
     background: transparent !important;
 }
+
+.modal-dialog {
+    color: white;
+    opacity: 100% !important;
+    margin-bottom: 0 !important;
+}
+
+.modal-title{
+    color: white;
+    opacity: 100% !important;
+}

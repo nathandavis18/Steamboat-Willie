@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{handler?}"
 @model IndexModel
 @using Infrastructure.Models
 @inject UserManager<AppUser> UserManager
@@ -115,32 +115,33 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                 @foreach (var app in Model.Appointments)
                 {
                     <div class="col-md-3">
-                        <a class="no-decoration" asp-page="/Appointments/Details" asp-route-id="@app.Id">
-                            <div class="card">
-                                <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
-                                <div class="card-body">
-                                    <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
-                                    <strong>When:</strong>
-                                    @app.Date <br />
-                                    <pre>       @app.StartTime - @app.EndTime</pre>
-                                    <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net")))
+                        <div class="card">
+                            <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
+                            <div class="card-body">
+                                <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
+                                <strong>When:</strong>
+                                @app.Date <br />
+                                <pre>       @app.StartTime - @app.EndTime</pre>
+                                <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net")))
+                                {
+                                    @if (app.Location.Contains("http"))
                                     {
-                                        @if (app.Location.Contains("http"))
-                                        {
-                                            <a href="@app.Location" target="_blank">@app.Location</a>
-                                        }
-                                        else
-                                        {
-                                            <a href="http://@app.Location" target="_blank">@app.Location</a>
-                                        }
+                                        <a href="@app.Location" target="_blank">@app.Location</a>
                                     }
                                     else
                                     {
-                                        @app.Location
+                                        <a href="http://@app.Location" target="_blank">@app.Location</a>
                                     }
-                                </div>
+                                }
+                                else
+                                {
+                                    @app.Location
+                                }
+                                <br />
+                                <a class="btn btn-primary" asp-page="/Appointments/Details" asp-route-id="@app.Id">Details</a>  
+                                <a class="btn btn-danger" asp-page="/Appointments/ConfirmDelete" asp-route-id="@app.Id">Cancel Appointment</a>
                             </div>
-                        </a>
+                        </div>
                     </div>
                 }
             </div>
@@ -216,6 +217,18 @@ else if (User.IsInRole(SD.CLIENT_ROLE))
     </div>
     <br />
 
+    <div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Appointment</h5>
+                </div>
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>;
+
     @if (!Model.Appointments.Any())
     {
         <div class="text-center">
@@ -228,32 +241,34 @@ else if (User.IsInRole(SD.CLIENT_ROLE))
             @foreach (var app in Model.Appointments)
             {
                 <div class="col-md-3 mb-3">
-                    <a class="no-decoration" asp-page="/Appointments/Details" asp-route-id="@app.Id">
-                        <div class="card">
-                            <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
-                            <div class="card-body">
-                                <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
-                                <strong>When:</strong>
-                                @app.Date <br />
-                                <pre>       @app.StartTime - @app.EndTime</pre>
-                                <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net") || app.Location.Contains(".us") || app.Location.Contains("zoom.")))
+                    <div class="card">
+                        <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
+                        <div class="card-body">
+                            <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
+                            <strong>When:</strong>
+                            @app.Date <br />
+                            <pre>       @app.StartTime - @app.EndTime</pre>
+                            <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net") || app.Location.Contains(".us") || app.Location.Contains("zoom.")))
+                            {
+                                @if (app.Location.Contains("http"))
                                 {
-                                    @if (app.Location.Contains("http"))
-                                    {
-                                        <a href="@app.Location" target="_blank">@app.Location</a>
-                                    }
-                                    else
-                                    {
-                                        <a href="http://@app.Location" target="_blank">@app.Location</a>
-                                    }
+                                    <a href="@app.Location" target="_blank">@app.Location</a>
                                 }
                                 else
                                 {
-                                    @app.Location
+                                    <a href="http://@app.Location" target="_blank">@app.Location</a>
                                 }
-                            </div>
+                            }
+                            else
+                            {
+                                @app.Location
+                            }
+                            <br />
+                            <hr />
+                            <button class="btn btn-danger" asp-page="/Appointments/_CancelAppointmentPartial" data-id="@app.Id" data-toggle="modal" data-target="#details-modal" style="margin-right: 20px; margin-left: 12%;" id="cancelBtn">Cancel</button>
+                            <a class="btn btn-primary" asp-page="/Appointments/Details" asp-route-id="@app.Id">Details</a>
                         </div>
-                    </a>
+                    </div>
                 </div>
             }
         </div>
@@ -284,5 +299,15 @@ else
         }
         
         sessionStorage.clear();
+    </script>
+
+    <script>
+        $(function () {
+            $('#cancelBtn').on('click', function () {
+                $('.modal-body').load(`/appointmentcancel?id=${$(this).data('id')}`, function (data) {
+                    $('#details-modal').modal('show');
+                });
+            });
+        })
     </script>
 }
