@@ -332,3 +332,25 @@ input:checked + .slider:before {
     font-size: 15px;
     color: white;
 }
+
+.fc-col-header {
+    background-color: black;
+}
+
+.form-floating > input:not(:focus):placeholder-shown + label {
+    background: transparent;
+    color: darkgray;
+}
+
+.form-floating > input + label:after {
+    background: transparent !important;
+}
+
+.form-floating > select:not(:focus):placeholder-shown + label {
+    background: transparent;
+    color: darkgray;
+}
+
+.form-floating > select + label:after {
+    background: transparent !important;
+}

@@ -14,21 +14,27 @@
     <br /><br />
 
     <form asp-page="./Index" method="get">
-        <div class="form-actions no-color">
+        <div class="form-actions no-color form-group row">
             <p>
-                Find by name:
-                <input type="text" name="SearchString" value="@Model.CurrentFilter" />
-                <input type="submit" value="Search" class="btn btn-primary" />
+                <div class="col-sm-2">
+                    <label for="SearchString">Find by name:</label>
+                    <input class="form-control bg-secondary text-white" type="text" name="SearchString" value="@Model.CurrentFilter" />
+                </div>
+                <div class="col-sm-4 align-self-end">
+                    <input type="submit" value="Search" class="btn btn-primary" />
+                </div>
             </p>
         </div>
     </form>
     <form asp-page="./Index" method="get" id="roleForm">
-        <div class="form-actions no-color">
+        <div class="form-actions no-color form-group row">
             <p>
-                Find by Role:
-                <select asp-for="@Model.CurrentRole" asp-items="@Model.Roles" name="RoleSort" id="roleFilter">
-                    <option value="@String.Empty" selected>All Roles</option>
-                </select>
+                <div class="col-sm-4">
+                    <label for="RoleSort">Find by Role:</label>
+                    <select asp-for="@Model.CurrentRole" asp-items="@Model.Roles" name="RoleSort" id="roleFilter" class="form-select bg-secondary text-white">
+                        <option value="@String.Empty" selected>All Roles</option>
+                    </select>
+                </div>
             </p>
         </div>
     </form>
@@ -101,18 +107,20 @@
         var prevDisabled = !Model.ApplicationUsers.HasPreviousPage ? "disabled" : "";
         var nextDisabled = !Model.ApplicationUsers.HasNextPage ? "disabled" : "";
     }
-    <a asp-page="./Index" asp-route-pageIndex="1" class="btn btn-primary @prevDisabled">
-        First
-    </a>
-    <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.PageIndex - 1)" class="btn btn-primary @prevDisabled">
-        Previous
-    </a>
-    <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.PageIndex + 1)" class="btn btn-primary @nextDisabled">
-        Next
-    </a>
-    <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.TotalPages)" class="btn btn-primary @nextDisabled">
-        Last
-    </a>
+    <div class="mb-3">
+        <a asp-page="./Index" asp-route-pageIndex="1" class="btn btn-primary @prevDisabled">
+            First
+        </a>
+        <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.PageIndex - 1)" class="btn btn-primary @prevDisabled">
+            Previous
+        </a>
+        <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.PageIndex + 1)" class="btn btn-primary @nextDisabled">
+            Next
+        </a>
+        <a asp-page="./Index" asp-route-pageIndex="@(Model.ApplicationUsers.TotalPages)" class="btn btn-primary @nextDisabled">
+            Last
+        </a>
+    </div>
 </div>
 
 @section Scripts{

@@ -13,56 +13,56 @@
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.FName" class="form-control" autocomplete="First Name" aria-required="true" placeholder="John" />
+                <input asp-for="Input.FName" class="form-control bg-secondary text-white" autocomplete="First Name" aria-required="true" placeholder="John" />
                 <label asp-for="Input.FName">First Name</label>
                 <span asp-validation-for="Input.FName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.LName" class="form-control" autocomplete="Last Name" aria-required="true" placeholder="Doe" />
+                <input asp-for="Input.LName" class="form-control bg-secondary text-white" autocomplete="Last Name" aria-required="true" placeholder="Doe" />
                 <label asp-for="Input.LName">Last Name</label>
                 <span asp-validation-for="Input.LName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <input asp-for="Input.Email" class="form-control bg-secondary text-white" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label asp-for="Input.Email">Email</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <input asp-for="Input.Password" class="form-control bg-secondary text-white" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label asp-for="Input.Password">Password</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <input asp-for="Input.ConfirmPassword" class="form-control bg-secondary text-white" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.WNumber" class="form-control" autocomplete="wnumber" aria-required="true" placeholder="W#" />
+                <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" />
                 <label asp-for="Input.WNumber">W#</label>
                 <span asp-validation-for="Input.WNumber" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
+                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
                 @if (!User.IsInRole(SD.ADMIN_ROLE))
                 {
-                    <label asp-for="ClientInput.DepartmentId" class="form-label"></label>
+                    <label asp-for="ClientInput.DepartmentId"></label>
                     <span asp-validation-for="ClientInput.DepartmentId" class="text-danger"></span>
                 }
                 else{
-                    <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
+                    <label asp-for="ProviderInput.DepartmentId"></label>
                     <span asp-validation-for="ProviderInput.DepartmentId" class="text-danger"></span>
                 }
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
+                <input asp-for="Input.PhoneNumber" class="form-control bg-secondary text-white" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
                 <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
             @if (!User.IsInRole(SD.ADMIN_ROLE))
             {
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
+                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
                         <option>Freshman</option>
                         <option>Sophomore</option>
                         <option>Junior</option>
@@ -72,7 +72,7 @@
                     <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select" placeholder="Flex, Regular">
+                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
                         <option>Full-Time Student</option>
                         <option>Part-Time Student</option>
                         <option>Flex Student</option>
@@ -91,7 +91,7 @@
                     <option selected>@SD.PROVIDER_ROLE</option>
                 </select>
                 <div class="form-floating mb-3" id="TitleSelector">
-                    <select asp-for="ProviderInput.Title" class="form-select" placeholder="Choose the best title for this advisor">
+                    <select asp-for="ProviderInput.Title" class="form-select bg-secondary text-white" placeholder="Choose the best title for this advisor">
                         <option>Advisor</option>
                         <option>Instructor</option>
                         <option>Tutor</option>
@@ -101,9 +101,15 @@
 
                 @*Validating the model state by completing all required fields*@
                 <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
-                <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden/>
+                <input asp-for="ClientInput.StudentType" class="form-check-input bg-secondary text-white" value="Valid" hidden/>
             }
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary mb-2">Register</button>
+            <div>
+                <p class="text-center">
+                    Already have an account?
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Login</a>
+                </p>
+            </div>
         </form>
     </div>
     <div class="col-md-6 col-md-offset-2">
@@ -131,7 +137,7 @@
                                 {
                                     if (provider.DisplayName == "Google")
                                     {
-                                        <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="gsi-material-button ggl-btn">
+                                        <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="gsi-material-button ggl-btn bg-secondary text-white">
                                             <div class="gsi-material-button-state"></div>
                                             <div class="gsi-material-button-content-wrapper">
                                                 <div class="gsi-material-button-icon">
@@ -151,7 +157,7 @@
                                     else if (provider.DisplayName == "Microsoft")
                                     {
                                         <div class="bsk-container">
-                                            <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="bsk-btn bsk-btn-default msf-btn">
+                                            <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="btn btn-secondary">
                                                 <object type="image/svg+xml" data="https://s3-eu-west-1.amazonaws.com/cdn-testing.web.bas.ac.uk/scratch/bas-style-kit/ms-pictogram/ms-pictogram.svg" class="x-icon"></object>
                                                 Sign up with Microsoft
                                             </button>
