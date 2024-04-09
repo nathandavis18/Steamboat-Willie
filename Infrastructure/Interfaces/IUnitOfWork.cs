@@ -10,6 +10,8 @@ namespace Infrastructure.Interfaces
         IGenericRepository<Location> Location { get; }
         IGenericRepository<Provider> Provider { get; }
         IGenericRepository<ProviderAvailability> ProviderAvailability { get; }
+        IGenericRepository<Class> Class { get; }
+        IGenericRepository<ProviderClass> ProviderClass { get; }
         int Commit();
         Task<int> CommitAsync();
     }

@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Models
 {
-    public class Location
+    public class Class
     {
         [Key]
         public int Id { get; set; }
 
-        public string? LocationValue { get; set; } 
-
-        public string? Campus { get; set; } //Ogden, Davis, Online, SLCC
+        public string? Name { get; set; }
     }
 }

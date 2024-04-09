@@ -186,7 +186,6 @@ namespace DataAccess
                 FName = "Admin",
                 LName = "Test",
                 PhoneNumber = "1234567890",
-                DateOfBirth = DateTime.Parse("01/01/0001"),
                 WNumber = "W00000000",
                 ProfilePictureURL = "default.png"
             }, "Pass1234!").GetAwaiter().GetResult();
@@ -201,7 +200,6 @@ namespace DataAccess
                 FName = "Client",
                 LName = "Test",
                 PhoneNumber = "1234567890",
-                DateOfBirth = DateTime.Parse("01/01/0001"),
                 WNumber = "W00000000",
                 ProfilePictureURL = "default.png"
             }, "Pass1234!").GetAwaiter().GetResult();
@@ -225,7 +223,6 @@ namespace DataAccess
                 FName = "Provider",
                 LName = "Test",
                 PhoneNumber = "1234567890",
-                DateOfBirth = DateTime.Parse("01/01/0001"),
                 WNumber = "W00000000",
                 ProfilePictureURL = "default.png"
             }, "Pass1234!").GetAwaiter().GetResult();
