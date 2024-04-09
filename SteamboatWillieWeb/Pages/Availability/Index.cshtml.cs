@@ -254,7 +254,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                 List<string> daysOfWeek = DaysOfWeek();
                 if (RecurrenceModelInput.IsWeekly)
                 {
-                    for (var x = startDate; x <= RecurrenceModelInput.EndDate; x = x.AddDays(1))
+                    for (var x = startDate; x <= RecurrenceModelInput.EndDate.AddDays(1); x = x.AddDays(1))
                     {
                         if (daysOfWeek.Contains(x.DayOfWeek.ToString()))
                         {
