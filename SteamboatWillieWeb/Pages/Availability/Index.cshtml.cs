@@ -242,7 +242,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                         ProviderId = AvailabilityModelInput.ProviderId,
                         LocationId = int.Parse(AvailabilityModelInput.LocationId),
                         StartTime = startDate + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
-                        EndTime = startDate.AddHours(startDate.Hour).AddMinutes(startDate.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                        EndTime = startDate.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                         Duration = AvailabilityModelInput.Duration,
                         Scheduled = false
                     };
@@ -265,7 +265,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                                     ProviderId = AvailabilityModelInput.ProviderId,
                                     LocationId = int.Parse(AvailabilityModelInput.LocationId),
                                     StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
-                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    EndTime = x.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                                     Duration = AvailabilityModelInput.Duration,
                                     Scheduled = false
                                 };
@@ -287,7 +287,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                                     ProviderId = AvailabilityModelInput.ProviderId,
                                     LocationId = int.Parse(AvailabilityModelInput.LocationId),
                                     StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
-                                    EndTime = x.AddHours(x.Hour).AddMinutes(x.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    EndTime = x.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                                     Duration = AvailabilityModelInput.Duration,
                                     Scheduled = false
                                 };
