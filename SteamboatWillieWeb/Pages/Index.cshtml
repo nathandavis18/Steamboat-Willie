@@ -255,7 +255,8 @@ else
 }
 
 @section Scripts {
-    <script>var slider = document.getElementById('tutor-slider');
+    <script>
+        var slider = document.getElementById('tutor-slider');
         var provider = document.getElementById('tutor-provider-view');
         var client = document.getElementById('tutor-student-view');
 
@@ -268,5 +269,8 @@ else
                 provider.style.display = "contents";
                 client.style.display = "none";
             }
-        }</script>
+        }
+        
+        sessionStorage.clear();
+    </script>
 }

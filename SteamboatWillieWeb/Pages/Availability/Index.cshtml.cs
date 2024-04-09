@@ -67,7 +67,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             [Required]
             [Display(Name = "Location")]
             public string LocationId {  get; set; }
-            public string Location { get; set; }
+            public string? Location { get; set; }
 
             public bool NewLocation { get; set; }
         }
@@ -151,8 +151,7 @@ namespace SteamboatWillieWeb.Pages.Availability
 
         public IActionResult OnPost(int? id)
         {
-            var y = Request.Form["locationType"];
-            TestDateInput.NewLocation = y.Equals("makeLocation");
+            bool makeLocation = false;
             var currentUserId = _userManager.GetUserId(User);
             var provider = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
             if (TestDateInput.StartTime < provider.StartTime.Value.TimeOfDay)
@@ -171,11 +170,15 @@ namespace SteamboatWillieWeb.Pages.Availability
                 }
             }
 
-            if(TestDateInput.NewLocation)
+            if(int.Parse(TestDateInput.LocationId) == 0)
             {
                 if (TestDateInput.Location.IsNullOrEmpty())
                 {
                     ModelState.AddModelError("TestDateInput.Location", "You must enter a value for the new location");
+                }
+                else
+                {
+                    makeLocation = true;
                 }
             }
 
@@ -218,7 +221,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                 return Page();
             }
 
-            if (TestDateInput.NewLocation)
+            if (makeLocation)
             {
                 Location newLocation = new Location()
                 {

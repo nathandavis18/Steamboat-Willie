@@ -53,7 +53,7 @@
             </div>
             <div id="makeLocationDiv" style="display:none;">
                 <label class="text-white">Create New Location: </label>
-                <input asp-for="TestDateInput.Location" value="Valid" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" id="newLocationInput"/>
+                <input asp-for="TestDateInput.Location" value="@Model.TestDateInput.Location" class="form-control bg-secondary text-white" placeholder="Zoom link, Office, etc" id="newLocationInput"/>
                 <input asp-for="TestDateInput.LocationId" value="0" hidden />
                 <span asp-validation-for="TestDateInput.Location" class="text-danger"></span>
             </div>
@@ -150,16 +150,14 @@
     });
 
     $('input[name="locationType"]').change(function () {
-        if ($('#chooseLocation').is(':checked')) {
-            $('#chooseLocationDiv').show();
-            $('#makeLocationDiv').hide();
-            sessionStorage.setItem('location', 'checked');
-        } else {
+        if ($('#makeLocation').is(':checked')) {
             $('#chooseLocationDiv').hide();
             $('#makeLocationDiv').show();
-            $('#newLocationInput').val('');
-            sessionStorage.setItem('location', 'unchecked');
-            sessionStorage.setItem('locationValue', document.getElementById('makeLocation').value);
+            sessionStorage.setItem('location', 'checked');
+        } else {
+            $('#chooseLocationDiv').show();
+            $('#makeLocationDiv').hide();
+            sessionStorage.setItem('location', 'clear');
         }
     });
 
@@ -174,14 +172,13 @@
         }
 
         if (sessionStorage.getItem('location') == 'checked') {
-            document.getElementById('chooseLocation').checked = true;
-            $('#chooseLocationDiv').show();
-            $('#makeLocationDiv').hide();
-        } else {
             document.getElementById('makeLocation').checked = true;
-            $('#makeLocationDiv').show();
             $('#chooseLocationDiv').hide();
-            document.getElementById('makeLocation').value = sessionStorage.getItem('locationValue');
+            $('#makeLocationDiv').show();
+        } else {
+            document.getElementById('chooseLocation').checked = true;
+            $('#makeLocationDiv').hide();
+            $('#chooseLocationDiv').show();
         }   
     });
 
