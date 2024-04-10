@@ -128,5 +128,11 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
             return RedirectToPage("./Details", new { id = id } );
         }
+
+
+        public PartialViewResult OnGetRegisterAppointment(string? id)
+        {
+            return Partial("./_RegisterAppointmentPartial", this);
+        }
     }
 }
