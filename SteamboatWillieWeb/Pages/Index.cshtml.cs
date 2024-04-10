@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utility;
-using static SteamboatWillieWeb.Pages.Appointments.RegisterAppointmentModel;
+using Infrastructure.ViewModels;
 
 namespace SteamboatWillieWeb.Pages
 {
@@ -17,7 +17,7 @@ namespace SteamboatWillieWeb.Pages
         public string CurrentUserEndTime { get; set; }
 
         [BindProperty]
-        public AppointmentModel? AppointmentModelInput {  get; set; }
+        public AppointmentViewModel? AppointmentModelInput {  get; set; }
 
         public List<AppointmentCard> Appointments { get; set; }
         private IEnumerable<ProviderAvailability> providerAvailabilities;
@@ -149,7 +149,7 @@ namespace SteamboatWillieWeb.Pages
 
             var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id, includes: "ProviderAvailability");
             var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
-            AppointmentModelInput = new AppointmentModel
+            AppointmentModelInput = new AppointmentViewModel
             {
                 AvailabilityId = id,
                 Date = appointment.ProviderAvailability.StartTime.ToLongDateString(),
@@ -183,7 +183,7 @@ namespace SteamboatWillieWeb.Pages
         {
             var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id, includes: "ProviderAvailability");
             var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
-            AppointmentModelInput = new AppointmentModel
+            AppointmentModelInput = new AppointmentViewModel
             {
                 AvailabilityId = id,
                 Date = appointment.ProviderAvailability.StartTime.ToLongDateString(),
