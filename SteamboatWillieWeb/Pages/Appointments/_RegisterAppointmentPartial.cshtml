@@ -1,0 +1,32 @@
+﻿@model SteamboatWillieWeb.Pages.Appointments.IndexModel
+@{
+}
+
+<div class="modal-header">
+    <div class="col-md-6 text-end"><h5 class="modal-title">Book Appointment</h5></div>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div>
+        <form method="post">
+            <div class="row">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>When: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>With: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>Location: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>Comments: </strong></span>
+                </div>
+                <div class="col-md-9">
+                    <span>@Model.InputModel.Date @Model.InputModel.Time</span> <br />
+                    <span>@Model.InputModel.ProviderName</span> <br />
+                    <span>@Model.InputModel.Location</span> <br />
+                    <textarea cols="3" style="width: 95%" asp-for="InputModel.Comments"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                <input type="submit" class="btn btn-success" value="Book Appointment" asp-page-handler="RegisterAppointment" asp-route-id="@Model.InputModel.AvailabilityId" />
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,5 +1,6 @@
 using DataAccess;
 using Infrastructure.Models;
+using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -28,6 +29,10 @@ namespace SteamboatWillieWeb.Pages.Appointments
             _userManager = userManager;
             CalendarObj = new List<Calendar>();
         }
+
+        [BindProperty]
+        public AppointmentViewModel? InputModel { get; set; }
+
         public IActionResult OnGet(string? type = null)
         {
             if (!User.Identity!.IsAuthenticated)
@@ -127,6 +132,45 @@ namespace SteamboatWillieWeb.Pages.Appointments
             string id = Request.Form["availabilityId"];
 
             return RedirectToPage("./Details", new { id = id } );
+        }
+
+
+        public PartialViewResult OnGetRegisterAppointment(string? id)
+        {
+            var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id);
+            var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
+            InputModel = new AppointmentViewModel
+            {
+                AvailabilityId = id,
+                Date = availability.StartTime.ToLongDateString(),
+                Time = availability.StartTime.ToShortTimeString(),
+                Location = _unitOfWork.Location.Get(l => l.Id == availability.LocationId).LocationValue,
+                ProviderType = provider.Title,
+                ProviderName = _unitOfWork.AppUser.Get(a => a.Id == provider.AppUserId).FullName
+            };
+            return Partial("./_RegisterAppointmentPartial", this);
+        }
+
+        public IActionResult OnPostRegisterAppointment(string id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id);
+            availability.Scheduled = true;
+            _unitOfWork.ProviderAvailability.Update(availability);
+
+            Appointment appointment = new Appointment
+            {
+                ProviderAvailabilityId = id,
+                ClientId = userId,
+                StudentComments = InputModel.Comments,
+                Description = "Appointment",
+                StudentNoShow = false
+            };
+
+            _unitOfWork.Appointment.Add(appointment);
+            _unitOfWork.Commit();
+
+            return RedirectToPage("../Index");
         }
     }
 }
