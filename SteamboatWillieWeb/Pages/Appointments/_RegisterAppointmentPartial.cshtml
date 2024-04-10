@@ -3,7 +3,7 @@
 }
 
 <div class="modal-header">
-    <div class="col-md-6 text-end"><h5 class="modal-title">Appointment Details</h5></div>
+    <div class="col-md-6 text-end"><h5 class="modal-title">Book Appointment</h5></div>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body">
@@ -17,25 +17,15 @@
                     <span class="d-inline-block"><strong>Comments: </strong></span>
                 </div>
                 <div class="col-md-9">
-                    <span></span> <br />
-                    <span></span> <br />
-                    <span></span> <br />
-                    <div id="notEdit">
-                        <span></span>
-                    </div>
-                    <div id="edit" style="display: none">
-                        <textarea cols="3" style="width: 95%"></textarea>
-                    </div>
+                    <span>@Model.InputModel.Date @Model.InputModel.Time</span> <br />
+                    <span>@Model.InputModel.ProviderName</span> <br />
+                    <span>@Model.InputModel.Location</span> <br />
+                    <textarea cols="3" style="width: 95%" asp-for="InputModel.Comments"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                <div id="editBtnDiv">
-                    <button form="none" class="btn btn-warning" onclick="editComments()">Edit Comments</button>
-                </div>
-                <div id="saveBtnDiv" style="display: none">
-                    <input type="submit" class="btn btn-success" value="Save Changes" asp-page-handler="AppointmentDetails" asp-route-id="" />
-                </div>
+                <input type="submit" class="btn btn-success" value="Book Appointment" asp-page-handler="RegisterAppointment" asp-route-id="@Model.InputModel.AvailabilityId" />
             </div>
         </form>
     </div>
