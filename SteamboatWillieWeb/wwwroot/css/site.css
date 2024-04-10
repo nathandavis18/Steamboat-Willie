@@ -354,3 +354,7 @@ input:checked + .slider:before {
 .form-floating > select + label:after {
     background: transparent !important;
 }
+
+.modal-dialog {
+    color: white;
+}
