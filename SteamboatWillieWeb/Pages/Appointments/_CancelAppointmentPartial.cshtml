@@ -1,0 +1,28 @@
+﻿@model SteamboatWillieWeb.Pages.IndexModel
+@{
+}
+
+<div class="modal-header">
+    <div class="col-md-6 text-end"><h5 class="modal-title">Cancel Appointment</h5></div>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div>
+        <div class="row">
+            <div class="col-md-3 text-end">
+                <span class="d-inline-block"><strong>When: </strong> </span> <br />
+                <span class="d-inline-block"><strong>With: </strong> </span>
+            </div>
+            <div class="col-md-9">
+                <span>@Model.AppointmentModelInput.Date @Model.AppointmentModelInput.Time </span> <br />
+                <span>@Model.AppointmentModelInput.ProviderName </span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            <form method="post">
+                <input type="submit" class="btn btn-danger" value="Confirm Cancel" asp-page-handler="AppointmentCancel" asp-route-id="@Model.AppointmentModelInput.AvailabilityId" />
+            </form>
+        </div>
+    </div>
+</div>

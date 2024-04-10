@@ -15,7 +15,9 @@ namespace SteamboatWillieWeb.Pages
         private readonly UserManager<AppUser> _userManager;
         public string CurrentUserStartTime { get; set; }
         public string CurrentUserEndTime { get; set; }
-        public AppointmentModel AppointmentModelInput {  get; set; }
+
+        [BindProperty]
+        public AppointmentModel? AppointmentModelInput {  get; set; }
 
         public List<AppointmentCard> Appointments { get; set; }
         private IEnumerable<ProviderAvailability> providerAvailabilities;
@@ -140,6 +142,8 @@ namespace SteamboatWillieWeb.Pages
             return Page();
         }
 
+
+        //Cancel Appointment Popup Methods
         public PartialViewResult OnGetAppointmentCancel(string? id)
         {
 
@@ -156,10 +160,10 @@ namespace SteamboatWillieWeb.Pages
                 Comments = appointment.StudentComments,
                 IsScheduled = appointment.ProviderAvailability.Scheduled
             };
-            return Partial("_CancelAppointmentPartial", this);
+            return Partial("./Appointments/_CancelAppointmentPartial", this);
         }
 
-        public IActionResult OnPostCancel(string? id)
+        public IActionResult OnPostAppointmentCancel(string? id)
         {
             var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id);
             _unitOfWork.Appointment.Delete(appointment);
@@ -167,6 +171,38 @@ namespace SteamboatWillieWeb.Pages
             availability.Scheduled = false;
             _unitOfWork.ProviderAvailability.Update(availability);
 
+            _unitOfWork.Commit();
+
+            return RedirectToPage("./Index");
+        }
+
+        
+
+        //Details Button Popup Methods
+        public PartialViewResult OnGetAppointmentDetails(string? id)
+        {
+            var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id, includes: "ProviderAvailability");
+            var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
+            AppointmentModelInput = new AppointmentModel
+            {
+                AvailabilityId = id,
+                Date = appointment.ProviderAvailability.StartTime.ToLongDateString(),
+                Time = appointment.ProviderAvailability.StartTime.ToShortTimeString(),
+                Location = _unitOfWork.Location.Get(l => l.Id == appointment.ProviderAvailability.LocationId).LocationValue,
+                ProviderType = provider.Title,
+                ProviderName = _unitOfWork.AppUser.Get(a => a.Id == provider.AppUserId).FullName,
+                Comments = appointment.StudentComments,
+                IsScheduled = appointment.ProviderAvailability.Scheduled
+            };
+            return Partial("./Appointments/_DetailsAppointmentPartial", this);
+        }
+
+        public IActionResult OnPostAppointmentDetails(string? id, string? comments)
+        {
+            var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id);
+            appointment.StudentComments = AppointmentModelInput.Comments;
+
+            _unitOfWork.Appointment.Update(appointment);
             _unitOfWork.Commit();
 
             return RedirectToPage("./Index");

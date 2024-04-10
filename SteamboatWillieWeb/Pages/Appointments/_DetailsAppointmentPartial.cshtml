@@ -1,0 +1,43 @@
+﻿@model SteamboatWillieWeb.Pages.IndexModel
+@{
+}
+
+<div class="modal-header">
+    <div class="col-md-6 text-end"><h5 class="modal-title">Appointment Details</h5></div>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div>
+        <form method="post">
+            <div class="row">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>When: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>With: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>Location: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>Comments: </strong></span>
+                </div>
+                <div class="col-md-9">
+                    <span>@Model.AppointmentModelInput.Date @Model.AppointmentModelInput.Time </span> <br />
+                    <span>@Model.AppointmentModelInput.ProviderName </span> <br />
+                    <span>@Model.AppointmentModelInput.Location </span> <br />
+                    <div id="notEdit">
+                        <span>@Model.AppointmentModelInput.Comments </span>
+                    </div>
+                    <div id="edit" style="display: none">
+                        <textarea cols="3" style="width: 95%" asp-for="AppointmentModelInput.Comments"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                <div id="editBtnDiv">
+                    <button form="none" class="btn btn-warning" onclick="editComments()">Edit Comments</button>
+                </div>
+                <div id="saveBtnDiv" style="display: none">
+                    <input type="submit" class="btn btn-success" value="Save Changes" asp-page-handler="AppointmentDetails" asp-route-id="@Model.AppointmentModelInput.AvailabilityId" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+            
