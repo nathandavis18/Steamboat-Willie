@@ -7,6 +7,8 @@ namespace Infrastructure.Interfaces
         //Get object by ID
         T GetById(int? id);
 
+        T GetById(string? id);
+
         //Returns a set of objects osuing an expression filter (Essentially a WHERE clause in SQL)
         T Get(Expression<Func<T, bool>> predicate, bool trackChanges = false, string? includes = null);
 

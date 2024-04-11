@@ -179,6 +179,11 @@ namespace DataAccess
             return _context.Set<T>().Find(id);
         }
 
+        public virtual T GetById(string? id)
+        {
+            return _context.Set<T>().Find(id);
+        }
+
         public void Update(T entity)
         {
             //For track changes

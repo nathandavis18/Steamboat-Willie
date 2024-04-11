@@ -45,7 +45,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
-            providerAvailability = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.Id == id).FirstOrDefault();
+            providerAvailability = _unitOfWork.ProviderAvailability.GetById(id);
             if (id == null || providerAvailability == null)
             {
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
@@ -55,10 +55,10 @@ namespace SteamboatWillieWeb.Pages.Availability
             var wnumber = "";
             var comments = "";
             var clientEmail = "";
-            Appointment = _unitOfWork.Appointment.GetAll().Where(x => x.ProviderAvailabilityId == id).FirstOrDefault();
+            Appointment = _unitOfWork.Appointment.GetById(id);
             if (providerAvailability.Scheduled)
             {
-                var client = _unitOfWork.AppUser.GetAll().Where(x => x.Id == Appointment.ClientId).FirstOrDefault();
+                var client = _unitOfWork.AppUser.GetById(Appointment.ClientId);
                 clientName = client.FullName;
                 wnumber = client.WNumber;
                 comments = Appointment.StudentComments;
@@ -66,7 +66,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             }
             var date = providerAvailability.StartTime.ToString("MM/dd/yyyy");
             var time = providerAvailability.StartTime.ToString("h:mm tt") + " - " + providerAvailability.EndTime.ToString("h:mm tt");
-            var location = _unitOfWork.Location.GetAll(x => x.Id == providerAvailability.LocationId).Select(x => x.LocationValue).FirstOrDefault();
+            var location = _unitOfWork.Location.GetById(providerAvailability.LocationId).LocationValue;
             details = new Details { date = date, time = time, clientName = clientName, wnumber = wnumber, clientEmail = clientEmail, location = location, studentComments = comments };
             return Page();
         }
@@ -79,12 +79,12 @@ namespace SteamboatWillieWeb.Pages.Availability
                 return Page();
             }
             else {
-                providerAvailability = await _unitOfWork.ProviderAvailability.GetAsync(pa => pa.Id == id);
-                Appointment = await _unitOfWork.Appointment.GetAsync(a => a.ProviderAvailabilityId == id);
+                providerAvailability = _unitOfWork.ProviderAvailability.GetById(id);
+                Appointment = _unitOfWork.Appointment.GetById(id);
                 if (removeAppointmentOnly.HasValue)
                 {
-                    var clientEmail = (await _unitOfWork.AppUser.GetAsync(a => a.Id == Appointment.ClientId)).Email;
-                    var providerName = (await _unitOfWork.AppUser.GetAsync(x => x.Id == providerAvailability.ProviderId)).FullName;
+                    var clientEmail = _unitOfWork.AppUser.GetById(Appointment.ClientId).Email;
+                    var providerName = _unitOfWork.AppUser.GetById(providerAvailability.ProviderId).FullName;
                     await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName));
                     _unitOfWork.Appointment.Delete(Appointment);
                     providerAvailability.Scheduled = false;
@@ -94,8 +94,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                 }
                 else if (removeEverything.HasValue)
                 {
-                    var clientEmail = (await _unitOfWork.AppUser.GetAsync(a => a.Id == Appointment.ClientId)).Email;
-                    var providerName = (await _unitOfWork.AppUser.GetAsync(x => x.Id == providerAvailability.ProviderId)).FullName;
+                    var clientEmail = _unitOfWork.AppUser.GetById(Appointment.ClientId).Email;
+                    var providerName = _unitOfWork.AppUser.GetById(providerAvailability.ProviderId).FullName;
                     await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName));
                     _unitOfWork.Appointment.Delete(Appointment);
                     _unitOfWork.ProviderAvailability.Delete(providerAvailability);

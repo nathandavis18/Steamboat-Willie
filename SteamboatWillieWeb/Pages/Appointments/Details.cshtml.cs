@@ -56,20 +56,20 @@ namespace SteamboatWillieWeb.Pages.Appointments
             }
 
             var userId = _userManager.GetUserId(User);
-            var client = _unitOfWork.Client.Get(c => c.AppUserId == userId);
-            SelectedAvailability = _unitOfWork.ProviderAvailability.Get(p => p.Id == id);
+            var client = _unitOfWork.Client.GetById(userId);
+            SelectedAvailability = _unitOfWork.ProviderAvailability.GetById(id);
             AppointmentInput = new AppointmentModel
             {
                 AvailabilityId = SelectedAvailability.Id,
                 Date = SelectedAvailability.StartTime.ToLongDateString(),
                 Time = SelectedAvailability.StartTime.ToShortTimeString() + " - " + SelectedAvailability.EndTime.ToShortTimeString(),
                 Location = _unitOfWork.Location.GetById(SelectedAvailability.LocationId).LocationValue,
-                ProviderType = _unitOfWork.Provider.Get(p => p.AppUserId == SelectedAvailability.ProviderId).Title,
-                ProviderName = _unitOfWork.AppUser.Get(p => p.Id == SelectedAvailability.ProviderId).FullName,
+                ProviderType = _unitOfWork.Provider.GetById(SelectedAvailability.ProviderId).Title,
+                ProviderName = _unitOfWork.AppUser.GetById(SelectedAvailability.ProviderId).FullName,
                 IsScheduled = SelectedAvailability.Scheduled
             };
 
-            var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == AppointmentInput.AvailabilityId);
+            var appointment = _unitOfWork.Appointment.GetById(AppointmentInput.AvailabilityId);
             if(appointment != null)
             {
                 AppointmentInput.Comments = appointment.StudentComments;
@@ -112,11 +112,11 @@ namespace SteamboatWillieWeb.Pages.Appointments
         public async Task<IActionResult> OnPost(bool update = false)
         {
             var user = await _userManager.GetUserAsync(User);
-            var availability = _unitOfWork.ProviderAvailability.Get(p => p.Id == AppointmentInput.AvailabilityId);
+            var availability = _unitOfWork.ProviderAvailability.GetById(AppointmentInput.AvailabilityId);
 
             if (update)
             {
-                var app = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == AppointmentInput.AvailabilityId);
+                var app = _unitOfWork.Appointment.GetById(AppointmentInput.AvailabilityId);
                 app.StudentComments = AppointmentInput.Comments;
                 _unitOfWork.Appointment.Update(app);
 

@@ -58,7 +58,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
                     CalendarObj.Add(new Calendar
                     {
                         Id = a.Id,
-                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
                         EndTime = DateTimeParser.ParseDateTime(a.EndTime)
                     });
@@ -73,7 +73,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
                     CalendarObj.Add(new Calendar
                     {
                         Id = a.Id,
-                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
                         EndTime = DateTimeParser.ParseDateTime(a.EndTime)
                     });
@@ -87,7 +87,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
                     CalendarObj.Add(new Calendar
                     {
                         Id = a.Id,
-                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
                         EndTime = DateTimeParser.ParseDateTime(a.EndTime)
                     });
@@ -101,7 +101,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
                     CalendarObj.Add(new Calendar
                     {
                         Id = a.Id,
-                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
                         EndTime = DateTimeParser.ParseDateTime(a.EndTime)
                     });
@@ -115,7 +115,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
                     CalendarObj.Add(new Calendar
                     {
                         Id = a.Id,
-                        Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
+                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
                         EndTime = DateTimeParser.ParseDateTime(a.EndTime)
                     });
@@ -137,16 +137,16 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
         public PartialViewResult OnGetRegisterAppointment(string? id)
         {
-            var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id);
+            var availability = _unitOfWork.ProviderAvailability.GetById(id);
             var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
             InputModel = new AppointmentViewModel
             {
                 AvailabilityId = id,
                 Date = availability.StartTime.ToLongDateString(),
                 Time = availability.StartTime.ToShortTimeString(),
-                Location = _unitOfWork.Location.Get(l => l.Id == availability.LocationId).LocationValue,
+                Location = _unitOfWork.Location.GetById(availability.LocationId).LocationValue,
                 ProviderType = provider.Title,
-                ProviderName = _unitOfWork.AppUser.Get(a => a.Id == provider.AppUserId).FullName
+                ProviderName = _unitOfWork.AppUser.GetById(provider.AppUserId).FullName
             };
             return Partial("./_RegisterAppointmentPartial", this);
         }
@@ -154,7 +154,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
         public IActionResult OnPostRegisterAppointment(string id)
         {
             var userId = _userManager.GetUserId(User);
-            var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id);
+            var availability = _unitOfWork.ProviderAvailability.GetById(id);
             availability.Scheduled = true;
             _unitOfWork.ProviderAvailability.Update(availability);
 

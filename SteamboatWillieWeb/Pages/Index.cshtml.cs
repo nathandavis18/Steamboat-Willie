@@ -64,19 +64,19 @@ namespace SteamboatWillieWeb.Pages
                 {
                     var clientAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability").Where(a => a.ClientId == user.Id).ToList();
                     clientAppointments.Sort((x, y) =>
-                        _unitOfWork.ProviderAvailability.Get(p => p.Id == x.ProviderAvailabilityId).StartTime.CompareTo(_unitOfWork.ProviderAvailability.Get(p => p.Id == y.ProviderAvailabilityId).StartTime) //Cool
+                        _unitOfWork.ProviderAvailability.GetById(x.ProviderAvailabilityId).StartTime.CompareTo(_unitOfWork.ProviderAvailability.GetById(y.ProviderAvailabilityId).StartTime) //Cool
                     );
                     foreach(var app in clientAppointments)
                     {
                         Appointments.Add(new AppointmentCard
                         {
                             Id = app.ProviderAvailabilityId,
-                            ProviderName = _unitOfWork.AppUser.Get(x => x.Id == app.ProviderAvailability.ProviderId).FullName,
-                            AppointmentType = _unitOfWork.Provider.Get(x => x.AppUserId == app.ProviderAvailability.ProviderId).Title,
+                            ProviderName = _unitOfWork.AppUser.GetById(app.ProviderAvailability.ProviderId).FullName,
+                            AppointmentType = _unitOfWork.Provider.GetById(app.ProviderAvailability.ProviderId).Title,
                             Date = app.ProviderAvailability.StartTime.ToLongDateString(),
                             StartTime = app.ProviderAvailability.StartTime.ToShortTimeString(),
                             EndTime = app.ProviderAvailability.EndTime.ToShortTimeString(),
-                            Location = _unitOfWork.Location.Get(x => x.Id == app.ProviderAvailability.LocationId).LocationValue
+                            Location = _unitOfWork.Location.GetById(app.ProviderAvailability.LocationId).LocationValue
                         });
                         var x = Appointments.Last();
                         x.Color = GetColor(x.AppointmentType);
@@ -155,9 +155,9 @@ namespace SteamboatWillieWeb.Pages
                 AvailabilityId = id,
                 Date = appointment.ProviderAvailability.StartTime.ToLongDateString(),
                 Time = appointment.ProviderAvailability.StartTime.ToShortTimeString(),
-                Location = _unitOfWork.Location.Get(l => l.Id == appointment.ProviderAvailability.LocationId).LocationValue,
+                Location = _unitOfWork.Location.GetById(appointment.ProviderAvailability.LocationId).LocationValue,
                 ProviderType = provider.Title,
-                ProviderName = _unitOfWork.AppUser.Get(a => a.Id == provider.AppUserId).FullName,
+                ProviderName = _unitOfWork.AppUser.GetById(provider.AppUserId).FullName,
                 Comments = appointment.StudentComments,
                 IsScheduled = appointment.ProviderAvailability.Scheduled
             };
@@ -166,9 +166,9 @@ namespace SteamboatWillieWeb.Pages
 
         public IActionResult OnPostAppointmentCancel(string? id)
         {
-            var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id);
+            var appointment = _unitOfWork.Appointment.GetById(id);
             _unitOfWork.Appointment.Delete(appointment);
-            var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id);
+            var availability = _unitOfWork.ProviderAvailability.GetById(id);
             availability.Scheduled = false;
             _unitOfWork.ProviderAvailability.Update(availability);
 
@@ -189,9 +189,9 @@ namespace SteamboatWillieWeb.Pages
                 AvailabilityId = id,
                 Date = appointment.ProviderAvailability.StartTime.ToLongDateString(),
                 Time = appointment.ProviderAvailability.StartTime.ToShortTimeString(),
-                Location = _unitOfWork.Location.Get(l => l.Id == appointment.ProviderAvailability.LocationId).LocationValue,
+                Location = _unitOfWork.Location.GetById(appointment.ProviderAvailability.LocationId).LocationValue,
                 ProviderType = provider.Title,
-                ProviderName = _unitOfWork.AppUser.Get(a => a.Id == provider.AppUserId).FullName,
+                ProviderName = _unitOfWork.AppUser.GetById(provider.AppUserId).FullName,
                 Comments = appointment.StudentComments,
                 IsScheduled = appointment.ProviderAvailability.Scheduled
             };
@@ -200,7 +200,7 @@ namespace SteamboatWillieWeb.Pages
 
         public IActionResult OnPostAppointmentDetails(string? id, string? comments)
         {
-            var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id);
+            var appointment = _unitOfWork.Appointment.GetById(id);
             appointment.StudentComments = AppointmentModelInput.Comments;
 
             _unitOfWork.Appointment.Update(appointment);

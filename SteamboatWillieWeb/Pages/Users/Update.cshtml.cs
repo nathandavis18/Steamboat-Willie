@@ -38,7 +38,7 @@ namespace SteamboatWillieWeb.Pages.Users
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
-            AppUser = _unitOfWork.AppUser.Get(u => u.Id == id);
+            AppUser = _unitOfWork.AppUser.GetById(id);
             var roles = await _userManager.GetRolesAsync(AppUser);
             UsersRoles = roles.ToList();
             OldRoles = roles.ToList();
@@ -52,7 +52,7 @@ namespace SteamboatWillieWeb.Pages.Users
             UsersRoles = newRoles.ToList();
             var oldRoles = await _userManager.GetRolesAsync(AppUser);
             var rolesToAdd = new List<string>();
-            var user = _unitOfWork.AppUser.Get(u=>u.Id == AppUser.Id);
+            var user = _unitOfWork.AppUser.GetById(AppUser.Id);
 
             user.FName = AppUser.FName;
             user.LName = AppUser.LName;

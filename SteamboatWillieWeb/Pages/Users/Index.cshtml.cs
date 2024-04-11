@@ -73,7 +73,7 @@ namespace SteamboatWillieWeb.Pages.Users
 
         public async Task<IActionResult> OnPostLockUnlock(string id)
         {
-            var user = _unitOfWork.AppUser.Get(u => u.Id == id);
+            var user = _unitOfWork.AppUser.GetById(id);
             if (user.LockoutEnd == null)
             {
                 user.LockoutEnd = DateTime.Now.AddYears(150);
