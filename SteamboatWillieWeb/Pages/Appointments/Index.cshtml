@@ -41,8 +41,9 @@
         @if(Model.CalendarObj != null){
             foreach (var obj in Model.CalendarObj)
             {
+                var backgroundColor = @obj.Color == null ? "#135DD8" : obj.Color;
                 <text>
-                    var e = { id: '@obj.Id.ToString()', title: '@obj.Name.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()', url: '#'};
+                    var e = { id: '@obj.Id.ToString()', title: '@obj.Name.ToString()', start: '@obj.StartTime.ToString()', backgroundColor: '@backgroundColor', end: '@obj.EndTime.ToString()', url: '#'};
                     calendar.addEvent(e);
                 </text>
             }

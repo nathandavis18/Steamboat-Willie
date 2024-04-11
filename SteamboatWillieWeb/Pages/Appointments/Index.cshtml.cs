@@ -19,6 +19,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             public string? Name { get; set; }
             public string? StartTime { get; set; }
             public string? EndTime {  get; set; }
+            public string? Color { get; set; }
         }
 
         private readonly UnitOfWork _unitOfWork;
@@ -60,7 +61,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
                         Id = a.Id,
                         Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
+                        Color = a.Provider.HexColor                            
                     });
                 }
                 
@@ -75,7 +77,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
                         Id = a.Id,
                         Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
+                        Color = a.Provider.HexColor
                     });
                 }
             }
@@ -89,7 +92,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
                         Id = a.Id,
                         Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
+                        Color = a.Provider.HexColor
                     });
                 }
             }
@@ -103,7 +107,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
                         Id = a.Id,
                         Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
+                        Color = a.Provider.HexColor
                     });
                 }
             }
@@ -117,7 +122,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
                         Id = a.Id,
                         Name = _unitOfWork.AppUser.Get(x => x.Id == a.ProviderId).FullName,
                         StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime)
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
+                        Color = a.Provider.HexColor
                     });
                 }
             }

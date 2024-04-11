@@ -143,6 +143,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Working End Time")]
             [DataType(DataType.Time)]
             public DateTime EndTime { get; set; }
+
+            [Display(Name = "Your Color")]
+            public string Color { get; set; }
         }
 
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
@@ -200,6 +203,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                     NewStudent = provider.AdvisementTypes.Split(",").Contains("NewStudent"),
                     ExistingStudent = provider.AdvisementTypes.Split(",").Contains("ExistingStudent"),
                     FlexStudent = provider.AdvisementTypes.Split(",").Contains("FlexStudent"),
+                    Color = provider.HexColor
                 };
             }
             FileInput = new FileInputModel();
@@ -277,6 +281,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                     provider.AdvisementTypes = ",";
                 }
                 provider.DepartmentId = int.Parse(Input.DepartmentId);
+                provider.HexColor = ProviderInput.Color;
                 _unitOfWork.Provider.Update(provider);
             }
 
