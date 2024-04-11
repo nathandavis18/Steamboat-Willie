@@ -1,10 +1,11 @@
 ﻿using Infrastructure.Models;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess
 {
-    public class AppDbContext : IdentityDbContext
+    public class AppDbContext : IdentityDbContext, IDataProtectionKeyContext
     {
         public AppDbContext (DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -26,7 +27,7 @@ namespace DataAccess
 
         public DbSet<ProviderClass> ProviderClasses { get; set; }
 
-
+        public DbSet<DataProtectionKey> DataProtectionKeys {  get; set; }
 
     }
 }

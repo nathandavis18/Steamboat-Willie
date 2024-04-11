@@ -25,6 +25,7 @@ using System.Globalization;
 using DataAccess;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Utility;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -38,6 +39,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly UnitOfWork _unitOfWork;
+        private readonly AppDbContext _context;
 
         public ExternalLoginModel(
             SignInManager<AppUser> signInManager,
@@ -45,7 +47,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             IUserStore<AppUser> userStore,
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender,
-            UnitOfWork unitOfWork)
+            UnitOfWork unitOfWork,
+            AppDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -54,6 +57,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         /// <summary>
@@ -257,16 +261,17 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var testBefore = code;
+                        code = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(code));
                         var callbackUrl = Url.Page(
                             "/Account/ConfirmEmail",
                             pageHandler: null,
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        /*await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-                        */
+                        
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
