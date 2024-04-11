@@ -140,7 +140,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             AvailabilityModelInput = new AvailabilityModel()
             {
                 StartDate = startDate,
-                StartTime = _unitOfWork.Provider.Get(p => p.AppUserId == user.Id).StartTime.Value.TimeOfDay,
+                StartTime = _unitOfWork.Provider.GetById(user.Id).StartTime.Value.TimeOfDay,
                 ProviderId = user.Id,
                 NumAppointments = 1,
                 NewLocation = true
@@ -153,7 +153,7 @@ namespace SteamboatWillieWeb.Pages.Availability
         {
             bool makeLocation = false;
             var currentUserId = _userManager.GetUserId(User);
-            var provider = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
+            var provider = _unitOfWork.Provider.GetById(currentUserId);
             if (AvailabilityModelInput.StartTime < provider.StartTime.Value.TimeOfDay)
             {
                 ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time cannot be before office hours start");
