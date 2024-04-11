@@ -215,13 +215,14 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 var user = CreateUser();
                 user.FName = Input.FName;
                 user.LName = Input.LName;
-                user.PhoneNumber = Input.PhoneNumber;
                 user.WNumber = Input.WNumber;
                 user.ProfilePictureURL = "default.png";
                 _unitOfWork.AppUser.Update(user);
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
@@ -231,21 +232,23 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    /*var callbackUrl = Url.Page(
+                    var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
+                    var htmlMessage = EmailFormats.ConfirmEmail.Replace("[ConfirmEmailLink]", HtmlEncoder.Default.Encode(callbackUrl));
+
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");*/
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     //We can change this so it doesn't automatically send the email confirmation
 
                     await _userManager.AddToRoleAsync(user, (Input.Role == null) ? SD.CLIENT_ROLE : Input.Role); //Adds user to Client Role by default,
                                                                                                                  //or adds them to the chosen role if selection was made by admin
 
-                    if(await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
+                    if (await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
                     {
                         Client clientEntry = new Client();
                         clientEntry.AppUserId = userId;
