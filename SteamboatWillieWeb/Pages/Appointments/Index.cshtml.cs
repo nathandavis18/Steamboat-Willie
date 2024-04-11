@@ -19,6 +19,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             public string? Name { get; set; }
             public string? StartTime { get; set; }
             public string? EndTime {  get; set; }
+            public string? Color { get; set; }
         }
 
         private readonly UnitOfWork _unitOfWork;
@@ -49,14 +50,15 @@ namespace SteamboatWillieWeb.Pages.Appointments
             var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => !p.Scheduled && !(p.Provider.AppUserId == user.Id) && p.StartTime >= DateTime.Now);
             foreach(var a in availabilities)
             {
-                CalendarObj.Add(new Calendar
-                {
-                    Id = a.Id,
-                    Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
-                    StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                    EndTime = DateTimeParser.ParseDateTime(a.EndTime)
-                });
-            }
+                    CalendarObj.Add(new Calendar
+                    {
+                        Id = a.Id,
+                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
+                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
+                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
+                        Color = a.Provider.HexColor
+                    });
+              }
             return Page();
         }
 

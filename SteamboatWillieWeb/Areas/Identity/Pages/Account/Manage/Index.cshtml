@@ -140,6 +140,18 @@
                     <label asp-for="ProviderInput.EndTime" class="form-label"></label>
                     <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
                 </div>
+                    <div style="width:100%" class="mb-3 form-control-color form-control bg-secondary text-muted">
+                    <small><label asp-for="ProviderInput.Color" class="form-label ms-2"></label></small> 
+                    @if (Model.ProviderInput.Color == null) {
+                        <input asp-for="ProviderInput.Color" type="color" class="border border-secondary" onchange="clickColor(0, -1, -1, 5)" value="#135DD8" style="width:100%;">
+                    }
+                    else
+                    {
+                        <input asp-for="ProviderInput.Color" type="color" class="border border-secondary" onchange="clickColor(0, -1, -1, 5)" value="@Model.ProviderInput.Color" style="width:100%;">
+                    }
+                </div>
+                    
+                
                 @*Validating the model state by completing all required fields*@
                 <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
                 <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden/>
@@ -156,6 +168,7 @@
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
         </form>
     </div>
+    
     <div class="col-md-6">
         <div class="profile-image-box">
             <div class="profile-image-container container">
@@ -166,9 +179,10 @@
                     <input type="submit" asp-page-handler="Image" id="pfp-upload-submit" hidden/>
                 </form>
             </div>
-        </div>
+        </div>        
     </div>
 </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
