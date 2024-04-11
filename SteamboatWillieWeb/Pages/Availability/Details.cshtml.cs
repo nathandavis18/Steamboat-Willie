@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Infrastructure.Models;
 using Utility;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace SteamboatWillieWeb.Pages.Availability
 {
     public class DetailsModel : PageModel
     {
         private readonly UnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
         public Infrastructure.Models.Appointment Appointment { get; set; }
         public ProviderAvailability providerAvailability { get; set; }
         public Details details { get; set; }
@@ -25,9 +27,10 @@ namespace SteamboatWillieWeb.Pages.Availability
             public string studentComments;
         }
 
-        public DetailsModel(UnitOfWork unitOfWork)
+        public DetailsModel(UnitOfWork unitOfWork, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
+            _emailSender = emailSender;
             Appointment = new Infrastructure.Models.Appointment();
             providerAvailability = new ProviderAvailability();
         }
@@ -68,7 +71,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             return Page();
         }
 
-        public IActionResult OnPost(string id, bool? removeAppointmentOnly, bool? removeEverything, bool? removeAvailability)
+        public async Task<IActionResult> OnPost(string id, bool? removeAppointmentOnly, bool? removeEverything, bool? removeAvailability)
         {
             if (!ModelState.IsValid)
             {
@@ -76,16 +79,24 @@ namespace SteamboatWillieWeb.Pages.Availability
                 return Page();
             }
             else {
-                providerAvailability = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.Id == id).FirstOrDefault();
-                Appointment = _unitOfWork.Appointment.GetAll().Where(x => x.ProviderAvailabilityId == id).FirstOrDefault();
+                providerAvailability = await _unitOfWork.ProviderAvailability.GetAsync(pa => pa.Id == id);
+                Appointment = await _unitOfWork.Appointment.GetAsync(a => a.ProviderAvailabilityId == id);
                 if (removeAppointmentOnly.HasValue)
                 {
+                    var clientEmail = (await _unitOfWork.AppUser.GetAsync(a => a.Id == Appointment.ClientId)).Email;
+                    var providerName = (await _unitOfWork.AppUser.GetAsync(x => x.Id == providerAvailability.ProviderId)).FullName;
+                    await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName));
                     _unitOfWork.Appointment.Delete(Appointment);
                     providerAvailability.Scheduled = false;
+                    _unitOfWork.ProviderAvailability.Update(providerAvailability);
                     TempData["success"] = "Appointment Deleted Successfully";
+
                 }
                 else if (removeEverything.HasValue)
                 {
+                    var clientEmail = (await _unitOfWork.AppUser.GetAsync(a => a.Id == Appointment.ClientId)).Email;
+                    var providerName = (await _unitOfWork.AppUser.GetAsync(x => x.Id == providerAvailability.ProviderId)).FullName;
+                    await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName));
                     _unitOfWork.Appointment.Delete(Appointment);
                     _unitOfWork.ProviderAvailability.Delete(providerAvailability);
                     TempData["success"] = "Appointment and Availability Deleted Successfully";
@@ -95,7 +106,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                     _unitOfWork.ProviderAvailability.Delete(providerAvailability);
                     TempData["success"] = "Availability Deleted Successfully";
                 }
-                _unitOfWork.Commit();
+                await _unitOfWork.CommitAsync();
                 return RedirectToPage("/Index");
             }   
         }

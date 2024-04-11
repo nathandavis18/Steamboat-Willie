@@ -1,19 +1,19 @@
 ﻿using DataAccess;
 using Infrastructure.Models;
+using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utility;
-using Infrastructure.ViewModels;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace SteamboatWillieWeb.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailSender _emailSender;
         public string CurrentUserStartTime { get; set; }
         public string CurrentUserEndTime { get; set; }
 
@@ -45,11 +45,11 @@ namespace SteamboatWillieWeb.Pages
             public string Color { get; set; }
         }
 
-        public IndexModel(ILogger<IndexModel> logger, UnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender)
         {
-            _logger = logger;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _emailSender = emailSender;
             Appointments = new List<AppointmentCard>();
             providerAvailabilities = new List<ProviderAvailability>();
             CalendarObj = new List<Calendar>();

@@ -238,9 +238,15 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+                user.FName = Input.FName;
+                user.LName = Input.LName;
+                user.WNumber = Input.WNumber;
+                user.ProfilePictureURL = "default.png";
+                _unitOfWork.AppUser.Update(user);
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
 
                 IdentityResult result;
 
@@ -269,8 +275,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        var message = EmailFormats.ConfirmEmail.Replace("[ConfirmEmailLink]", HtmlEncoder.Default.Encode(callbackUrl));
+
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", message);
                         
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
@@ -279,13 +286,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                             return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
                         }
                         await _userManager.AddToRoleAsync(user, SD.CLIENT_ROLE);
-                        await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-
-                        user.FName = Input.FName;
-                        user.LName = Input.LName;
-                        user.WNumber = Input.WNumber;
-                        user.ProfilePictureURL = "default.png";
-                        _unitOfWork.AppUser.Update(user);
 
                         var client = new Client();
                         client.AppUserId = userId;
