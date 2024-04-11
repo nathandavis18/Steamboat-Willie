@@ -45,6 +45,9 @@ namespace SteamboatWillieWeb.Pages
             public string Color { get; set; }
         }
 
+        [BindProperty]
+        public AvailabilityModel? AvailabilityModelInput { get; set; }
+
         public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
@@ -81,28 +84,6 @@ namespace SteamboatWillieWeb.Pages
                         var x = Appointments.Last();
                         x.Color = GetColor(x.AppointmentType);
                     }
-                    /*Appointments.Add(new AppointmentCard
-                    {
-                        Id = "3",
-                        ProviderName = "Test Tutor",
-                        AppointmentType = "Tutor",
-                        Date = "Some Day",
-                        StartTime = "1:00 PM",
-                        EndTime = "2:00 PM",
-                        Location = "That Place",
-                        Color = GetColor("Tutor")
-                    });
-                    Appointments.Add(new AppointmentCard
-                    {
-                        Id = "3",
-                        ProviderName = "Test Advisor",
-                        AppointmentType = "Advisor",
-                        Date = "The Next Day",
-                        StartTime = "1:00 PM",
-                        EndTime = "2:00 PM",
-                        Location = "Other Place",
-                        Color = GetColor("Advisor")
-                    });*/
                 }
             }
             if(User.IsInRole(SD.PROVIDER_ROLE))
@@ -145,10 +126,22 @@ namespace SteamboatWillieWeb.Pages
 
 
         //Cancel Appointment Popup Methods
-        public PartialViewResult OnGetAppointmentCancel(string? id)
+        public async Task<IActionResult> OnGetAppointmentCancelAsync(string? id)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (!await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
+            {
+                TempData["access_denied"] = "You don't have access to that page";
+                return RedirectToPage("./Index");
+            }
 
             var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id, includes: "ProviderAvailability");
+            if (appointment == null)
+            {
+                TempData["access_denied"] = "An error occured, please try again";
+                return RedirectToPage("./Index");
+            }
+
             var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
             AppointmentModelInput = new AppointmentViewModel
             {
@@ -180,9 +173,23 @@ namespace SteamboatWillieWeb.Pages
         
 
         //Details Button Popup Methods
-        public PartialViewResult OnGetAppointmentDetails(string? id)
+        public async Task<IActionResult> OnGetAppointmentDetailsAsync(string? id)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (!await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
+            {
+                TempData["access_denied"] = "You don't have access to that page";
+                return RedirectToPage("./Index");
+            }
+
             var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id, includes: "ProviderAvailability");
+
+            if (appointment == null)
+            {
+                TempData["access_denied"] = "An error occured, please try again";
+                return RedirectToPage("./Index");
+            }
+
             var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
             AppointmentModelInput = new AppointmentViewModel
             {
@@ -205,6 +212,90 @@ namespace SteamboatWillieWeb.Pages
 
             _unitOfWork.Appointment.Update(appointment);
             _unitOfWork.Commit();
+
+            return RedirectToPage("./Index");
+        }
+
+        //Provider Availability Popup Stuff
+        public async Task<IActionResult> OnGetViewAvailabilityAsync(string? id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if(!await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
+            {
+                TempData["access_denied"] = "You don't have access to that page";
+                return RedirectToPage("./Index");
+            }
+            var appointment = _unitOfWork.Appointment.GetById(id);
+            var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Location");
+            if(availability == null)
+            {
+                TempData["access_denied"] = "An error occured, please try again";
+                return RedirectToPage("./Index");
+            }
+
+            AvailabilityModelInput = new AvailabilityModel
+            {
+                AvailabilityId = id,
+                Location = availability.Location.LocationValue,
+                Date = availability.StartTime.ToLongDateString(),
+                Time = availability.StartTime.ToShortTimeString(),
+            };
+            if (appointment != null)
+            {
+                var client = _unitOfWork.Client.Get(c => c.AppUserId == appointment.ClientId, includes: "AppUser");
+                AvailabilityModelInput.WNumber = client.AppUser.WNumber;
+                AvailabilityModelInput.Comments = appointment.StudentComments;
+                AvailabilityModelInput.ClientName = client.AppUser.FullName;
+                AvailabilityModelInput.ClientEmail = client.AppUser.Email;
+                AvailabilityModelInput.IsAppointment = true;
+            }
+            return Partial("./Availability/_ViewAvailabilityPartial", this);
+        }
+
+        public IActionResult OnPostRemoveAvailability(string id)
+        {
+            var availability = _unitOfWork.ProviderAvailability.GetById(id);
+            _unitOfWork.ProviderAvailability.Delete(availability);
+            _unitOfWork.Commit();
+
+            return RedirectToPage("./Index");
+        }
+
+        public async Task<IActionResult> OnPostRemoveAppointmentAsync(string id)
+        {
+            var availability = _unitOfWork.ProviderAvailability.GetById(id);
+            var appointment = _unitOfWork.Appointment.GetById(id);
+            var reason = !String.IsNullOrEmpty(AvailabilityModelInput.CancelReason) ? AvailabilityModelInput.CancelReason : "None";
+
+            var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
+            var providerName = _unitOfWork.AppUser.GetById(availability.ProviderId).FullName;
+            await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName)
+                                                                                               .Replace("[ProviderReason]", reason));
+
+            _unitOfWork.Appointment.Delete(appointment);
+
+            availability.Scheduled = false;
+            _unitOfWork.ProviderAvailability.Update(availability);
+
+            await _unitOfWork.CommitAsync();
+
+            return RedirectToPage("./Index");
+        }
+
+        public async Task<IActionResult> OnPostRemoveAllAsync(string id)
+        {
+            var appointment = _unitOfWork.Appointment.GetById(id);
+            var availability = _unitOfWork.ProviderAvailability.GetById(id);
+            var reason = !String.IsNullOrEmpty(AvailabilityModelInput.CancelReason) ? AvailabilityModelInput.CancelReason : "None";
+
+            var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
+            var providerName = _unitOfWork.AppUser.GetById(availability.ProviderId).FullName;
+            await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName)
+                                                                                               .Replace("[ProviderReason]", reason));
+
+            _unitOfWork.Appointment.Delete(appointment);
+            _unitOfWork.ProviderAvailability.Delete(availability);
+            await _unitOfWork.CommitAsync();
 
             return RedirectToPage("./Index");
         }

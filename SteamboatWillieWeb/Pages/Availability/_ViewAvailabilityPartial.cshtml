@@ -1,0 +1,72 @@
+﻿@model SteamboatWillieWeb.Pages.IndexModel
+@{
+}
+
+<div class="modal-header">
+    @if (Model.AvailabilityModelInput.IsAppointment)
+    {
+        <div class="col-md-6 text-end"><h5 class="modal-title">Appointment Details</h5></div>
+    }
+    else
+    {
+        <div class="col-md-6 text-end"><h5 class="modal-title">Availability Details</h5></div>
+    }
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div>
+        <form method="post">
+            <div class="row">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>When: </strong> </span> <br />
+                    @if (Model.AvailabilityModelInput.IsAppointment)
+                    {
+                        <span class="d-inline-block"><strong>Client Name: </strong> </span> <br />
+                        <span class="d-inline-block"><strong>Client W#: </strong> </span> <br />
+                        <span class="d-inline-block"><strong>Client Email: </strong> </span> <br />
+                    }
+                    <span class="d-inline-block"><strong>Location: </strong> </span> <br />
+                    @if (Model.AvailabilityModelInput.IsAppointment)
+                    {
+                        <span class="d-inline-block"><strong>Comments: </strong></span> <br />
+                    }
+                    <div id="reason" style="display: none;">
+                        <span class="d-inline-block"><strong>Reason: </strong></span>
+                    </div> <br />
+                </div>
+                <div class="col-md-9">
+                    <span>@Model.AvailabilityModelInput.Date @Model.AvailabilityModelInput.Time</span> <br />
+                    @if (Model.AvailabilityModelInput.IsAppointment)
+                    {
+                        <span>@Model.AvailabilityModelInput.ClientName</span> <br />
+                        <span>@Model.AvailabilityModelInput.WNumber</span> <br />
+                        <span>@Model.AvailabilityModelInput.ClientEmail</span> <br />
+                    }
+                    <span>@Model.AvailabilityModelInput.Location</span> <br />
+                    @if (Model.AvailabilityModelInput.IsAppointment)
+                    {
+                        <span>@Model.AvailabilityModelInput.Comments</span> <br />
+                    }
+                    <textarea asp-for="AvailabilityModelInput.CancelReason" cols="1" value="Test" style="width: 95%; display: none;" id="reasonBox"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @if (!Model.AvailabilityModelInput.IsAppointment)
+                {
+                    <input type="submit" class="btn btn-danger" value="Remove Availability" asp-page-handler="RemoveAvailability" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
+                }
+                else
+                {
+                    <div id="confirmDeleteAll" style="display: none">
+                        <input type="submit" class="btn btn-danger" value="Cancel Appointment" asp-page-handler="RemoveAppointment" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
+                        <input type="submit" class="btn btn-danger" value="Cancel & Remove Availability" asp-page-handler="RemoveAll" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
+                    </div>
+                    <div id="warning">
+                        <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                        <button form="none" class="btn btn-warning" id="btnAll" onclick="btnCancelClick()">Cancel</button>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+</div>
