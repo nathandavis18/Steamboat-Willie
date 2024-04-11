@@ -53,7 +53,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                             center: 'title',
                             right: 'today dayGridMonth,timeGridWeek' // user can switch between the two
                         },
-                        navLinks: true,
+                        /*navLinks: true,
                         navLinkDayClick: function (date) {
                             var currentDate = new Date();
                             currentDate = currentDate.setDate(currentDate.getDate() - 1);
@@ -66,22 +66,25 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                             var formattedDate = year + '-' + month + '-' + day;
                             var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
                             window.location.href = redirectTo;
-                        },
+                        },*/
                         views: {
                             dayGridMonth: {
                                 dayMaxEvents: 5,
                                 moreLinkClick: 'timeGridDay'
                             },
                         },
-                        // eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
-                        //     alert('event:' + info.event.title);
-                        // }
+                        eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
+                            alert('hi');
+                            $('modal-content').load(`/ViewAvailability?id=${info.event.id}`, function () {
+                                $('#details-modal').modal('show');
+                            });
+                        }
                     });
                 @foreach (var obj in Model.CalendarObj)
                 {
                     var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
                     <text>
-                        var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Start.ToString()', end: '@obj.End.ToString()', backgroundColor: '@backgroundColor', url: '@Url.Page("Availability/Details")' + '?id=' + '@obj.Id.ToString()' };
+                        var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Start.ToString()', end: '@obj.End.ToString()', backgroundColor: '@backgroundColor', url: '#' };
                         calendar.addEvent(e);
                     </text>
                 }
@@ -187,25 +190,32 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                             moreLinkClick: 'timeGridDay'
                         },
                     },
-                    // eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
-                    //     alert('event:' + info.event.title);
-                    // }
+                    eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
+                        viewAvailability(info.event.id);
+                    }
                 });
-            @foreach (var obj in Model.CalendarObj)
-            {
-                var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
-                <text>
-                    var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Start.ToString()', end: '@obj.End.ToString()', backgroundColor: '@backgroundColor', url:'@Url.Page("Availability/Details")' + '?id=' + '@obj.Id.ToString()'};
-                    calendar.addEvent(e);
-                </text>
-            }
-                    calendar.render();
+                @foreach (var obj in Model.CalendarObj)
+                {
+                    var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
+                    <text>
+                        var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Start.ToString()', end: '@obj.End.ToString()', backgroundColor: '@backgroundColor', url:'#'};
+                        calendar.addEvent(e);
+                    </text>
+                }
+                calendar.render();
             });
         </script>
     </head>
     <body>
         <div class="text-end">
             <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
+        </div>
+
+        <div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                </div>
+            </div>
         </div>
         <div id='calendar'></div>
     </body>
@@ -319,6 +329,27 @@ else
             document.getElementById('notEdit').style.display = 'none';
             document.getElementById('editBtnDiv').style.display = 'none';
             document.getElementById('saveBtnDiv').style.display = 'block';
+        }
+    </script>
+
+    <script>
+        function viewAvailability(id) {
+            $('.modal-content').load(`/ViewAvailability?id=${id}`, function () {
+                $('#details-modal').modal('show');
+            });
+        }
+
+        function btnCancelClick() {
+            document.getElementById('warning').style.display = 'none';
+            document.getElementById('reason').style.display = 'block';
+            document.getElementById('confirmDeleteAll').style.display = 'block';
+            document.getElementById('reasonBox').style.display = 'block';
+        }
+        function btnAppClick() {
+            document.getElementById('warning').style.display = 'none';
+            document.getElementById('reason').style.display = 'block';
+            document.getElementById('confirmDeleteApp').style.display = 'block';
+            document.getElementById('reasonBox').style.display = 'block';
         }
     </script>
 }

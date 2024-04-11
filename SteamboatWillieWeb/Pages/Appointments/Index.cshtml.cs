@@ -46,32 +46,10 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
-            if(type == null)
-            {
-                return NotFound();
-            }
 
-            if (type.Equals("Tutoring"))
+            var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => !p.Scheduled && !(p.Provider.AppUserId == user.Id) && p.StartTime >= DateTime.Now);
+            foreach(var a in availabilities)
             {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Tutor") && !p.Scheduled && !(p.Provider.AppUserId == user.Id) && p.StartTime >= DateTime.Now);
-                foreach (var a in availabilities)
-                {
-                    CalendarObj.Add(new Calendar
-                    {
-                        Id = a.Id,
-                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
-                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
-                        Color = a.Provider.HexColor                            
-                    });
-                }
-                
-            }
-            else if (type.Equals("NewStudent"))
-            {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("NewStudent") && !p.Scheduled && p.StartTime >= DateTime.Now);
-                foreach (var a in availabilities)
-                {
                     CalendarObj.Add(new Calendar
                     {
                         Id = a.Id,
@@ -80,70 +58,26 @@ namespace SteamboatWillieWeb.Pages.Appointments
                         EndTime = DateTimeParser.ParseDateTime(a.EndTime),
                         Color = a.Provider.HexColor
                     });
-                }
-            }
-            else if (type.Equals("ExistingStudent"))
-            {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("ExistingStudent") && !p.Scheduled && p.StartTime >= DateTime.Now);
-                foreach (var a in availabilities)
-                {
-                    CalendarObj.Add(new Calendar
-                    {
-                        Id = a.Id,
-                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
-                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
-                        Color = a.Provider.HexColor
-                    });
-                }
-            }
-            else if (type.Equals("FlexStudent"))
-            {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Advisor") && p.Provider.AdvisementTypes.Split(',').Contains("FlexStudent") && !p.Scheduled && p.StartTime >= DateTime.Now);
-                foreach (var a in availabilities)
-                {
-                    CalendarObj.Add(new Calendar
-                    {
-                        Id = a.Id,
-                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
-                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
-                        Color = a.Provider.HexColor
-                    });
-                }
-            }
-            else if (type.Equals("Instructing"))
-            {
-                var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => p.Provider.Title.Equals("Instructor") && !p.Scheduled && p.StartTime >= DateTime.Now);
-                foreach (var a in availabilities)
-                {
-                    CalendarObj.Add(new Calendar
-                    {
-                        Id = a.Id,
-                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
-                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
-                        Color = a.Provider.HexColor
-                    });
-                }
-            }
-
-            
-
+              }
             return Page();
         }
 
-        public IActionResult OnPost()
+        //On Event Click
+        public async Task<IActionResult> OnGetRegisterAppointmentAsync(string? id)
         {
-            string id = Request.Form["availabilityId"];
+            var user = await _userManager.GetUserAsync(User);
+            if (!await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
+            {
+                TempData["access_denied"] = "You don't have access to that page";
+                return RedirectToPage("./Index");
+            }
 
-            return RedirectToPage("./Details", new { id = id } );
-        }
-
-
-        public PartialViewResult OnGetRegisterAppointment(string? id)
-        {
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
+            if (availability == null)
+            {
+                TempData["access_denied"] = "You don't have access to that page";
+                return RedirectToPage("./Index");
+            }
             var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;
             InputModel = new AppointmentViewModel
             {
