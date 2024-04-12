@@ -269,8 +269,11 @@ namespace SteamboatWillieWeb.Pages
 
             var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
             var providerName = _unitOfWork.AppUser.GetById(availability.ProviderId).FullName;
+
+            var callbackLink = Url.Page("/Appointments/Index", pageHandler: null, values: null, protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName)
-                                                                                               .Replace("[ProviderReason]", reason));
+                                                                                               .Replace("[ProviderReason]", reason)
+                                                                                               .Replace("[Link]", callbackLink));
 
             _unitOfWork.Appointment.Delete(appointment);
 
@@ -290,8 +293,11 @@ namespace SteamboatWillieWeb.Pages
 
             var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
             var providerName = _unitOfWork.AppUser.GetById(availability.ProviderId).FullName;
+
+            var callbackLink = Url.Page("/Appointments/Index", pageHandler: null, values: null, protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(clientEmail, "Appointment Canceled", EmailFormats.AppointmentCanceled.Replace("[ProviderName]", providerName)
-                                                                                               .Replace("[ProviderReason]", reason));
+                                                                                               .Replace("[ProviderReason]", reason)
+                                                                                               .Replace("[Link]", callbackLink));
 
             _unitOfWork.Appointment.Delete(appointment);
             _unitOfWork.ProviderAvailability.Delete(availability);
