@@ -3,35 +3,27 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-@if(TempData["access_denied"] != null)
+@if(TempData["error"] != null)
 {
     <script>
         $(function () {
-            toastr.error('@TempData["access_denied"]');
+            toastr.error('@TempData["error"]', { timeout: 15000 });
         });
     </script>
 }
-@if (TempData["no_title"] != null)
+@if (TempData["warning"] != null)
 {
     <script>
         $(function () {
-            toastr.error('@TempData["no_title"]');
+            toastr.warning('@TempData["warning"]');
         });
     </script>
 }
-@if (TempData["img_error"] != null)
+@if (TempData["success"] != null)
 {
     <script>
         $(function () {
-            toastr.error('@TempData["img_error"]');
-        });
-    </script>
-}
-@if (TempData["no_image"] != null)
-{
-    <script>
-        $(function () {
-            toastr.error('@TempData["no_image"]');
+            toastr.success('@TempData["success"]');
         });
     </script>
 }

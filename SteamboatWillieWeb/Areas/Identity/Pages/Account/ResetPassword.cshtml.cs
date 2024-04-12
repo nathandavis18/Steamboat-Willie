@@ -72,17 +72,22 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
         }
 
-        public IActionResult OnGet(string code = null)
+        public IActionResult OnGet(string code = null, string user = null)
         {
             if (code == null)
             {
                 return BadRequest("A code must be supplied for password reset.");
             }
+            if(user == null)
+            {
+                return BadRequest("Click the link in your email to reset your password");
+            }
             else
             {
                 Input = new InputModel
                 {
-                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code))
+                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code)),
+                    Email = user,
                 };
                 return Page();
             }

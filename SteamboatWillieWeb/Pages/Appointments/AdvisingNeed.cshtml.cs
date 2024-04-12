@@ -18,7 +18,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             }
             if (!User.IsInRole(SD.CLIENT_ROLE))
             {
-                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
             return Page();

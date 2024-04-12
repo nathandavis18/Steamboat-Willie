@@ -58,7 +58,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToPage("./ForgotPasswordConfirmation");
+                    TempData["warning"] = "Password Reset Link sent. Check your email to reset your password";
+                    return RedirectToPage("../Index", new { Area = "" });
                 }
 
                 // For more information on how to enable account confirmation and password reset please
@@ -68,7 +69,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 var callbackUrl = Url.Page(
                     "/Account/ResetPassword",
                     pageHandler: null,
-                    values: new { area = "Identity", code },
+                    values: new { area = "Identity", code, user = Input.Email },
                     protocol: Request.Scheme);
 
                 await _emailSender.SendEmailAsync(
@@ -76,7 +77,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     "Reset Password",
                     $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-                return RedirectToPage("./ForgotPasswordConfirmation");
+                TempData["warning"] = "Password Reset Link sent. Check your email to reset your password";
+                return RedirectToPage("../Index", new {Area = ""});
             }
 
             return Page();

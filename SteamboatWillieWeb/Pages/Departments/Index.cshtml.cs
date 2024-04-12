@@ -25,7 +25,7 @@ namespace SteamboatWillieWeb.Pages.Departments
             }
             if (!User.IsInRole(SD.ADMIN_ROLE))
             {
-                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
             List<Department> departmentsList = _unitOfWork.Department.GetAll().ToList();

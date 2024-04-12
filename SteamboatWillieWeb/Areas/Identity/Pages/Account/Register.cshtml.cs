@@ -240,8 +240,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
                     var htmlMessage = EmailFormats.ConfirmEmail.Replace("[ConfirmEmailLink]", HtmlEncoder.Default.Encode(callbackUrl));
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", htmlMessage);
 
                     //We can change this so it doesn't automatically send the email confirmation
 

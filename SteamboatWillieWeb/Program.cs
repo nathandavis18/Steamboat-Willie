@@ -18,8 +18,8 @@ builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentity<AppUser, IdentityRole>().AddDefaultTokenProviders()
-    .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddDefaultTokenProviders().AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddDataProtection().PersistKeysToDbContext<AppDbContext>();
 

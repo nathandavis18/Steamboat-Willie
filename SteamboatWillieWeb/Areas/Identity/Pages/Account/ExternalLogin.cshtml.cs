@@ -172,6 +172,15 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
+            var user = await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email));
+            if (user != null)
+            {
+                if (!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    TempData["error"] = "You must confirm your email. Check your email for a verification link. Be sure to check your Spam Folder if you don't see it.";
+                    return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
+                }
+            }
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
@@ -279,12 +288,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
                         await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", message);
                         
-
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
-                        }
                         await _userManager.AddToRoleAsync(user, SD.CLIENT_ROLE);
 
                         var client = new Client();
@@ -295,6 +298,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         _unitOfWork.Client.Add(client);
 
                         await _unitOfWork.CommitAsync();
+
+                        // If account confirmation is required, we need to show the link if we don't have a real email sender
+                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                        {
+                            return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
+                        }
+
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
                         return LocalRedirect(returnUrl);
                     }
