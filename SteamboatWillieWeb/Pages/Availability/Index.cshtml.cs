@@ -110,7 +110,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             }
             if (!User.IsInRole(SD.PROVIDER_ROLE))
             {
-                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
 

@@ -62,7 +62,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
             if (!User.IsInRole(SD.CLIENT_ROLE))
             {
-                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
             if(prevProviderType != providerType)
@@ -160,14 +160,14 @@ namespace SteamboatWillieWeb.Pages.Appointments
             var user = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
             {
-                TempData["access_denied"] = "You don't have access to that page";
+                TempData["error"] = "You don't have access to that page";
                 return RedirectToPage("./Index");
             }
 
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
             if (availability == null)
             {
-                TempData["access_denied"] = "You don't have access to that page";
+                TempData["error"] = "You don't have access to that page";
                 return RedirectToPage("./Index");
             }
             var provider = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Provider").Provider;

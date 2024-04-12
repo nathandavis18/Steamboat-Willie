@@ -131,14 +131,14 @@ namespace SteamboatWillieWeb.Pages
             var user = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
             {
-                TempData["access_denied"] = "You don't have access to that page";
+                TempData["error"] = "You don't have access to that page";
                 return RedirectToPage("./Index");
             }
 
             var appointment = _unitOfWork.Appointment.Get(a => a.ProviderAvailabilityId == id, includes: "ProviderAvailability");
             if (appointment == null)
             {
-                TempData["access_denied"] = "An error occured, please try again";
+                TempData["error"] = "An error occured, please try again";
                 return RedirectToPage("./Index");
             }
 
@@ -178,7 +178,7 @@ namespace SteamboatWillieWeb.Pages
             var user = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
             {
-                TempData["access_denied"] = "You don't have access to that page";
+                TempData["error"] = "You don't have access to that page";
                 return RedirectToPage("./Index");
             }
 
@@ -186,7 +186,7 @@ namespace SteamboatWillieWeb.Pages
 
             if (appointment == null)
             {
-                TempData["access_denied"] = "An error occured, please try again";
+                TempData["error"] = "An error occured, please try again";
                 return RedirectToPage("./Index");
             }
 
@@ -222,14 +222,14 @@ namespace SteamboatWillieWeb.Pages
             var user = await _userManager.GetUserAsync(User);
             if(!await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
             {
-                TempData["access_denied"] = "You don't have access to that page";
+                TempData["error"] = "You don't have access to that page";
                 return RedirectToPage("./Index");
             }
             var appointment = _unitOfWork.Appointment.GetById(id);
             var availability = _unitOfWork.ProviderAvailability.Get(pa => pa.Id == id, includes: "Location");
             if(availability == null)
             {
-                TempData["access_denied"] = "An error occured, please try again";
+                TempData["error"] = "An error occured, please try again";
                 return RedirectToPage("./Index");
             }
 

@@ -296,13 +296,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         {
             if (FileInput.ImgFile == null)
             {
-                TempData["no_image"] = "Error: No Image Selected";
+                TempData["error"] = "Error: No Image Selected";
                 return RedirectToPage();
             }
             var extension = Path.GetExtension(FileInput.ImgFile.FileName);
             if(!(extension.Equals(".png") || extension.Equals(".jpg") || extension.Equals(".jpeg")))
             {
-                TempData["img_error"] = "Error: Image file type not supported.";
+                TempData["error"] = "Error: Image file type not supported.";
                 return RedirectToPage();
             }
             var user = await _userManager.GetUserAsync(User);

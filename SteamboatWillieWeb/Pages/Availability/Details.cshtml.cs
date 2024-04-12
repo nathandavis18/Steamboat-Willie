@@ -42,13 +42,13 @@ namespace SteamboatWillieWeb.Pages.Availability
             }
             if (!User.IsInRole(SD.PROVIDER_ROLE))
             {
-                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
             providerAvailability = _unitOfWork.ProviderAvailability.GetById(id);
             if (id == null || providerAvailability == null)
             {
-                TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
+                TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
             var clientName = "";
