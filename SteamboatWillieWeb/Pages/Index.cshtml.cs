@@ -165,6 +165,7 @@ namespace SteamboatWillieWeb.Pages
         {
             var appointment = _unitOfWork.Appointment.GetById(id);
             string calendarId = appointment.ClientEventId;
+            string clientId = appointment.ClientId!;
             _unitOfWork.Appointment.Delete(appointment);
 
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
@@ -173,7 +174,10 @@ namespace SteamboatWillieWeb.Pages
 
             await _unitOfWork.CommitAsync();
 
-            await _googleCalendarService.DeleteEvent(calendarId, new CancellationToken(false));
+            if (!String.IsNullOrEmpty(calendarId))
+            {
+                await _googleCalendarService.DeleteEvent(calendarId, clientId, new CancellationToken(false));
+            }
 
             return RedirectToPage("./Index");
         }

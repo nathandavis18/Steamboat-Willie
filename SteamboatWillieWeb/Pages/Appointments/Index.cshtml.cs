@@ -204,7 +204,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             };
 
             Event gEvent = EventCreater.MakeEvent("Test", "Test Location", "Test Description", availability.StartTime.ToString(), availability.EndTime.ToString());
-            string calendarId = await _googleCalendarService.CreateEvent(gEvent, new CancellationToken(false));
+            string calendarId = await _googleCalendarService.CreateEvent(gEvent, userId, new CancellationToken(false));
             appointment.ClientEventId = calendarId;
 
             _unitOfWork.Appointment.Add(appointment);

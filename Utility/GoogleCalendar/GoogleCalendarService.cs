@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace Utility.GoogleCalendar
 {
@@ -20,53 +21,60 @@ namespace Utility.GoogleCalendar
             _configuration = configuration;
         }
 
-        public async Task<string> CreateEvent(Event request, CancellationToken cancellationToken)
+        public async Task<string> CreateEvent(Event request, string userId, CancellationToken cancellationToken)
         {
-            var settings = _configuration.GetSection("GoogleCalendarSettings");
-            string[] scope = new string[] { settings["Scope"] };
-            UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
-                {
-                    ClientId = settings["ClientId"],
-                    ClientSecret = settings["ClientSecret"],
-                },
-                scope,
-                settings["User"],
-                cancellationToken);
-            var services = new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = settings["ApplicationName"],
-            });
-
-            var eventRequest = services.Events.Insert(request, settings["CalendarId"]);
-            var requestCreate = await eventRequest.ExecuteAsync(cancellationToken);
-
-            var id = requestCreate.Id;
-            return id;
-        }
-
-        public async Task<string> DeleteEvent(string eventId, CancellationToken cancellationToken)
-        {
-            var settings = _configuration.GetSection("GoogleCalendarSettings");
-            string[] scope = new string[] { settings["Scope"] };
+            var settings = _configuration.GetSection("Authentication:Google");
+            string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
             UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
             {
                 ClientId = settings["ClientId"],
                 ClientSecret = settings["ClientSecret"],
             },
                 scope,
-                settings["User"],
+                userId,
                 cancellationToken);
             var services = new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = settings["ApplicationName"],
+                ApplicationName = "Steamboat Willie Scheduler",
             });
 
-            var eventRequest = services.Events.Delete(settings["CalendarId"], eventId);
+            var eventRequest = services.Events.Insert(request, "primary");
             var requestCreate = await eventRequest.ExecuteAsync(cancellationToken);
 
-            return requestCreate;
+            var id = requestCreate.Id;
+            return id;
+        }
+
+        public async Task<string> DeleteEvent(string eventId, string userId, CancellationToken cancellationToken)
+        {
+            var settings = _configuration.GetSection("Authentication:Google");
+            string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
+            UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
+            {
+                ClientId = settings["ClientId"],
+                ClientSecret = settings["ClientSecret"],
+            },
+                scope,
+                userId,
+                cancellationToken);
+            var services = new CalendarService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "Steamboat Willie Scheduler",
+            });
+
+            var eventExists = await services.Events.Get("primary", eventId).ExecuteAsync();
+
+            if(eventExists.Status.ToUpper().Equals("cancelled".ToUpper()))
+            {
+                return String.Empty;
+            }
+
+            var eventRequest = services.Events.Delete("primary", eventId);
+            var requestDelete = await eventRequest.ExecuteAsync(cancellationToken);
+
+            return requestDelete;
         }
     }
 }

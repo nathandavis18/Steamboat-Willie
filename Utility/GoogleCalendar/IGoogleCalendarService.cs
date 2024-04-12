@@ -4,7 +4,7 @@ namespace Utility.GoogleCalendar
 {
     public interface IGoogleCalendarService
     {
-        public Task<string> CreateEvent(Event request, CancellationToken cancellationToken);
-        public Task<string> DeleteEvent(string eventId, CancellationToken cancellationToken);
+        public Task<string> CreateEvent(Event request, string userId, CancellationToken cancellationToken);
+        public Task<string> DeleteEvent(string eventId, string userId, CancellationToken cancellationToken);
     }
 }
