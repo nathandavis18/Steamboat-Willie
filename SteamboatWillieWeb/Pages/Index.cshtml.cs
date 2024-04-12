@@ -1,4 +1,5 @@
 ﻿using DataAccess;
+using Google.Apis.Calendar.v3.Data;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utility;
+using Utility.GoogleCalendar;
 
 namespace SteamboatWillieWeb.Pages
 {
@@ -13,6 +15,7 @@ namespace SteamboatWillieWeb.Pages
     {
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IGoogleCalendarService _googleCalendarService;
         private readonly IEmailSender _emailSender;
         public string CurrentUserStartTime { get; set; }
         public string CurrentUserEndTime { get; set; }
@@ -48,17 +51,18 @@ namespace SteamboatWillieWeb.Pages
         [BindProperty]
         public AvailabilityModel? AvailabilityModelInput { get; set; }
 
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender)
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _emailSender = emailSender;
+            _googleCalendarService = googleCalendarService;
             Appointments = new List<AppointmentCard>();
             providerAvailabilities = new List<ProviderAvailability>();
             CalendarObj = new List<Calendar>();
         }
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
             if (User.IsInRole(SD.CLIENT_ROLE))
             {
@@ -157,15 +161,19 @@ namespace SteamboatWillieWeb.Pages
             return Partial("./Appointments/_CancelAppointmentPartial", this);
         }
 
-        public IActionResult OnPostAppointmentCancel(string? id)
+        public async Task<IActionResult> OnPostAppointmentCancelAsync(string? id)
         {
             var appointment = _unitOfWork.Appointment.GetById(id);
+            string calendarId = appointment.ClientEventId;
             _unitOfWork.Appointment.Delete(appointment);
+
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
             availability.Scheduled = false;
             _unitOfWork.ProviderAvailability.Update(availability);
 
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
+
+            await _googleCalendarService.DeleteEvent(calendarId, new CancellationToken(false));
 
             return RedirectToPage("./Index");
         }

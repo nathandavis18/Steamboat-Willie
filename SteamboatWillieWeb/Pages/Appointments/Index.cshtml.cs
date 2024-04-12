@@ -1,4 +1,5 @@
 using DataAccess;
+using Google.Apis.Calendar.v3.Data;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
 using Utility;
+using Utility.GoogleCalendar;
 
 namespace SteamboatWillieWeb.Pages.Appointments
 {
@@ -24,10 +26,12 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        private readonly IGoogleCalendarService _googleCalendarService;
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IGoogleCalendarService googleCalendarService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _googleCalendarService = googleCalendarService;
             CalendarObj = new List<Calendar>();
             FilterModelInput = new FilterModel();
         }
@@ -183,7 +187,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             return Partial("./_RegisterAppointmentPartial", this);
         }
 
-        public IActionResult OnPostRegisterAppointment(string id)
+        public async Task<IActionResult> OnPostRegisterAppointmentAsync(string id)
         {
             var userId = _userManager.GetUserId(User);
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
@@ -198,6 +202,10 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 Description = "Appointment",
                 StudentNoShow = false
             };
+
+            Event gEvent = EventCreater.MakeEvent("Test", "Test Location", "Test Description", availability.StartTime.ToString(), availability.EndTime.ToString());
+            string calendarId = await _googleCalendarService.CreateEvent(gEvent, new CancellationToken(false));
+            appointment.ClientEventId = calendarId;
 
             _unitOfWork.Appointment.Add(appointment);
             _unitOfWork.Commit();
