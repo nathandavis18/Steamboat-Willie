@@ -25,8 +25,13 @@ namespace Infrastructure.Models
 
         public string? ProviderAttachment {  get; set; }
 
-        //navigational stuff
+
+        //Google calendar stuff
+        public string? ClientEventId { get; set; }
+        public string? ProviderEventId {  get; set; }
+
         
+        //navigational stuff
         [ForeignKey(nameof(ProviderAvailabilityId))]
         public ProviderAvailability? ProviderAvailability { get; set; }
 

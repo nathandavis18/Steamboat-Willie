@@ -1,0 +1,19 @@
+﻿@model SteamboatWillieWeb.Pages.IndexModel
+@{
+}
+
+<div class="modal-header">
+    <div class="col-md-8"><h5 class="modal-title">Integrate Google Calendar</h5></div>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div>
+        <p class="text-center"><strong>Would you like to turn on Google Calendar Integration?<br /></strong>(You can always change this in your profile settings)</p>
+        <div class="modal-footer">
+            <form method="post">
+                <input type="submit" class="btn btn-danger" value="Nah" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="dont"/>
+                <input type="submit" class="btn btn-success" value="Yes Please!" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="absolutely"/>
+            </form>
+        </div>
+    </div>
+</div>

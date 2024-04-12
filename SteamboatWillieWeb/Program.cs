@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Utility;
+using Utility.GoogleCalendar;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
+
+builder.Services.Configure<GoogleCalendarSettings>(builder.Configuration.GetSection("GoogleCalendarSettings"));
+builder.Services.AddSingleton<IGoogleCalendarSettings>(s => s.GetRequiredService<IOptions<GoogleCalendarSettings>>().Value);
+builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

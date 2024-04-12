@@ -1,4 +1,5 @@
 using DataAccess;
+using Google.Apis.Calendar.v3.Data;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
 using Utility;
+using Utility.GoogleCalendar;
 
 namespace SteamboatWillieWeb.Pages.Appointments
 {
@@ -24,10 +26,12 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        private readonly IGoogleCalendarService _googleCalendarService;
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IGoogleCalendarService googleCalendarService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _googleCalendarService = googleCalendarService;
             CalendarObj = new List<Calendar>();
             FilterModelInput = new FilterModel();
         }
@@ -183,24 +187,46 @@ namespace SteamboatWillieWeb.Pages.Appointments
             return Partial("./_RegisterAppointmentPartial", this);
         }
 
-        public IActionResult OnPostRegisterAppointment(string id)
+        public async Task<IActionResult> OnPostRegisterAppointmentAsync(string id)
         {
-            var userId = _userManager.GetUserId(User);
+            var clientId = _userManager.GetUserId(User);
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
+            var providerId = availability.ProviderId;
             availability.Scheduled = true;
             _unitOfWork.ProviderAvailability.Update(availability);
 
             Appointment appointment = new Appointment
             {
                 ProviderAvailabilityId = id,
-                ClientId = userId,
+                ClientId = clientId,
                 StudentComments = InputModel.Comments,
                 Description = "Appointment",
-                StudentNoShow = false
+                StudentNoShow = false,
+                ClientEventId = null,
+                ProviderEventId = null
             };
 
+            var location = _unitOfWork.Location.GetById(availability.LocationId).LocationValue;
+
+            if (_unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
+            {
+                string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(providerId).FullName;
+                Event @event = EventCreater.MakeEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
+                string clientCalendarId = await _googleCalendarService.CreateEvent(@event, clientId, new CancellationToken(false));
+                appointment.ClientEventId = clientCalendarId;
+            }
+
+            if (_unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
+            {
+                string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(clientId).FullName;
+                Event @event = EventCreater.MakeEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
+                string providerCalendarId = await _googleCalendarService.CreateEvent(@event, providerId, new CancellationToken(false));
+                appointment.ProviderEventId = providerCalendarId;
+            }
+
             _unitOfWork.Appointment.Add(appointment);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
+
 
             return RedirectToPage("../Index");
         }

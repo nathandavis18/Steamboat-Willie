@@ -10,12 +10,26 @@
 <input type="hidden" id="currentUserStartTime" value="@Model.CurrentUserStartTime" />
 <input type="hidden" id="currentUserEndTime" value="@Model.CurrentUserEndTime" />
 
+<div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
 @if (!User.Identity.IsAuthenticated)
 {
     <div class="text-center">
         <h1 class="display-4">Welcome!</h1>
         <p class="display-4 login-signup">Please, <a asp-page="/Account/Login" asp-area="Identity">log in</a> or <a asp-page="/Account/Register" asp-area="Identity">sign up</a> to continue</p>
     </div>
+}
+else if (Model.IntegratePopup)
+{
+    <script>
+        $('.modal-content').load(`/Index?integratePopup=${'Integrate'}`, function () {
+            $('#details-modal').modal('show');
+        });
+    </script>
 }
 else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
 {
@@ -210,13 +224,6 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
         <div class="text-end">
             <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
         </div>
-
-        <div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                </div>
-            </div>
-        </div>
         <div id='calendar'></div>
     </body>
 }
@@ -226,13 +233,6 @@ else if (User.IsInRole(SD.CLIENT_ROLE))
         <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
     </div>
     <br />
-
-    <div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-            </div>
-        </div>
-    </div>
 
     @if (!Model.Appointments.Any())
     {

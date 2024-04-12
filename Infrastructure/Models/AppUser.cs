@@ -20,6 +20,8 @@ namespace Infrastructure.Models
         [DisplayName("Profile Picture")]
         public string? ProfilePictureURL { get; set; } 
 
+        public bool? GoogleCalendarIntegration { get; set; }
+
         [NotMapped]
         public string? FullName { get { return FName + " " + LName; } }
     }

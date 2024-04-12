@@ -8,6 +8,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DataAccess;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,15 +26,18 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
 
         public IndexModel(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
-            UnitOfWork unitOfWork)
+            UnitOfWork unitOfWork,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _unitOfWork = unitOfWork;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -101,6 +107,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             [DisplayName("Profile Picture")]
             public string ProfilePictureURL { get; set; }
+
+            public bool IsIntegrated { get; set; }
         }
 
         public class ClientInputModel
@@ -181,7 +189,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                     Value = x.Id.ToString()
                 }),
                 PhoneNumber = phoneNumber,
-                ProfilePictureURL = user.ProfilePictureURL
+                ProfilePictureURL = user.ProfilePictureURL,
+                IsIntegrated = user.GoogleCalendarIntegration.Value
             };
             if (await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
             {
@@ -316,6 +325,39 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 await _unitOfWork.CommitAsync();
             }
             return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(string integrate)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            user.GoogleCalendarIntegration = integrate.Equals("integrate");
+
+            if (integrate.Equals("integrate"))
+            {
+                var settings = _configuration.GetSection("Authentication:Google");
+                string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
+                UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
+                {
+                    ClientId = settings["ClientId"],
+                    ClientSecret = settings["ClientSecret"],
+                },
+                scope,
+                user.Id,
+                new CancellationToken(false));
+            }
+
+            _unitOfWork.AppUser.Update(user);
+            await _unitOfWork.CommitAsync();
+
+            if(user.GoogleCalendarIntegration == true)
+            {
+                TempData["success"] = "You have successfully integrated with Google Calendar!";
+            }
+            else
+            {
+                TempData["warning"] = "Your appointments will no longer automatically integrate with your Google Calendar.";
+            }
+            return RedirectToPage("./Index");
         }
     }
 }
