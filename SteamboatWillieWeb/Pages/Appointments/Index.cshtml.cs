@@ -29,12 +29,31 @@ namespace SteamboatWillieWeb.Pages.Appointments
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             CalendarObj = new List<Calendar>();
+            FilterModelInput = new FilterModel();
         }
 
         [BindProperty]
         public AppointmentViewModel? InputModel { get; set; }
 
-        public IActionResult OnGet(string? type = null)
+        [BindProperty]
+        public FilterModel? FilterModelInput { get; set; }
+
+        public class FilterModel
+        {
+            public string? CurrentCampus { get; set; }
+            public string? CurrentProvider { get; set; }
+            public string? CurrentProviderType { get; set; }
+            public string? CurrentAppointmentType { get; set; }
+            public string? CurrentClasses { get; set; }
+
+            public List<SelectListItem> Classes { get; set; }
+            public List<SelectListItem> Providers { get; set; }
+            public List<SelectListItem> AppointmentTypes { get; set; }
+            public List<SelectListItem> Campuses { get; set; }
+            public List<SelectListItem> ProviderTypes { get; set; }
+        }
+
+        public IActionResult OnGet(string? campus, string? providerId, string? providerType, string? appointmentType, string? classes, string? prevProviderType)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -46,9 +65,82 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 TempData["access_denied"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
+            if(prevProviderType != providerType)
+            {
+                providerId = String.Empty;
+            }
 
-            var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider").Where(p => !p.Scheduled && !(p.Provider.AppUserId == user.Id) && p.StartTime >= DateTime.Now);
-            foreach(var a in availabilities)
+            FilterModelInput.CurrentCampus = campus;
+            FilterModelInput.CurrentProvider = providerId;
+            FilterModelInput.CurrentClasses = classes;
+            FilterModelInput.CurrentProviderType = providerType;
+            FilterModelInput.CurrentAppointmentType = appointmentType;
+
+
+            FilterModelInput.AppointmentTypes = new List<SelectListItem>()
+            {
+                new SelectListItem { Text = "Office Hours", Value = "Office Hours"},
+                new SelectListItem { Text = "General Advisement", Value = "General Advisement"},
+                new SelectListItem { Text = "New Student Advisement", Value = "New Student"},
+                new SelectListItem { Text = "Flex Student Advisement", Value = "Flex Student"}
+            };
+            FilterModelInput.Campuses = new List<SelectListItem>()
+            {
+                new SelectListItem { Text = "Ogden Campus", Value = "Ogden" },
+                new SelectListItem {Text = "Davis Campus", Value = "Davis"},
+                new SelectListItem { Text = "SLCC Campus", Value = "SLCC"},
+                new SelectListItem {Text = "Online", Value = "Online"}
+            };
+            FilterModelInput.ProviderTypes = new List<SelectListItem>()
+            {
+                new SelectListItem { Text = "Advisement", Value = "Advisor" },
+                new SelectListItem { Text = "Instructing", Value = "Instructor" },
+                new SelectListItem { Text = "Tutoring", Value = "Tutor" }
+            };
+
+            var allAvailabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider,Location").Where(p => !p.Scheduled && !(p.Provider.AppUserId == user.Id) && p.StartTime >= DateTime.Now);
+            var availabilities = allAvailabilities;
+            var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").Where(p => allAvailabilities.Select(a => a.ProviderId).Contains(p.AppUserId));
+            var allClasses = _unitOfWork.ProviderClass.GetAll(includes: "Class,Provider").Where(pc => availabilities.Select(a => a.ProviderId).Contains(pc.ProviderId)).DistinctBy(pc => pc.Class.Name);
+            FilterModelInput.Classes = allClasses.Select(pc => new SelectListItem
+                {
+                    Text = pc.Class.Id.ToString(),
+                    Value = pc.Class.Name
+                }).ToList();
+            FilterModelInput.Providers = providers.Select(p => new SelectListItem
+                {
+                    Text = p.AppUser.FullName,
+                    Value = p.AppUserId
+                }).ToList();
+            
+            if (!String.IsNullOrEmpty(campus))
+            {
+                availabilities = availabilities.Where(a => a.Location.Campus == campus);
+            }
+            if (!String.IsNullOrEmpty(providerId))
+            {
+                availabilities = availabilities.Where(a => a.ProviderId == providerId);
+            }
+            if (!String.IsNullOrEmpty(providerType))
+            {
+                availabilities = availabilities.Where(a => a.Provider.Title == providerType);
+                providers = providers.Where(p => p.Title == providerType);
+                FilterModelInput.Providers = providers.Select(p => new SelectListItem
+                    {
+                        Text = p.AppUser.FullName,
+                        Value = p.AppUserId
+                    }).ToList();
+            }
+            if (!String.IsNullOrEmpty(appointmentType))
+            {
+                availabilities = availabilities.Where(a => a.AppointmentType == appointmentType);
+            }
+            if (!String.IsNullOrEmpty(classes))
+            {
+                var providerClasses = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").Where(pc => classes.Contains(pc.Class.Name));
+                availabilities = availabilities.Where(a => providerClasses.Select(pc => pc.ProviderId).Contains(a.ProviderId));
+            }
+            foreach (var a in availabilities)
             {
                     CalendarObj.Add(new Calendar
                     {
