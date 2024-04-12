@@ -167,6 +167,19 @@
             }
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
         </form>
+        <br />
+        <div class="form-floating mb-3">
+            <form id="googleCalendarForm" method="post">
+                @if (Model.Input.IsIntegrated)
+                {
+                    <input type="submit" class="btn btn-warning" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="deintegrate" value="Disable Google Calendar Integration" />
+                }
+                else
+                {
+                    <input type="submit" class="btn btn-success" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="integrate" value="Enable Google Calendar Integration" />
+                }
+            </form>
+        </div>
     </div>
     
     <div class="col-md-6">

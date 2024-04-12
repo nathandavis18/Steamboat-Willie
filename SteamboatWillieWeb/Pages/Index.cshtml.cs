@@ -1,11 +1,15 @@
 ﻿using DataAccess;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
+using Google.Apis.Services;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Threading;
 using Utility;
 using Utility.GoogleCalendar;
 
@@ -17,6 +21,7 @@ namespace SteamboatWillieWeb.Pages
         private readonly UserManager<AppUser> _userManager;
         private readonly IGoogleCalendarService _googleCalendarService;
         private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
         public string CurrentUserStartTime { get; set; }
         public string CurrentUserEndTime { get; set; }
 
@@ -51,7 +56,9 @@ namespace SteamboatWillieWeb.Pages
         [BindProperty]
         public AvailabilityModel? AvailabilityModelInput { get; set; }
 
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService)
+        public bool IntegratePopup {  get; set; }
+
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -60,13 +67,26 @@ namespace SteamboatWillieWeb.Pages
             Appointments = new List<AppointmentCard>();
             providerAvailabilities = new List<ProviderAvailability>();
             CalendarObj = new List<Calendar>();
+            _configuration = configuration;
         }
 
-        public async Task<IActionResult> OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(string integratePopup = "")
         {
+            var user = await _userManager.GetUserAsync(User);
+            if(user != null)
+            {
+                if (integratePopup.Equals("Integrate"))
+                {
+                    return Partial("_GoogleCalendarPartial", this);
+                }
+                if(user.GoogleCalendarIntegration == null)
+                {
+                    IntegratePopup = true;
+                }
+            }
+
             if (User.IsInRole(SD.CLIENT_ROLE))
             {
-                var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
                 if (user != null)
                 {
                     var clientAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability").Where(a => a.ClientId == user.Id).ToList();
@@ -128,6 +148,32 @@ namespace SteamboatWillieWeb.Pages
             return Page();
         }
 
+        //Google Calendar Integration Question
+        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(string integrate)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            user.GoogleCalendarIntegration = integrate.Equals("absolutely");
+
+            if (integrate.Equals("absolutely"))
+            {
+                var settings = _configuration.GetSection("Authentication:Google");
+                string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
+                UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
+                {
+                    ClientId = settings["ClientId"],
+                    ClientSecret = settings["ClientSecret"],
+                },
+                scope,
+                user.Id,
+                new CancellationToken(false));
+            }
+
+            _unitOfWork.AppUser.Update(user);
+            await _unitOfWork.CommitAsync();
+
+            return RedirectToPage("./Index");
+        }
+
 
         //Cancel Appointment Popup Methods
         public async Task<IActionResult> OnGetAppointmentCancelAsync(string? id)
@@ -164,8 +210,11 @@ namespace SteamboatWillieWeb.Pages
         public async Task<IActionResult> OnPostAppointmentCancelAsync(string? id)
         {
             var appointment = _unitOfWork.Appointment.GetById(id);
-            string calendarId = appointment.ClientEventId;
+            string clientCalendarId = appointment.ClientEventId;
             string clientId = appointment.ClientId!;
+            string providerId = _unitOfWork.ProviderAvailability.GetById(appointment.ProviderAvailabilityId).ProviderId;
+            string providerCalendarId = appointment.ProviderEventId;
+
             _unitOfWork.Appointment.Delete(appointment);
 
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
@@ -174,9 +223,14 @@ namespace SteamboatWillieWeb.Pages
 
             await _unitOfWork.CommitAsync();
 
-            if (!String.IsNullOrEmpty(calendarId))
+            if (!String.IsNullOrEmpty(clientCalendarId) && _unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
             {
-                await _googleCalendarService.DeleteEvent(calendarId, clientId, new CancellationToken(false));
+                await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, new CancellationToken(false));
+            }
+
+            if (!String.IsNullOrEmpty(providerCalendarId) && _unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
+            {
+                await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, new CancellationToken(false));
             }
 
             return RedirectToPage("./Index");
@@ -277,6 +331,12 @@ namespace SteamboatWillieWeb.Pages
         {
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
             var appointment = _unitOfWork.Appointment.GetById(id);
+
+            var clientCalendarId = appointment.ClientEventId;
+            var providerCalendarId = appointment.ProviderEventId;
+            var clientId = appointment.ClientId;
+            var providerId = availability.ProviderId;
+
             var reason = !String.IsNullOrEmpty(AvailabilityModelInput.CancelReason) ? AvailabilityModelInput.CancelReason : "None";
 
             var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
@@ -294,6 +354,16 @@ namespace SteamboatWillieWeb.Pages
 
             await _unitOfWork.CommitAsync();
 
+            if (!String.IsNullOrEmpty(clientCalendarId) && _unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
+            {
+                await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, new CancellationToken(false));
+            }
+
+            if (!String.IsNullOrEmpty(providerCalendarId) && _unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
+            {
+                await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, new CancellationToken(false));
+            }
+
             return RedirectToPage("./Index");
         }
 
@@ -302,6 +372,11 @@ namespace SteamboatWillieWeb.Pages
             var appointment = _unitOfWork.Appointment.GetById(id);
             var availability = _unitOfWork.ProviderAvailability.GetById(id);
             var reason = !String.IsNullOrEmpty(AvailabilityModelInput.CancelReason) ? AvailabilityModelInput.CancelReason : "None";
+
+            var clientCalendarId = appointment.ClientEventId;
+            var providerCalendarId = appointment.ProviderEventId;
+            var clientId = appointment.ClientId;
+            var providerId = availability.ProviderId;
 
             var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
             var providerName = _unitOfWork.AppUser.GetById(availability.ProviderId).FullName;
@@ -314,6 +389,16 @@ namespace SteamboatWillieWeb.Pages
             _unitOfWork.Appointment.Delete(appointment);
             _unitOfWork.ProviderAvailability.Delete(availability);
             await _unitOfWork.CommitAsync();
+
+            if (!String.IsNullOrEmpty(clientCalendarId) && _unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
+            {
+                await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, new CancellationToken(false));
+            }
+
+            if (!String.IsNullOrEmpty(providerCalendarId) && _unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
+            {
+                await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, new CancellationToken(false));
+            }
 
             return RedirectToPage("./Index");
         }

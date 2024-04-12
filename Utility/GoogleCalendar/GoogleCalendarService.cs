@@ -16,6 +16,7 @@ namespace Utility.GoogleCalendar
     public class GoogleCalendarService : IGoogleCalendarService
     {
         private readonly IConfiguration _configuration;
+        private const string CalendarEnvironment = "primary";
         public GoogleCalendarService(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -39,7 +40,7 @@ namespace Utility.GoogleCalendar
                 ApplicationName = "Steamboat Willie Scheduler",
             });
 
-            var eventRequest = services.Events.Insert(request, "primary");
+            var eventRequest = services.Events.Insert(request, CalendarEnvironment);
             var requestCreate = await eventRequest.ExecuteAsync(cancellationToken);
 
             var id = requestCreate.Id;
@@ -64,14 +65,14 @@ namespace Utility.GoogleCalendar
                 ApplicationName = "Steamboat Willie Scheduler",
             });
 
-            var eventExists = await services.Events.Get("primary", eventId).ExecuteAsync();
+            var eventExists = await services.Events.Get(CalendarEnvironment, eventId).ExecuteAsync();
 
             if(eventExists.Status.ToUpper().Equals("cancelled".ToUpper()))
             {
                 return String.Empty;
             }
 
-            var eventRequest = services.Events.Delete("primary", eventId);
+            var eventRequest = services.Events.Delete(CalendarEnvironment, eventId);
             var requestDelete = await eventRequest.ExecuteAsync(cancellationToken);
 
             return requestDelete;

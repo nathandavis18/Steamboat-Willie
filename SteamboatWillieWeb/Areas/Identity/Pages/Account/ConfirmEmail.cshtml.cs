@@ -29,8 +29,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [TempData]
-        public string StatusMessage { get; set; }
         public async Task<IActionResult> OnGetAsync(string userId, string code)
         {
             if (userId == null || code == null)
@@ -45,14 +43,14 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             }
             code = Encoding.ASCII.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await _userManager.ConfirmEmailAsync(user, code);
-            StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            var msg = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
             if (result.Succeeded)
             {
-                TempData["success"] = StatusMessage + " Login to continue.";
+                TempData["success"] = msg + " Login to continue.";
             }
             else
             {
-                TempData["error"] = StatusMessage + " If this continues to happen, please contact support.";
+                TempData["error"] = msg + " If this continues to happen, please contact support.";
             }
             return RedirectToPage("../Index", new {Area = ""});
         }
