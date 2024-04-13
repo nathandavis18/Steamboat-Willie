@@ -2,30 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
+using DataAccess;
 using Infrastructure.Models;
+using Infrastructure.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata;
-using System.Globalization;
-using DataAccess;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
 using Utility;
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -65,7 +55,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; } = new InputModel();
+        public ExternalLoginInputModel Input { get; set; } = new ExternalLoginInputModel();
+
+        [BindProperty]
+        public WeberStudentInputModel WeberStudentInput { get; set; } = new WeberStudentInputModel();
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -90,62 +83,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public class InputModel
-        {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-
-            [Required]
-            [Display(Name = "First Name")]
-            public string FName { get; set; }
-
-            [Required]
-            [DisplayName("Last Name")]
-            public string LName { get; set; }
-
-
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Password (Optional)")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-
-            [Phone]
-            [Display(Name = "Phone number")]
-            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", ErrorMessage = "Phone number must follow the format (xxx) xxx-xxxx")]
-            [StringLength(15)]
-            [Required]
-            public string PhoneNumber { get; set; }
-
-            [Display(Name = "W#")]
-            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
-            [StringLength(9)]
-            [Required]
-            public string WNumber { get; set; }
-
-            [Required]
-            [Display(Name = "Major")]
-            public string DepartmentId { get; set; }
-            public IEnumerable<SelectListItem> Departments { get; set; }
-
-            [Required]
-            [Display(Name = "Class Level")]
-            public string ClassLevel { get; set; }
-
-            [Required]
-            [Display(Name = "Student Type")]
-            public string StudentType { get; set; }
-
-        }
         
         public IActionResult OnGet() => RedirectToPage("./Login");
 
@@ -222,7 +159,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     Input.PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.OtherPhone);
                 }
 
-                Input.Departments = _unitOfWork.Department.GetAll().Select(d => new SelectListItem
+                WeberStudentInput.Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(d => new SelectListItem
                 {
                     Text = d.DepartmentName,
                     Value = d.Id.ToString()
@@ -276,7 +213,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        var testBefore = code;
                         code = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(code));
                         var callbackUrl = Url.Page(
                             "/Account/ConfirmEmail",
@@ -287,14 +223,18 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         var message = EmailFormats.ConfirmEmail.Replace("[ConfirmEmailLink]", HtmlEncoder.Default.Encode(callbackUrl));
 
                         await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", message);
-                        
+
                         await _userManager.AddToRoleAsync(user, SD.CLIENT_ROLE);
 
                         var client = new Client();
                         client.AppUserId = userId;
-                        client.DepartmentId = Int32.Parse(Input.DepartmentId);
-                        client.ClassLevel = Input.ClassLevel;
-                        client.StudentType = Input.StudentType;
+                        client.IsWeberStudent = WeberStudentInput.IsWeberStudent;
+                        if (WeberStudentInput.IsWeberStudent)
+                        {
+                            client.DepartmentId = Int32.Parse(WeberStudentInput.DepartmentId);
+                            client.ClassLevel = WeberStudentInput.ClassLevel;
+                            client.StudentType = WeberStudentInput.StudentType;
+                        }
                         _unitOfWork.Client.Add(client);
 
                         await _unitOfWork.CommitAsync();

@@ -7,10 +7,14 @@
 }
 
 <h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
 <div class="row">
     <div class="col-md-6">
         <form id="profile-form" method="post">
+            @if(User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE)) //If they are a tutor
+            {
+                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
+                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
+            }
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.FName" class="form-control bg-secondary text-white" autocomplete="First Name" aria-required="true" placeholder="John" />
@@ -23,49 +27,17 @@
                 <span asp-validation-for="Input.LName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" />
-                <label asp-for="Input.WNumber">W#</label>
-                <span asp-validation-for="Input.WNumber" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-            @if (User.IsInRole(SD.CLIENT_ROLE))
-            {
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
-                <label asp-for="ClientInput.DepartmentId" class="form-label"></label>
-            }
-            else if (User.IsInRole(SD.PROVIDER_ROLE))
-            {
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
-                <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
-            }
-            </div>
-            <div class="form-floating mb-3">
                 <input asp-for="Input.PhoneNumber" class="form-control bg-secondary text-white" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
                 <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            @if(User.IsInRole(SD.CLIENT_ROLE) && User.IsInRole(SD.PROVIDER_ROLE))
+            @if(User.IsInRole(SD.PROVIDER_ROLE))
             {
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
-                        <option>Freshman</option>
-                        <option>Sophomore</option>
-                        <option>Junior</option>
-                        <option>Senior</option>
-                    </select>
-                    <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
+                    <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required/>
+                    <label asp-for="Input.WNumber">W#</label>
+                    <span asp-validation-for="Input.WNumber" class="text-danger"></span>
                 </div>
-                <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
-                        <option>Full-Time Student</option>
-                        <option>Part-Time Student</option>
-                        <option>Flex Student</option>
-                    </select>
-                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
-                </div>
-                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
                 <div class="form-floating mb-3">
                     <input asp-for="ProviderInput.StartTime" class="form-control bg-secondary text-white" required />
                     <label asp-for="ProviderInput.StartTime" class="form-label"></label>
@@ -77,34 +49,12 @@
                     <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
                 </div>
             }
-            else if (User.IsInRole(SD.CLIENT_ROLE))
+            @if (User.IsInRole(SD.PROVIDER_ROLE) && !User.IsInRole(SD.CLIENT_ROLE)) //Just Provider Role, not tutor
             {
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
-                        <option>Freshman</option>
-                        <option>Sophomore</option>
-                        <option>Junior</option>
-                        <option>Senior</option>
-                    </select>
-                    <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
+                    <select asp-for="ProviderInput.DepartmentId" asp-items="@Model.ProviderInput.Departments" class="form-select bg-secondary text-white"></select>
+                    <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
                 </div>
-                <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
-                        <option>Full-Time Student</option>
-                        <option>Part-Time Student</option>
-                        <option>Flex Student</option>
-                    </select>
-                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
-                </div>
-
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
-                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
-            }
-            else if (User.IsInRole(SD.PROVIDER_ROLE))
-            {
                 <div class="form-floating mb-3" id="TitleSelector">
                     <select asp-for="ProviderInput.Title" class="form-select bg-secondary text-white" placeholder="Choose the best title for this advisor" id="providerTitle" onchange="titleChange(this.value)">
                         <option>Advisor</option>
@@ -130,19 +80,60 @@
                     <input asp-for="ProviderInput.FlexStudent" class="form-check-input bg-secondary text-white" />
                     </div>
                 </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.StartTime" class="form-control bg-secondary text-white" required/>
-                    <label asp-for="ProviderInput.StartTime" class="form-label"></label>
-                    <span asp-validation-for="ProviderInput.StartTime" class="text-danger"></span>
+            }
+            @if (User.IsInRole(SD.CLIENT_ROLE)) //Can't do else if, since this can apply to tutors
+            {
+                @if (User.IsInRole(SD.PROVIDER_ROLE))
+                {
+                    <input type="checkbox" asp-for="WeberStudentInput.IsWeberStudent" class="form-check-input" checked hidden/>
+                }
+                else
+                {
+                    <div class="form-check mb-3">
+                        <input type="checkbox" asp-for="WeberStudentInput.IsWeberStudent" class="form-check-input" onchange="weberStudent()" id="weber-checkbox"/>
+                        <label asp-for="WeberStudentInput.IsWeberStudent" class="form-check-label"></label>
+                    </div>
+                }
+                <div id="weber-student-stuff" style="@(Model.WeberStudentInput.IsWeberStudent == true ? "display: block;" : "display: none;")">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required/>
+                        <label asp-for="Input.WNumber">W#</label>
+                        <span asp-validation-for="Input.WNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.DepartmentId" asp-items="@Model.WeberStudentInput.Departments" class="form-select bg-secondary text-white"></select>
+                        <label asp-for="WeberStudentInput.DepartmentId" class="form-label"></label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.ClassLevel" class="form-select bg-secondary text-white">
+                            <option>Freshman</option>
+                            <option>Sophomore</option>
+                            <option>Junior</option>
+                            <option>Senior</option>
+                        </select>
+                        <label asp-for="WeberStudentInput.ClassLevel" class="form-label"></label>
+                        <span asp-validation-for="WeberStudentInput.ClassLevel" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.StudentType" class="form-select bg-secondary text-white">
+                            <option>Full-Time Student</option>
+                            <option>Part-Time Student</option>
+                            <option>Flex Student</option>
+                        </select>
+                        <label asp-for="WeberStudentInput.StudentType" class="form-label"></label>
+                        <span asp-validation-for="WeberStudentInput.StudentType" class="text-danger"></span>
+                    </div>
                 </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.EndTime" class="form-control bg-secondary text-white" required/>
-                    <label asp-for="ProviderInput.EndTime" class="form-label"></label>
-                    <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
-                </div>
-                    <div style="width:100%" class="mb-3 form-control-color form-control bg-secondary text-muted">
-                    <small><label asp-for="ProviderInput.Color" class="form-label ms-2"></label></small> 
-                    @if (Model.ProviderInput.Color == null) {
+            }
+            @if (User.IsInRole(SD.PROVIDER_ROLE))
+            {
+                <div style="width:100%" class="mb-3 form-control-color form-control bg-secondary text-muted">
+                    <small><label asp-for="ProviderInput.Color" class="form-label ms-2"></label></small>
+                    @if (Model.ProviderInput.Color == null)
+                    {
                         <input asp-for="ProviderInput.Color" type="color" class="border border-secondary" onchange="clickColor(0, -1, -1, 5)" value="#135DD8" style="width:100%;">
                     }
                     else
@@ -150,20 +141,6 @@
                         <input asp-for="ProviderInput.Color" type="color" class="border border-secondary" onchange="clickColor(0, -1, -1, 5)" value="@Model.ProviderInput.Color" style="width:100%;">
                     }
                 </div>
-                    
-                
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
-                <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden/>
-            }
-            else
-            {
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="ProviderInput.Title" value="Valid" hidden />
-                <input asp-for="Input.DepartmentId" value="Valid" hidden />
-                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
-                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
-                <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden />
             }
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
         </form>
@@ -232,6 +209,16 @@
                 p.style.display = 'none';
             }
         }
-        
+    </script>
+
+    <script>
+        function weberStudent() {
+            if ($('#weber-checkbox').is(':checked')) {
+                $('#weber-student-stuff').show();
+            }
+            else {
+                $('#weber-student-stuff').hide();
+            }
+        }
     </script>
 }

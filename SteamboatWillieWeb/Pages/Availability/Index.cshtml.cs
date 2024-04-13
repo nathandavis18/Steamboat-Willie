@@ -1,35 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using DataAccess;
-using Infrastructure.Interfaces;
+﻿using DataAccess;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using Utility;
 
 namespace SteamboatWillieWeb.Pages.Availability
 {
     public class IndexModel : PageModel
     {
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
         [BindProperty]
         public IEnumerable<SelectListItem>? Locations { get; set; }
 
-        public IndexModel(UnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, UserManager<AppUser> userManager)
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
-            _webHostEnvironment = webHostEnvironment;
             _userManager = userManager;
         }
         [BindProperty]
@@ -301,7 +292,51 @@ namespace SteamboatWillieWeb.Pages.Availability
             _unitOfWork.Commit();
             return RedirectToPage("../Index");
 
-            /*if (isRecurrenceChecked)
+            /**
+             * Previous Code from this section can be found at the bottom of this page.
+             */
+        }
+
+        private List<string> DaysOfWeek()
+        {
+            List<string> daysOfWeek = new List<string>();
+            if (RecurrenceModelInput.Monday)
+            {
+                daysOfWeek.Add("Monday");
+            }
+            if (RecurrenceModelInput.Tuesday)
+            {
+                daysOfWeek.Add("Tuesday");
+            }
+            if (RecurrenceModelInput.Wednesday)
+            {
+                daysOfWeek.Add("Wednesday");
+            }
+            if (RecurrenceModelInput.Thursday)
+            {
+                daysOfWeek.Add("Thursday");
+            }
+            if (RecurrenceModelInput.Friday)
+            {
+                daysOfWeek.Add("Friday");
+            }
+            if (RecurrenceModelInput.Saturday)
+            {
+                daysOfWeek.Add("Saturday");
+            }
+            if (RecurrenceModelInput.Sunday)
+            {
+                daysOfWeek.Add("Sunday");
+            }
+            return daysOfWeek;
+        }
+    }
+}
+
+
+//Previous OnPost functionality
+
+/*if (isRecurrenceChecked)
             {
                 var selectedDays = Request.Form["weekDays[]"];
                 List<string> selectedDaysList = new List<string>();
@@ -486,41 +521,3 @@ namespace SteamboatWillieWeb.Pages.Availability
 
         _unitOfWork.Commit();
         return RedirectToPage("../Index");*/
-
-        }
-
-        private List<string> DaysOfWeek()
-        {
-            List<string> daysOfWeek = new List<string>();
-            if (RecurrenceModelInput.Monday)
-            {
-                daysOfWeek.Add("Monday");
-            }
-            if (RecurrenceModelInput.Tuesday)
-            {
-                daysOfWeek.Add("Tuesday");
-            }
-            if (RecurrenceModelInput.Wednesday)
-            {
-                daysOfWeek.Add("Wednesday");
-            }
-            if (RecurrenceModelInput.Thursday)
-            {
-                daysOfWeek.Add("Thursday");
-            }
-            if (RecurrenceModelInput.Friday)
-            {
-                daysOfWeek.Add("Friday");
-            }
-            if (RecurrenceModelInput.Saturday)
-            {
-                daysOfWeek.Add("Saturday");
-            }
-            if (RecurrenceModelInput.Sunday)
-            {
-                daysOfWeek.Add("Sunday");
-            }
-            return daysOfWeek;
-        }
-    }
-}

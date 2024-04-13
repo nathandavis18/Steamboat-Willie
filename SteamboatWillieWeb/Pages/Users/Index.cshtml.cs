@@ -1,12 +1,9 @@
 using DataAccess;
-using Infrastructure.Interfaces;
-using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using Utility;
 using AppUser = Infrastructure.Models.AppUser;
 

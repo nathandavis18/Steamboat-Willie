@@ -1,6 +1,5 @@
 ﻿using Infrastructure.Interfaces;
 using Infrastructure.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess
 {
