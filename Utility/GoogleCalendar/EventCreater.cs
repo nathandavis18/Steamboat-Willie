@@ -4,7 +4,7 @@ namespace Utility.GoogleCalendar
 {
     public class EventCreater
     {
-        public static Event MakeEvent(string summary, string location, string description, string start, string end)
+        public static Event CreateEvent(string summary, string location, string description, string start, string end)
         {
             Event gEvent = new Event()
             {

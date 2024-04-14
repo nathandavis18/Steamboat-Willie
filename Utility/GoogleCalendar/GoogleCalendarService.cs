@@ -9,15 +9,22 @@ namespace Utility.GoogleCalendar
     public class GoogleCalendarService : IGoogleCalendarService
     {
         private readonly IConfiguration _configuration;
-        private const string CalendarEnvironment = "primary";
+        private const string CalendarEnvironment = "primary"; //Used to change the calendar environment between the main and testing environments. 
         public GoogleCalendarService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public async Task<string> CreateEvent(Event request, string userId, CancellationToken cancellationToken)
+        //Gets a user's credential for the calendar, creates a connection to the google calendar service, and loads the event into storage.
+        //Then, the storage is committed to the calendar. The id of the newly created event is stored for potential later use.
+        public async Task<string> AddEvent(Event request, string userId, CancellationToken cancellationToken)
         {
             var credential = await ValidateUser.ValidateUserCalendar(userId, _configuration);
+            if (!ValidateUser.IsUserValidated(credential))                                    
+            {   
+                return String.Empty;
+            }
+
             var services = new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
@@ -31,9 +38,16 @@ namespace Utility.GoogleCalendar
             return id;
         }
 
+        //Gets a user's credential for the calendar and creates a connection to the service. Checks to see if a google calendar event
+        //With the passed in Id exists. If it exists, and has not been canceled, then it deletes the event. The string is returned in case someone wants to use it.
         public async Task<string> DeleteEvent(string eventId, string userId, CancellationToken cancellationToken)
         {
             var credential = await ValidateUser.ValidateUserCalendar(userId, _configuration);
+            if (!ValidateUser.IsUserValidated(credential))
+            {
+                return String.Empty;
+            }
+
             var services = new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
