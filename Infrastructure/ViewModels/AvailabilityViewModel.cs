@@ -12,5 +12,7 @@
         public string Location { get; set; }
         public string Comments { get; set; }
         public string? CancelReason { get; set; }
+        public bool StudentNoShow { get; set; }
+        public DateTime TimeDate { get; set; }
     }
 }

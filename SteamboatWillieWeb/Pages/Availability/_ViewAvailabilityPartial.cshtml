@@ -54,6 +54,7 @@
                 @if (!Model.AvailabilityModelInput.IsAppointment)
                 {
                     <input type="submit" class="btn btn-danger" value="Remove Availability" asp-page-handler="RemoveAvailability" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
+                    <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                 }
                 else
                 {
@@ -62,8 +63,24 @@
                         <input type="submit" class="btn btn-danger" value="Cancel & Remove Availability" asp-page-handler="RemoveAll" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
                     </div>
                     <div id="warning">
+                        @if (Model.AvailabilityModelInput.TimeDate <= DateTime.Today)
+                        {
+                            @if (!Model.AvailabilityModelInput.StudentNoShow)
+                            {
+                                <input type="submit" class="btn btn-primary" value="Current: Student Showed Up" asp-page-handler="NoShowToggle" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
+                            }
+                            else
+                            {
+                                <input type="submit" class="btn btn-danger" value="Current: Student Didn't Show up" asp-page-handler="NoShowToggle" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
+                            }
+                        }
+                        else
+                        {
+                            <button form="none" class="btn btn-warning" id="btnAll" onclick="btnCancelClick()">Cancel</button>
+                        }
                         <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                        <button form="none" class="btn btn-warning" id="btnAll" onclick="btnCancelClick()">Cancel</button>
+                        
+                        
                     </div>
                 }
             </div>

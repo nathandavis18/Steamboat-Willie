@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using QuestPDF.Infrastructure;
 using Utility;
 using Utility.GoogleCalendar;
 
@@ -15,6 +16,8 @@ builder.Services.AddRazorPages();
 var connectionString = builder.Configuration.GetConnectionString("SmarterASP") ?? throw new InvalidOperationException("Connection string 'SmarterASP' not found.");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 

@@ -113,7 +113,7 @@ namespace SteamboatWillieWeb.Pages
             if(User.IsInRole(SD.PROVIDER_ROLE))
             {
                 var currentUserId = _userManager.GetUserId(User);
-                providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == currentUserId && x.StartTime > DateTime.Now.AddDays(-1));
+                providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == currentUserId/* && x.StartTime > DateTime.Now.AddDays(-1)*/);
                 var ProviderTitle = _unitOfWork.Provider.GetAll().Where(x => x.AppUserId == currentUserId).Select(x => x.Title).FirstOrDefault();
                 string scheduleTitle;
                 if (ProviderTitle == "Advisor")
@@ -305,6 +305,7 @@ namespace SteamboatWillieWeb.Pages
                 Location = availability.Location.LocationValue,
                 Date = availability.StartTime.ToLongDateString(),
                 Time = availability.StartTime.ToShortTimeString(),
+                TimeDate = availability.StartTime
             };
             if (appointment != null)
             {
@@ -314,6 +315,7 @@ namespace SteamboatWillieWeb.Pages
                 AvailabilityModelInput.ClientName = client.AppUser.FullName;
                 AvailabilityModelInput.ClientEmail = client.AppUser.Email;
                 AvailabilityModelInput.IsAppointment = true;
+                AvailabilityModelInput.StudentNoShow = appointment.StudentNoShow;
             }
             return Partial("./Availability/_ViewAvailabilityPartial", this);
         }
@@ -363,6 +365,19 @@ namespace SteamboatWillieWeb.Pages
             {
                 await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, new CancellationToken(false));
             }
+
+            return RedirectToPage("./Index");
+        }
+
+        public async Task<IActionResult> OnPostNoShowToggleAsync(string id)
+        {
+            var appointment = _unitOfWork.Appointment.GetById(id);
+            if (appointment.StudentNoShow)
+                appointment.StudentNoShow = false;
+            else appointment.StudentNoShow = true;
+            _unitOfWork.Appointment.Update(appointment);
+
+            await _unitOfWork.CommitAsync();
 
             return RedirectToPage("./Index");
         }
