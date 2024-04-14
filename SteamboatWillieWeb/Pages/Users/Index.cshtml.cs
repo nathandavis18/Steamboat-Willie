@@ -1,12 +1,9 @@
 using DataAccess;
-using Infrastructure.Interfaces;
-using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using Utility;
 using AppUser = Infrastructure.Models.AppUser;
 
@@ -27,10 +24,10 @@ namespace SteamboatWillieWeb.Pages.Users
 
         public PaginatedList<AppUser>? ApplicationUsers { get; set; }
         public Dictionary<string, List<string>>? UserRoles { get; set; }
-        public List<SelectListItem> Roles {  get; set; }
+        public List<SelectListItem>? Roles {  get; set; }
 
-        public string CurrentFilter { get; set; }
-        public string CurrentRole { get; set; }
+        public string? CurrentFilter { get; set; }
+        public string? CurrentRole { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? pageIndex, string searchString, string roleSort)
         {

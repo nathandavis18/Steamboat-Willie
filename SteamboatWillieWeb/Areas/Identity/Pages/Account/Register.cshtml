@@ -9,6 +9,7 @@
 <div class="row">
     <div class="col-md-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <input asp-for="Input.CreatingProvider" type="hidden" />
             <h2>Create a new account.</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
@@ -38,72 +39,73 @@
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" />
-                <label asp-for="Input.WNumber">W#</label>
-                <span asp-validation-for="Input.WNumber" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
-                @if (!User.IsInRole(SD.ADMIN_ROLE))
-                {
-                    <label asp-for="ClientInput.DepartmentId"></label>
-                    <span asp-validation-for="ClientInput.DepartmentId" class="text-danger"></span>
-                }
-                else{
-                    <label asp-for="ProviderInput.DepartmentId"></label>
-                    <span asp-validation-for="ProviderInput.DepartmentId" class="text-danger"></span>
-                }
-            </div>
-            <div class="form-floating mb-3">
                 <input asp-for="Input.PhoneNumber" class="form-control bg-secondary text-white" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
                 <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            @if (!User.IsInRole(SD.ADMIN_ROLE))
-            {
-                <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
-                        <option>Freshman</option>
-                        <option>Sophomore</option>
-                        <option>Junior</option>
-                        <option>Senior</option>
-                    </select>
-                    <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
-                        <option>Full-Time Student</option>
-                        <option>Part-Time Student</option>
-                        <option>Flex Student</option>
-                    </select>
-                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
-                </div>
-
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="Input.Role" value="@SD.CLIENT_ROLE" hidden />
-                <input asp-for="ProviderInput.Title" value="Valid" hidden />
-            }
-            else if (User.IsInRole(SD.ADMIN_ROLE) && Model.ProviderInput.CreatingProvider)
+            @if (Model.Input.CreatingProvider)
             {
                 <select asp-for="Input.Role" hidden>
                     <option selected>@SD.PROVIDER_ROLE</option>
                 </select>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required />
+                    <label asp-for="Input.WNumber">W#</label>
+                    <span asp-validation-for="Input.WNumber" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="ProviderInput.DepartmentId" asp-items="@Model.ProviderInput.Departments" class="form-select bg-secondary text-white"></select>
+                    <label asp-for="ProviderInput.DepartmentId"></label>
+                    <span asp-validation-for="ProviderInput.DepartmentId" class="text-danger"></span>
+                </div>
                 <div class="form-floating mb-3" id="TitleSelector">
                     <select asp-for="ProviderInput.Title" class="form-select bg-secondary text-white" placeholder="Choose the best title for this advisor">
                         <option>Advisor</option>
-                        <option>Instructor</option>
+                        <option selected>Instructor</option>
                         <option>Tutor</option>
                     </select>
                     <label asp-for="ProviderInput.Title" class="form-label"></label>
                 </div>
-
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
-                <input asp-for="ClientInput.StudentType" class="form-check-input bg-secondary text-white" value="Valid" hidden/>
             }
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary mb-2">Register</button>
+            else
+            {
+                <div class="form-check mb-3">
+                    <input type="checkbox" asp-for="WeberStudentInput.IsWeberStudent" class="form-check-input" onchange="weberStudent()"/>
+                    <label asp-for="WeberStudentInput.IsWeberStudent" class="form-check-label"></label>
+                </div>
+                <div id="weber-student-stuff" style="display: none;">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required />
+                        <label asp-for="Input.WNumber">W#</label>
+                        <span asp-validation-for="Input.WNumber" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.DepartmentId" asp-items="@Model.WeberStudentInput.Departments" class="form-select bg-secondary text-white"></select>
+                        <label asp-for="WeberStudentInput.DepartmentId"></label>
+                        <span asp-validation-for="WeberStudentInput.DepartmentId" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
+                            <option>Freshman</option>
+                            <option>Sophomore</option>
+                            <option>Junior</option>
+                            <option>Senior</option>
+                        </select>
+                        <label asp-for="WeberStudentInput.ClassLevel" class="form-label"></label>
+                        <span asp-validation-for="WeberStudentInput.ClassLevel" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
+                            <option>Full-Time Student</option>
+                            <option>Part-Time Student</option>
+                            <option>Flex Student</option>
+                        </select>
+                        <label asp-for="WeberStudentInput.StudentType" class="form-label"></label>
+                        <span asp-validation-for="WeberStudentInput.StudentType" class="text-danger"></span>
+                    </div>
+                </div>
+            }
+            <input type="submit" class="w-100 btn btn-lg btn-primary mb-2" value="Register" />
             <div>
                 <p class="text-center">
                     Already have an account?
@@ -119,58 +121,58 @@
             @{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
                 {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">
-                                article
-                                about setting up this ASP.NET application to support logging in via external services
-                            </a>.
-                        </p>
-                    </div>
+                                    <div>
+                                        <p>
+                                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">
+                                                article
+                                                about setting up this ASP.NET application to support logging in via external services
+                                            </a>.
+                                        </p>
+                                    </div>
                 }
                 else
                 {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
+                                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                        <div>
+                                            <p>
+                                                @foreach (var provider in Model.ExternalLogins!)
                                 {
                                     if (provider.DisplayName == "Google")
                                     {
-                                        <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="gsi-material-button ggl-btn bg-secondary text-white">
-                                            <div class="gsi-material-button-state"></div>
-                                            <div class="gsi-material-button-content-wrapper">
-                                                <div class="gsi-material-button-icon">
-                                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                                                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                                                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                                                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                                                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                                                        <path fill="none" d="M0 0h48v48H0z"></path>
-                                                    </svg>
-                                                </div>
-                                                <span class="gsi-material-button-contents">Sign up with Google</span>
-                                                <span style="display: none;">Sign up with Google</span>
-                                            </div>
-                                        </button>
+                                                        <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="gsi-material-button ggl-btn bg-secondary text-white">
+                                                            <div class="gsi-material-button-state"></div>
+                                                            <div class="gsi-material-button-content-wrapper">
+                                                                <div class="gsi-material-button-icon">
+                                                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                                                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                                                                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                                                                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                                                                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                                                                        <path fill="none" d="M0 0h48v48H0z"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <span class="gsi-material-button-contents">Sign up with Google</span>
+                                                                <span style="display: none;">Sign up with Google</span>
+                                                            </div>
+                                                        </button>
                                     }
                                     else if (provider.DisplayName == "Microsoft")
                                     {
-                                        <div class="bsk-container">
-                                            <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="btn btn-secondary">
-                                                <object type="image/svg+xml" data="https://s3-eu-west-1.amazonaws.com/cdn-testing.web.bas.ac.uk/scratch/bas-style-kit/ms-pictogram/ms-pictogram.svg" class="x-icon"></object>
-                                                Sign up with Microsoft
-                                            </button>
-                                        </div>
+                                                        <div class="bsk-container">
+                                                            <button type="submit" value="@provider.Name" name="provider" title="Sign up using your @provider.DisplayName account" class="btn btn-secondary">
+                                                                <object type="image/svg+xml" data="https://s3-eu-west-1.amazonaws.com/cdn-testing.web.bas.ac.uk/scratch/bas-style-kit/ms-pictogram/ms-pictogram.svg" class="x-icon"></object>
+                                                                Sign up with Microsoft
+                                                            </button>
+                                                        </div>
                                     }
                                     else
                                     {
-                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Sign up using your @provider.DisplayName account">@provider.DisplayName</button>
+                                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Sign up using your @provider.DisplayName account">@provider.DisplayName</button>
                                     }
                                 }
-                            </p>
-                        </div>
-                    </form>
+                                            </p>
+                                        </div>
+                                    </form>
                 }
             }
         </section>
@@ -187,6 +189,11 @@
             if (size > 3) { input = input.slice(0, 4) + ") " + input.slice(4, 11) }
             if (size > 6) { input = input.slice(0, 9) + "-" + input.slice(9) }
             return input;
+        }
+    </script>
+    <script>
+        function weberStudent(value) {
+            $('#weber-student-stuff').toggle();
         }
     </script>
 }

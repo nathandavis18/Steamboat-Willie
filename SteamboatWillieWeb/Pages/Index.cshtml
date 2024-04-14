@@ -98,7 +98,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
                 {
                     var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
                     <text>
-                        var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Start.ToString()', end: '@obj.End.ToString()', backgroundColor: '@backgroundColor', url: '#' };
+                        var e = { id: '@obj.Id.ToString()', title: '@obj.ProviderType.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()', backgroundColor: '@backgroundColor', url: '#' };
                         calendar.addEvent(e);
                     </text>
                 }
@@ -212,7 +212,7 @@ else if (User.IsInRole(SD.PROVIDER_ROLE))
                 {
                     var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
                     <text>
-                        var e = { id: '@obj.Id.ToString()', title: '@obj.Title.ToString()', start: '@obj.Start.ToString()', end: '@obj.End.ToString()', backgroundColor: '@backgroundColor', url:'#'};
+                        var e = { id: '@obj.Id.ToString()', title: '@obj.ProviderType.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()', backgroundColor: '@backgroundColor', url:'#'};
                         calendar.addEvent(e);
                     </text>
                 }

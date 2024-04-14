@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Globalization;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Utility
 {

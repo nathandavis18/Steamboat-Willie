@@ -43,38 +43,44 @@
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.WNumber" class="form-control" autocomplete="wnumber" placeholder="Please enter your W Number." />
-                <label asp-for="Input.WNumber" class="form-label"></label>
-                <span asp-validation-for="Input.WNumber" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select"></select>
-                <label asp-for="Input.DepartmentId" class="form-label"></label>
-                <span asp-validation-for="Input.DepartmentId" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
                 <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
                 <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <select asp-for="Input.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
-                    <option>Freshman</option>
-                    <option>Sophomore</option>
-                    <option>Junior</option>
-                    <option>Senior</option>
-                </select>
-                <label asp-for="Input.ClassLevel" class="form-label"></label>
-                <span asp-validation-for="Input.ClassLevel" class="text-danger"></span>
+            <div class="form-check mb-3">
+                <input type="checkbox" asp-for="WeberStudentInput.IsWeberStudent" class="form-check-input" onchange="weberStudent()" />
+                <label asp-for="WeberStudentInput.IsWeberStudent" class="form-check-label"></label>
             </div>
-            <div class="form-floating mb-3">
-                <select asp-for="Input.StudentType" class="form-select" placeholder="Flex, Regular">
-                    <option>Full-Time Student</option>
-                    <option>Part-Time Student</option>
-                    <option>Flex Student</option>
-                </select>
-                <label asp-for="Input.StudentType" class="form-label"></label>
-                <span asp-validation-for="Input.StudentType" class="text-danger"></span>
+            <div id="weber-student-stuff" style="display: none;">
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.WNumber" class="form-control" autocomplete="wnumber" placeholder="Please enter your W Number." required/>
+                    <label asp-for="Input.WNumber" class="form-label"></label>
+                    <span asp-validation-for="Input.WNumber" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="WeberStudentInput.DepartmentId" asp-items="@Model.WeberStudentInput.Departments" class="form-select"></select>
+                    <label asp-for="WeberStudentInput.DepartmentId" class="form-label"></label>
+                    <span asp-validation-for="WeberStudentInput.DepartmentId" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="WeberStudentInput.ClassLevel" class="form-select" placeholder="Fr. So. Jr. Sr.">
+                        <option>Freshman</option>
+                        <option>Sophomore</option>
+                        <option>Junior</option>
+                        <option>Senior</option>
+                    </select>
+                    <label asp-for="WeberStudentInput.ClassLevel" class="form-label"></label>
+                    <span asp-validation-for="WeberStudentInput.ClassLevel" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="WeberStudentInput.StudentType" class="form-select" placeholder="Flex, Regular">
+                        <option>Full-Time Student</option>
+                        <option>Part-Time Student</option>
+                        <option>Flex Student</option>
+                    </select>
+                    <label asp-for="WeberStudentInput.StudentType" class="form-label"></label>
+                    <span asp-validation-for="WeberStudentInput.StudentType" class="text-danger"></span>
+                </div>
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
@@ -91,6 +97,12 @@
             if (size > 3) { input = input.slice(0, 4) + ") " + input.slice(4, 11) }
             if (size > 6) { input = input.slice(0, 9) + "-" + input.slice(9) }
             return input;
+        }
+    </script>
+
+    <script>
+        function weberStudent(value) {
+            $('#weber-student-stuff').toggle();
         }
     </script>
 }

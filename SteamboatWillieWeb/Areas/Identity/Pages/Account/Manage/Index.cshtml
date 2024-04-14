@@ -5,12 +5,34 @@
     ViewData["Title"] = "Profile";
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" integrity="sha512-zxBiDORGDEAYDdKLuYU9X/JaJo/DPzE42UubfBw9yg8Qvb2YRRIQ8v4KsGHOx2H1/+sdSXyXxLXv5r7tHc9ygg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
 
 <h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
+
+@*Image Cropping Stuff Going Here*@
+
+<div class="modal" tabindex="-1" role="dialog" id="details-modal" style="margin-top: 5%;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div id="cropper"></div>
+            <button id="saveCropper" onclick="saveImage()" class="btn btn-success">Update Image</button>
+            <form asp-page-handler="Image" id="croppieForm" method="post" enctype="multipart/form-data">
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-6 profile-information-div">
         <form id="profile-form" method="post">
+            @if(User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE)) //If they are a tutor
+            {
+                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
+                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
+            }
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.FName" class="form-control bg-secondary text-white" autocomplete="First Name" aria-required="true" placeholder="John" />
@@ -23,49 +45,17 @@
                 <span asp-validation-for="Input.LName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" />
-                <label asp-for="Input.WNumber">W#</label>
-                <span asp-validation-for="Input.WNumber" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-            @if (User.IsInRole(SD.CLIENT_ROLE))
-            {
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
-                <label asp-for="ClientInput.DepartmentId" class="form-label"></label>
-            }
-            else if (User.IsInRole(SD.PROVIDER_ROLE))
-            {
-                <select asp-for="Input.DepartmentId" asp-items="@Model.Input.Departments" class="form-select bg-secondary text-white"></select>
-                <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
-            }
-            </div>
-            <div class="form-floating mb-3">
                 <input asp-for="Input.PhoneNumber" class="form-control bg-secondary text-white" autocomplete="phone number" aria-required="true" placeholder="(123) 456-7890" onInput="this.value = phoneFormat(this.value)" />
                 <label asp-for="Input.PhoneNumber">Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            @if(User.IsInRole(SD.CLIENT_ROLE) && User.IsInRole(SD.PROVIDER_ROLE))
+            @if(User.IsInRole(SD.PROVIDER_ROLE))
             {
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
-                        <option>Freshman</option>
-                        <option>Sophomore</option>
-                        <option>Junior</option>
-                        <option>Senior</option>
-                    </select>
-                    <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
+                    <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required/>
+                    <label asp-for="Input.WNumber">W#</label>
+                    <span asp-validation-for="Input.WNumber" class="text-danger"></span>
                 </div>
-                <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
-                        <option>Full-Time Student</option>
-                        <option>Part-Time Student</option>
-                        <option>Flex Student</option>
-                    </select>
-                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
-                </div>
-                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
                 <div class="form-floating mb-3">
                     <input asp-for="ProviderInput.StartTime" class="form-control bg-secondary text-white" required />
                     <label asp-for="ProviderInput.StartTime" class="form-label"></label>
@@ -77,34 +67,12 @@
                     <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
                 </div>
             }
-            else if (User.IsInRole(SD.CLIENT_ROLE))
+            @if (User.IsInRole(SD.PROVIDER_ROLE) && !User.IsInRole(SD.CLIENT_ROLE)) //Just Provider Role, not tutor
             {
                 <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.ClassLevel" class="form-select bg-secondary text-white" placeholder="Fr. So. Jr. Sr.">
-                        <option>Freshman</option>
-                        <option>Sophomore</option>
-                        <option>Junior</option>
-                        <option>Senior</option>
-                    </select>
-                    <label asp-for="ClientInput.ClassLevel" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.ClassLevel" class="text-danger"></span>
+                    <select asp-for="ProviderInput.DepartmentId" asp-items="@Model.ProviderInput.Departments" class="form-select bg-secondary text-white"></select>
+                    <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>
                 </div>
-                <div class="form-floating mb-3">
-                    <select asp-for="ClientInput.StudentType" class="form-select bg-secondary text-white" placeholder="Flex, Regular">
-                        <option>Full-Time Student</option>
-                        <option>Part-Time Student</option>
-                        <option>Flex Student</option>
-                    </select>
-                    <label asp-for="ClientInput.StudentType" class="form-label"></label>
-                    <span asp-validation-for="ClientInput.StudentType" class="text-danger"></span>
-                </div>
-
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="ProviderInput.Title" value="Tutor" hidden />
-                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
-            }
-            else if (User.IsInRole(SD.PROVIDER_ROLE))
-            {
                 <div class="form-floating mb-3" id="TitleSelector">
                     <select asp-for="ProviderInput.Title" class="form-select bg-secondary text-white" placeholder="Choose the best title for this advisor" id="providerTitle" onchange="titleChange(this.value)">
                         <option>Advisor</option>
@@ -130,19 +98,60 @@
                     <input asp-for="ProviderInput.FlexStudent" class="form-check-input bg-secondary text-white" />
                     </div>
                 </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.StartTime" class="form-control bg-secondary text-white" required/>
-                    <label asp-for="ProviderInput.StartTime" class="form-label"></label>
-                    <span asp-validation-for="ProviderInput.StartTime" class="text-danger"></span>
+            }
+            @if (User.IsInRole(SD.CLIENT_ROLE)) //Can't do else if, since this can apply to tutors
+            {
+                @if (User.IsInRole(SD.PROVIDER_ROLE))
+                {
+                    <input type="checkbox" asp-for="WeberStudentInput.IsWeberStudent" class="form-check-input" checked hidden/>
+                }
+                else
+                {
+                    <div class="form-check mb-3">
+                        <input type="checkbox" asp-for="WeberStudentInput.IsWeberStudent" class="form-check-input" onchange="weberStudent()" id="weber-checkbox"/>
+                        <label asp-for="WeberStudentInput.IsWeberStudent" class="form-check-label"></label>
+                    </div>
+                }
+                <div id="weber-student-stuff" style="@(Model.WeberStudentInput.IsWeberStudent == true ? "display: block;" : "display: none;")">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required/>
+                        <label asp-for="Input.WNumber">W#</label>
+                        <span asp-validation-for="Input.WNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.DepartmentId" asp-items="@Model.WeberStudentInput.Departments" class="form-select bg-secondary text-white"></select>
+                        <label asp-for="WeberStudentInput.DepartmentId" class="form-label"></label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.ClassLevel" class="form-select bg-secondary text-white">
+                            <option>Freshman</option>
+                            <option>Sophomore</option>
+                            <option>Junior</option>
+                            <option>Senior</option>
+                        </select>
+                        <label asp-for="WeberStudentInput.ClassLevel" class="form-label"></label>
+                        <span asp-validation-for="WeberStudentInput.ClassLevel" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="WeberStudentInput.StudentType" class="form-select bg-secondary text-white">
+                            <option>Full-Time Student</option>
+                            <option>Part-Time Student</option>
+                            <option>Flex Student</option>
+                        </select>
+                        <label asp-for="WeberStudentInput.StudentType" class="form-label"></label>
+                        <span asp-validation-for="WeberStudentInput.StudentType" class="text-danger"></span>
+                    </div>
                 </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="ProviderInput.EndTime" class="form-control bg-secondary text-white" required/>
-                    <label asp-for="ProviderInput.EndTime" class="form-label"></label>
-                    <span asp-validation-for="ProviderInput.EndTime" class="text-danger"></span>
-                </div>
-                    <div style="width:100%" class="mb-3 form-control-color form-control bg-secondary text-muted">
-                    <small><label asp-for="ProviderInput.Color" class="form-label ms-2"></label></small> 
-                    @if (Model.ProviderInput.Color == null) {
+            }
+            @if (User.IsInRole(SD.PROVIDER_ROLE))
+            {
+                <div style="width:100%" class="mb-3 form-control-color form-control bg-secondary text-muted">
+                    <small><label asp-for="ProviderInput.Color" class="form-label ms-2"></label></small>
+                    @if (Model.ProviderInput.Color == null)
+                    {
                         <input asp-for="ProviderInput.Color" type="color" class="border border-secondary" onchange="clickColor(0, -1, -1, 5)" value="#135DD8" style="width:100%;">
                     }
                     else
@@ -150,20 +159,6 @@
                         <input asp-for="ProviderInput.Color" type="color" class="border border-secondary" onchange="clickColor(0, -1, -1, 5)" value="@Model.ProviderInput.Color" style="width:100%;">
                     }
                 </div>
-                    
-                
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
-                <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden/>
-            }
-            else
-            {
-                @*Validating the model state by completing all required fields*@
-                <input asp-for="ProviderInput.Title" value="Valid" hidden />
-                <input asp-for="Input.DepartmentId" value="Valid" hidden />
-                <input asp-for="ClientInput.ClassLevel" value="Valid" hidden />
-                <input asp-for="ProviderInput.AdvisementTypes" value="," hidden />
-                <input asp-for="ClientInput.StudentType" class="form-check-input" value="Valid" hidden />
             }
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
         </form>
@@ -172,33 +167,31 @@
             <form id="googleCalendarForm" method="post">
                 @if (Model.Input.IsIntegrated)
                 {
-                    <input type="submit" class="btn btn-warning" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="deintegrate" value="Disable Google Calendar Integration" />
+                    <input type="submit" class="btn btn-warning" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="@false" value="Disable Google Calendar Integration" />
                 }
                 else
                 {
-                    <input type="submit" class="btn btn-success" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="integrate" value="Enable Google Calendar Integration" />
+                    <input type="submit" class="btn btn-success" asp-page-handler="GoogleCalendarIntegration" asp-route-integrate="@true" value="Enable Google Calendar Integration" />
                 }
             </form>
         </div>
     </div>
     
-    <div class="col-md-6">
-        <div class="profile-image-box">
-            <div class="profile-image-container container">
-                <form enctype="multipart/form-data" method="post">
-                    <input asp-for="FileInput.ImgFile" type="file" class="profile-image-btn form-control" id="pfp-upload-btn" accept="image/*" />
-                    <span asp-validation-for="FileInput.ImgFile"></span>
-                    <img src="~/images/profileimages/@Html.Raw(Model.Input.ProfilePictureURL)" class="profile-image" id="pfp", title="Click to change image!"/>
-                    <input type="submit" asp-page-handler="Image" id="pfp-upload-submit" hidden/>
-                </form>
-            </div>
-        </div>        
+    <div class="profile-image-div">
+        <div class="profile-image-container">
+            <form enctype="multipart/form-data" method="post">
+                <input asp-for="FileInput.ImgFile" type="file" class="profile-image-btn form-control" id="pfp-upload-btn" accept="image/*" onchange="uploadImage(this)"/>
+                <img src="~/images/profileimages/@Html.Raw(Model.Input.ProfilePictureURL)" class="profile-image" id="pfp", title="Click to change image!"/>
+                <input type="submit" asp-page-handler="Image" id="pfp-upload-submit" hidden/>
+            </form>
+        </div>
     </div>
 </div>
 
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js" integrity="sha512-Gs+PsXsGkmr+15rqObPJbenQ2wB3qYvTHuJO6YJzPe/dTLvhy0fmae2BcnaozxDo5iaF8emzmCZWbQ1XXiX2Ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
         function phoneFormat(input) {//returns (###) ###-####
@@ -209,18 +202,6 @@
             if (size > 6) { input = input.slice(0, 9) + "-" + input.slice(9) }
             return input;
         }
-        var isFileDialogOpen = false;
-        $('#pfp').click(function () { 
-            $('#pfp-upload-btn').trigger('click'); 
-            isFileDialogOpen = true;
-        });
-        function submitForm() {
-            if (isFileDialogOpen) {
-                isFileDialogOpen = false;
-                $('#pfp-upload-submit').trigger('click');
-            }
-        }
-        $('#pfp-upload-btn').change(submitForm);
 
         function titleChange(value) {
             if (value == 'Advisor') {
@@ -232,6 +213,76 @@
                 p.style.display = 'none';
             }
         }
-        
+    </script>
+
+    <script> //Profile Image Stuff
+
+        var modalOpened = false;
+
+        $('#pfp').on('click', function () {
+            $('#pfp-upload-btn').click();
+        });
+
+        var allowedExtensions =
+            /(\.jpg|\.jpeg|\.png|\.gif|\.xbm|\.tif|\.jfif|\.ico|\.tiff|\.gif|\.svg|\.svgz|\.webp|\.bmp|\.pjp|\.apng|\.pjpeg|\.avif)$/i; //List of valid image formats
+
+        function uploadImage(file) {
+            // if (!allowedExtensions.exec(file.value)) {
+            //     alert('Invalid image format uploaded');
+            // } else{
+            //     $('#pfp-upload-submit').click();
+            // }
+            if (!allowedExtensions.exec(file.value)) {
+                alert('Invalid image');
+            } else {
+                cropFile();
+            }
+        }
+        var croppedImage = $('#cropper').croppie({
+            viewport: { width: 250, height: 250, type: 'circle' },
+            boundary: { width: 400, height: 400 },
+            showZoomer: true,
+            url: '/',
+            format: 'png',
+
+        });
+
+        function cropFile() {
+            $('#details-modal').modal('show');
+            modalOpened = true;
+            var file = document.getElementById('pfp-upload-btn').files[0];
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var contents = event.target.result;
+                croppedImage.croppie('bind', {
+                    url: contents
+                });
+            };
+            reader.readAsDataURL(file);
+
+        }
+
+        function saveImage(){
+            croppedImage.croppie('result', 'base64').then(function (blob) {
+                var input = $("<input>").attr("type", "hidden").attr("name", "blob").val(blob);
+                $('#croppieForm').append(input);
+                $('#croppieForm').submit();
+            });
+        }
+
+        $('#details-modal').on('hidden.bs.modal', function () {
+            location.reload();
+        });
+    </script>
+
+    <script>
+        function weberStudent() {
+            if ($('#weber-checkbox').is(':checked')) {
+                $('#weber-student-stuff').show();
+            }
+            else {
+                $('#weber-student-stuff').hide();
+            }
+        }
     </script>
 }

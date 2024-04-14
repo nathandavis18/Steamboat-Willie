@@ -1,15 +1,10 @@
 ﻿using DataAccess;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Calendar.v3;
-using Google.Apis.Calendar.v3.Data;
-using Google.Apis.Services;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Threading;
 using Utility;
 using Utility.GoogleCalendar;
 
@@ -22,36 +17,15 @@ namespace SteamboatWillieWeb.Pages
         private readonly IGoogleCalendarService _googleCalendarService;
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
-        public string CurrentUserStartTime { get; set; }
-        public string CurrentUserEndTime { get; set; }
+        public string? CurrentUserStartTime { get; set; }
+        public string? CurrentUserEndTime { get; set; }
 
         [BindProperty]
         public AppointmentViewModel? AppointmentModelInput {  get; set; }
 
-        public List<AppointmentCard> Appointments { get; set; }
+        public List<AppointmentCalendarModel> Appointments { get; set; }
         private IEnumerable<ProviderAvailability> providerAvailabilities;
-        public List<Calendar> CalendarObj { get; set; }
-        public class Calendar //Test class, needs to be updated
-        {
-            public string Id { get; set; }
-            public string Title { get; set; }
-            public string Start { get; set; }
-            public string End { get; set; }
-            public string Type { get; set; } //appointment or availability, for provider calendar
-        }
-
-
-        public class AppointmentCard
-        {
-            public string Id { get; set; }
-            public string ProviderName { get; set; }
-            public string AppointmentType { get; set; }
-            public string Date { get; set; }
-            public string StartTime { get; set; }
-            public string EndTime { get; set; }
-            public string Location { get; set; }
-            public string Color { get; set; }
-        }
+        public List<AppointmentCalendarModel> CalendarObj { get; set; }
 
         [BindProperty]
         public AvailabilityModel? AvailabilityModelInput { get; set; }
@@ -64,9 +38,9 @@ namespace SteamboatWillieWeb.Pages
             _userManager = userManager;
             _emailSender = emailSender;
             _googleCalendarService = googleCalendarService;
-            Appointments = new List<AppointmentCard>();
+            Appointments = new List<AppointmentCalendarModel>();
             providerAvailabilities = new List<ProviderAvailability>();
-            CalendarObj = new List<Calendar>();
+            CalendarObj = new List<AppointmentCalendarModel>();
             _configuration = configuration;
         }
 
@@ -95,7 +69,7 @@ namespace SteamboatWillieWeb.Pages
                     );
                     foreach(var app in clientAppointments)
                     {
-                        Appointments.Add(new AppointmentCard
+                        Appointments.Add(new AppointmentCalendarModel
                         {
                             Id = app.ProviderAvailabilityId,
                             ProviderName = _unitOfWork.AppUser.GetById(app.ProviderAvailability.ProviderId).FullName,
@@ -136,11 +110,11 @@ namespace SteamboatWillieWeb.Pages
                         var appointment = _unitOfWork.Appointment.GetAll().Where(x => x.ProviderAvailabilityId == availability.Id).FirstOrDefault();
                         var clientName = _unitOfWork.AppUser.GetAll().Where(x => x.Id == appointment.ClientId).Select(x => x.FullName).FirstOrDefault();
 
-                        CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle + ": " + clientName, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Appointment" });
+                        CalendarObj.Add(new AppointmentCalendarModel { Id = availability.Id.ToString(), ProviderType = scheduleTitle + ": " + clientName, StartTime = DateTimeParser.ParseDateTime(availability.StartTime), EndTime = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Appointment" });
                     }
                     else
                     {
-                        CalendarObj.Add(new Calendar { Id = availability.Id.ToString(), Title = scheduleTitle, Start = DateTimeParser.ParseDateTime(availability.StartTime), End = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Availability" });
+                        CalendarObj.Add(new AppointmentCalendarModel { Id = availability.Id.ToString(), ProviderType = scheduleTitle, StartTime = DateTimeParser.ParseDateTime(availability.StartTime), EndTime = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Availability" });
                     }
                 }
 
@@ -149,23 +123,21 @@ namespace SteamboatWillieWeb.Pages
         }
 
         //Google Calendar Integration Question
-        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(string integrate)
+        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate)
         {
             var user = await _userManager.GetUserAsync(User);
-            user.GoogleCalendarIntegration = integrate.Equals("absolutely");
-
-            if (integrate.Equals("absolutely"))
+            if (user == null)
             {
-                var settings = _configuration.GetSection("Authentication:Google");
-                string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
-                UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
-                {
-                    ClientId = settings["ClientId"],
-                    ClientSecret = settings["ClientSecret"],
-                },
-                scope,
-                user.Id,
-                new CancellationToken(false));
+                return RedirectToPage("/Account/Login", new { ReturnUrl = "/Index", Area = "Identity" });
+            }
+            if (integrate)
+            {
+                var credential = await ValidateUser.ValidateUserCalendar(user!.Id, _configuration);
+                user.GoogleCalendarIntegration = ValidateUser.IsUserValidated(credential);
+            }
+            else
+            {
+                user.GoogleCalendarIntegration = false;
             }
 
             _unitOfWork.AppUser.Update(user);

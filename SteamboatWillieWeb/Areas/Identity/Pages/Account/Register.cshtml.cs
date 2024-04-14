@@ -2,30 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using DataAccess;
 using Infrastructure.Models;
+using Infrastructure.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
 using Utility;
-using System.Text.RegularExpressions;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Configuration;
-using DataAccess;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 {
@@ -64,10 +55,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public RegisterInputModel Input { get; set; }
 
         [BindProperty]
-        public ClientInputModel ClientInput {  get; set; }
+        public WeberStudentInputModel WeberStudentInput {  get; set; }
 
         [BindProperty]
         public ProviderInputModel ProviderInput { get; set; }
@@ -88,121 +79,49 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public class InputModel
-        {
-            [Required]
-            [Display(Name = "First Name")]
-            public string FName { get; set; }
-
-            [Required]
-            [DisplayName("Last Name")]
-            public string LName { get; set; }
 
 
-            [Phone]
-            [Display(Name = "Phone number")]
-            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", ErrorMessage = "Phone number must follow the format (xxx) xxx-xxxx")]
-            [StringLength(15)]
-            [Required]
-            public string PhoneNumber { get; set; }
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-
-            [Display(Name = "W#")]
-            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
-            [StringLength(9)]
-            [Required]
-            public string WNumber { get; set; }
-
-            public string Role {  get; set; }
-            public IEnumerable<SelectListItem> RoleList { get; set; }
-
-            [Required]
-            public string DepartmentId { get; set; }
-            public IEnumerable<SelectListItem> Departments { get; set; }
-        }
-
-        public class ClientInputModel
-        {
-            [Required]
-            [Display(Name = "Class Level")]
-            public string ClassLevel { get; set; }
-
-            [Required]
-            [Display(Name = "Student Type")]
-            public string StudentType { get; set; }
-
-            [Display(Name = "Major")]
-            public string DepartmentId { get; set; }
-
-        }
-
-        public class ProviderInputModel
-        {
-            [Required]
-            [Display(Name = "Title")]
-            public string Title { get; set; }
-
-            [Display(Name = "Department")]
-            public string DepartmentId { get; set; }
-
-            public bool CreatingProvider { get; set; }
-        }
-
-
-        public async Task OnGetAsync(string returnUrl = null, bool creatingProvider = false)
+        public async Task OnGetAsync(string returnUrl = null, bool creatingProvider = false, bool isWeberStudent = false)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            Input = new InputModel()
+            Input = new RegisterInputModel()
             {
                 RoleList = _roleManager.Roles.Select(r => r.Name).Select(x => new SelectListItem()
                 {
                     Text = x,
                     Value = x
                 }),
-                Departments = _unitOfWork.Department.GetAll().Select(x => new SelectListItem()
-                {
-                    Text = x.DepartmentName,
-                    Value = x.Id.ToString()
-                }),
                 Role = "",
+                CreatingProvider = creatingProvider,
             };
             if (!creatingProvider)
             {
-                ClientInput = new ClientInputModel();
+                WeberStudentInput = new WeberStudentInputModel()
+                {
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    {
+                        Text = x.DepartmentName,
+                        Value = x.Id.ToString()
+                    }),
+                    IsWeberStudent = isWeberStudent
+                };
             }
             else
             {
                 ProviderInput = new ProviderInputModel()
                 {
-                    CreatingProvider = creatingProvider
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    {
+                        Text = x.DepartmentName,
+                        Value = x.Id.ToString()
+                    }),
                 };
+            }
+
+            if (!User.IsInRole(SD.ADMIN_ROLE))
+            {
+                Input.CreatingProvider = false;
             }
         }
 
@@ -215,9 +134,10 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 var user = CreateUser();
                 user.FName = Input.FName;
                 user.LName = Input.LName;
-                user.WNumber = Input.WNumber;
                 user.ProfilePictureURL = "default.png";
                 _unitOfWork.AppUser.Update(user);
+
+                user.WNumber = Input.WNumber;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -251,21 +171,25 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     {
                         Client clientEntry = new Client();
                         clientEntry.AppUserId = userId;
-                        clientEntry.DepartmentId = Int32.Parse(Input.DepartmentId);
-                        clientEntry.ClassLevel = ClientInput.ClassLevel;
-                        clientEntry.StudentType = ClientInput.StudentType;
+                        clientEntry.IsWeberStudent = WeberStudentInput.IsWeberStudent;
+                        if (WeberStudentInput.IsWeberStudent)
+                        {
+                            clientEntry.DepartmentId = Int32.Parse(WeberStudentInput.DepartmentId);
+                            clientEntry.ClassLevel = WeberStudentInput.ClassLevel;
+                            clientEntry.StudentType = WeberStudentInput.StudentType;
+                        }
                         _unitOfWork.Client.Add(clientEntry);
                     }
                     if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
                     {
                         Provider providerEntry = new Provider();
                         providerEntry.AppUserId = userId;
-                        providerEntry.DepartmentId = Int32.Parse(Input.DepartmentId);
+                        providerEntry.DepartmentId = Int32.Parse(ProviderInput.DepartmentId);
                         providerEntry.Title = ProviderInput.Title;
                         providerEntry.AdvisementTypes = ",";
                         providerEntry.StartTime = DateTime.Parse("01/01/0001 08:00:00");
                         providerEntry.EndTime = DateTime.Parse("01/01/0001 20:00:00");
-                        ProviderInput.CreatingProvider = true;
+                        Input.CreatingProvider = true;
                         _unitOfWork.Provider.Add(providerEntry);
                     }
                     await _unitOfWork.CommitAsync();
@@ -276,7 +200,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        if (!ProviderInput.CreatingProvider)
+                        if (!Input.CreatingProvider)
                         {
                             await _signInManager.SignInAsync(user, isPersistent: false);
                         }

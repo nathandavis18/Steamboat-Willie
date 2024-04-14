@@ -1,13 +1,7 @@
-﻿using EllipticCurve;
-using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
-using MimeKit;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 using System.Net;
 using System.Net.Mail;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 
 namespace Utility
 {

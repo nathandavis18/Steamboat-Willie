@@ -2,22 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using DataAccess;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Calendar.v3;
-using Google.Apis.Services;
 using Infrastructure.Models;
+using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.AspNetCore.WebUtilities;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using System.ComponentModel.DataAnnotations;
 using Utility;
+using Utility.GoogleCalendar;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 {
@@ -50,18 +48,11 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [TempData]
-        public string StatusMessage { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public ProfileInputModel Input { get; set; }
 
         [BindProperty]
-        public ClientInputModel ClientInput { get; set; }
+        public WeberStudentInputModel WeberStudentInput { get; set; }
 
         [BindProperty]
         public ProviderInputModel ProviderInput { get; set; }
@@ -73,88 +64,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public class InputModel
-        {
-            [Required]
-            [Display(Name = "First Name")]
-            public string FName { get; set; }
-
-            [Required]
-            [DisplayName("Last Name")]
-            public string LName { get; set; }
-
-            [Required]
-            [DisplayName("Birthdate")]
-            [DataType(DataType.Date)]
-            public DateTime DateOfBirth { get; set; }
-
-            [Phone]
-            [Display(Name = "Phone number")]
-            [RegularExpression("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", ErrorMessage = "Phone number must follow the format (xxx) xxx-xxxx")]
-            [StringLength(15)]
-            [Required]
-            public string PhoneNumber { get; set; }
-
-            [Display(Name = "W#")]
-            [RegularExpression("^W([0-9]{8}$)", ErrorMessage = "W# must match the format of W########")]
-            [StringLength(9)]
-            [Required]
-            public string WNumber { get; set; }
-
-            [Required]
-            public string DepartmentId { get; set; }
-            public IEnumerable<SelectListItem> Departments { get; set; }
-
-            [DisplayName("Profile Picture")]
-            public string ProfilePictureURL { get; set; }
-
-            public bool IsIntegrated { get; set; }
-        }
-
-        public class ClientInputModel
-        {
-            [Required]
-            [Display(Name = "Class Level")]
-            public string ClassLevel { get; set; }
-
-            [Display(Name = "Major")]
-            public string DepartmentId { get; set; }
-
-            [Required]
-            [Display(Name = "Student Type")]
-            public string StudentType { get; set; }
-        }
-
-        public class ProviderInputModel
-        {
-            [Required]
-            [Display(Name = "Title")]
-            public string Title { get; set; }
-
-            [Display(Name = "Department")]
-            public string DepartmentId { get; set; }
-
-            [Display(Name = "Advisement Types")]
-            public string AdvisementTypes {  get; set; }
-
-            [Display(Name = "New Student")]
-            public bool NewStudent { get; set; }
-            [Display(Name = "Current Student")]
-            public bool ExistingStudent {  get; set; }
-            [Display(Name = "Flex Student")]
-            public bool FlexStudent { get; set; }
-
-            [Display(Name = "Working Start Time")]
-            [DataType(DataType.Time)]
-            public DateTime StartTime { get; set; }
-
-            [Display(Name = "Working End Time")]
-            [DataType(DataType.Time)]
-            public DateTime EndTime { get; set; }
-
-            [Display(Name = "Your Color")]
-            public string Color { get; set; }
-        }
 
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
         public class FileInputModel
@@ -178,34 +87,43 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
             Username = userName;
 
-            Input = new InputModel
+            Input = new ProfileInputModel
             {
                 FName = user.FName,
                 LName = user.LName,
                 WNumber = user.WNumber,
-                Departments = departments.Select(x => new SelectListItem()
-                {
-                    Text = x.DepartmentName,
-                    Value = x.Id.ToString()
-                }),
                 PhoneNumber = phoneNumber,
                 ProfilePictureURL = user.ProfilePictureURL,
                 IsIntegrated = user.GoogleCalendarIntegration.Value
             };
             if (await _userManager.IsInRoleAsync(user, SD.CLIENT_ROLE))
             {
-                Input.DepartmentId = client.DepartmentId.ToString();
-                ClientInput = new ClientInputModel()
+                WeberStudentInput = new WeberStudentInputModel()
                 {
-                    ClassLevel = client.ClassLevel,
-                    StudentType = client.StudentType
+                    IsWeberStudent = client.IsWeberStudent.Value,
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    {
+                        Text = x.DepartmentName,
+                        Value = x.Id.ToString()
+                    })
                 };
+                if (client.IsWeberStudent.Value)
+                {
+                    WeberStudentInput.DepartmentId = client.DepartmentId.ToString();
+                    WeberStudentInput.ClassLevel = client.ClassLevel;
+                    WeberStudentInput.StudentType = client.StudentType;
+                }
             }
             if (await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
             {
-                Input.DepartmentId = provider.DepartmentId.ToString();
                 ProviderInput = new ProviderInputModel()
                 {
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    {
+                        Text = x.DepartmentName,
+                        Value = x.Id.ToString()
+                    }),
+                    DepartmentId = provider.DepartmentId.ToString(),
                     Title = provider.Title,
                     StartTime = provider.StartTime.Value,
                     EndTime = provider.EndTime.Value,
@@ -250,19 +168,24 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
+                    TempData["error"] = "There was a problem setting your phone number. Please try again.";
                     return RedirectToPage();
                 }
             }
             user.FName = Input.FName;
             user.LName = Input.LName;
             user.WNumber = Input.WNumber;
+
             var client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == user.Id);
             if (client != null)
             {
-                client.ClassLevel = ClientInput.ClassLevel;
-                client.StudentType = ClientInput.StudentType;
-                client.DepartmentId = int.Parse(Input.DepartmentId);
+                client.IsWeberStudent = WeberStudentInput.IsWeberStudent;
+                if (WeberStudentInput.IsWeberStudent)
+                {
+                    client.ClassLevel = WeberStudentInput.ClassLevel;
+                    client.StudentType = WeberStudentInput.StudentType;
+                    client.DepartmentId = int.Parse(WeberStudentInput.DepartmentId);
+                }
                 _unitOfWork.Client.Update(client);
             }
 
@@ -289,7 +212,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 {
                     provider.AdvisementTypes = ",";
                 }
-                provider.DepartmentId = int.Parse(Input.DepartmentId);
+                provider.DepartmentId = int.Parse(ProviderInput.DepartmentId);
                 provider.HexColor = ProviderInput.Color;
                 _unitOfWork.Provider.Update(provider);
             }
@@ -297,53 +220,44 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             await _unitOfWork.CommitAsync();
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            TempData["success"] = "Your profile has been updated!";
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostImageAsync()
         {
-            if (FileInput.ImgFile == null)
-            {
-                TempData["error"] = "Error: No Image Selected";
-                return RedirectToPage();
-            }
-            var extension = Path.GetExtension(FileInput.ImgFile.FileName);
-            if(!(extension.Equals(".png") || extension.Equals(".jpg") || extension.Equals(".jpeg")))
-            {
-                TempData["error"] = "Error: Image file type not supported.";
-                return RedirectToPage();
-            }
+            var imageBase64 = Request.Form["blob"].ToString();
+            var startIndex = imageBase64.LastIndexOf("base64,") + 7;
+            var base64String = imageBase64.Substring(startIndex, imageBase64.Length - startIndex);
+            var imgContents = WebEncoders.Base64UrlDecode(base64String);
+
+            Image finalImage = Image.Load<Rgba32>(imgContents);
+
             var user = await _userManager.GetUserAsync(User);
-            var fileName = user.Id.Substring(0, 10) + user.FName.Substring(0, 3) + user.LName.Substring(0, 1) + "pfpImage.png";
+            var fileName = user.Id.Substring(0, 10) + "pfpImage.png";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/profileimages", fileName);
-            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
-            {
-                user.ProfilePictureURL = fileName;
-                await FileInput.ImgFile.CopyToAsync(fs);
-                _unitOfWork.AppUser.Update(user);
-                await _unitOfWork.CommitAsync();
-            }
-            return RedirectToPage();
+            await finalImage.SaveAsync(path);
+
+            user.ProfilePictureURL = fileName;
+            _unitOfWork.AppUser.Update(user);
+            await _unitOfWork.CommitAsync();
+
+            TempData["success"] = "Profile picture updated successfully!";
+
+            return RedirectToPage("./Index");
         }
 
-        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(string integrate)
+        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate)
         {
             var user = await _userManager.GetUserAsync(User);
-            user.GoogleCalendarIntegration = integrate.Equals("integrate");
-
-            if (integrate.Equals("integrate"))
+            if (integrate)
             {
-                var settings = _configuration.GetSection("Authentication:Google");
-                string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
-                UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
-                {
-                    ClientId = settings["ClientId"],
-                    ClientSecret = settings["ClientSecret"],
-                },
-                scope,
-                user.Id,
-                new CancellationToken(false));
+                var credential = await ValidateUser.ValidateUserCalendar(user.Id, _configuration);
+                user.GoogleCalendarIntegration = ValidateUser.IsUserValidated(credential);
+            }
+            else
+            {
+                user.GoogleCalendarIntegration = false;
             }
 
             _unitOfWork.AppUser.Update(user);
