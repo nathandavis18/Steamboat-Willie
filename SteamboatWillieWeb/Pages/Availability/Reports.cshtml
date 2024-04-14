@@ -1,0 +1,29 @@
+﻿@page
+@model SteamboatWillieWeb.Pages.Availability.ReportsModel
+@{
+}
+<h2>Appointment Reports</h2>
+<form method="post" id="form">
+    <input asp-for="ReportsModelInput.ProviderId" hidden />
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    <div class="form-control bg-black">
+        <div class="form-group mb-3">
+            <label asp-for="ReportsModelInput.StartDate" class="text-white"></label>
+            <input asp-for="ReportsModelInput.StartDate" id="startDate" class="form-control bg-secondary text-white" />
+            <span asp-validation-for="ReportsModelInput.StartDate" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="ReportsModelInput.EndDate" class="text-white"></label>
+            <input asp-for="ReportsModelInput.EndDate" class="form-control bg-secondary text-white" />
+            <span asp-validation-for="ReportsModelInput.EndDate" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="ReportsModelInput.FileName" class="text-white">File Name</label>
+            <input asp-for="ReportsModelInput.FileName" class="form-control bg-secondary text-white" placeholder="MyReport (no file extension)" />
+            <span asp-validation-for="ReportsModelInput.FileName" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="text-start mt-3">
+        <input type="submit" class="btn btn-primary" value="Generate Report" />
+    </div>
+</form>
