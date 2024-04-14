@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+#nullable disable
 
 namespace Infrastructure.ViewModels
 {

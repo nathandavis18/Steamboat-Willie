@@ -24,10 +24,10 @@ namespace SteamboatWillieWeb.Pages.Users
 
         public PaginatedList<AppUser>? ApplicationUsers { get; set; }
         public Dictionary<string, List<string>>? UserRoles { get; set; }
-        public List<SelectListItem> Roles {  get; set; }
+        public List<SelectListItem>? Roles {  get; set; }
 
-        public string CurrentFilter { get; set; }
-        public string CurrentRole { get; set; }
+        public string? CurrentFilter { get; set; }
+        public string? CurrentRole { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? pageIndex, string searchString, string roleSort)
         {

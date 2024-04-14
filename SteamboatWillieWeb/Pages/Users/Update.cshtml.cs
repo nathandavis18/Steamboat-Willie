@@ -20,10 +20,10 @@ namespace SteamboatWillieWeb.Pages.Users
         }
 
         [BindProperty]
-        public AppUser AppUser { get; set; }
-        public List<string> UsersRoles { get; set; }
-        public List<string> AllRoles { get; set; }
-        public List<string> OldRoles { get; set; }
+        public AppUser AppUser { get; set; } = new AppUser();
+        public List<string>? UsersRoles { get; set; }
+        public List<string>? AllRoles { get; set; }
+        public List<string>? OldRoles { get; set; }
 
 
         public async Task<IActionResult> OnGetAsync(string id)

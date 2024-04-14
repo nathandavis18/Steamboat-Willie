@@ -3,16 +3,15 @@
 #nullable disable
 
 using DataAccess;
-using Google.Apis.Auth.OAuth2;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Utility;
+using Utility.GoogleCalendar;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 {
@@ -248,23 +247,22 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(string integrate)
+        public IActionResult OnPostTestCroppie(string filename, IFormFile blob)
+        {
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate)
         {
             var user = await _userManager.GetUserAsync(User);
-            user.GoogleCalendarIntegration = integrate.Equals("integrate");
-
-            if (integrate.Equals("integrate"))
+            if (integrate)
             {
-                var settings = _configuration.GetSection("Authentication:Google");
-                string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
-                UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
-                {
-                    ClientId = settings["ClientId"],
-                    ClientSecret = settings["ClientSecret"],
-                },
-                scope,
-                user.Id,
-                new CancellationToken(false));
+                var credential = await ValidateUser.ValidateUserCalendar(user.Id, _configuration);
+                user.GoogleCalendarIntegration = ValidateUser.IsUserValidated(credential);
+            }
+            else
+            {
+                user.GoogleCalendarIntegration = false;
             }
 
             _unitOfWork.AppUser.Update(user);

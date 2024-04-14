@@ -17,16 +17,7 @@ namespace Utility.GoogleCalendar
 
         public async Task<string> CreateEvent(Event request, string userId, CancellationToken cancellationToken)
         {
-            var settings = _configuration.GetSection("Authentication:Google");
-            string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
-            UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
-            {
-                ClientId = settings["ClientId"],
-                ClientSecret = settings["ClientSecret"],
-            },
-                scope,
-                userId,
-                cancellationToken);
+            var credential = await ValidateUser.ValidateUserCalendar(userId, _configuration);
             var services = new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
@@ -42,16 +33,7 @@ namespace Utility.GoogleCalendar
 
         public async Task<string> DeleteEvent(string eventId, string userId, CancellationToken cancellationToken)
         {
-            var settings = _configuration.GetSection("Authentication:Google");
-            string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
-            UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
-            {
-                ClientId = settings["ClientId"],
-                ClientSecret = settings["ClientSecret"],
-            },
-                scope,
-                userId,
-                cancellationToken);
+            var credential = await ValidateUser.ValidateUserCalendar(userId, _configuration);
             var services = new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,

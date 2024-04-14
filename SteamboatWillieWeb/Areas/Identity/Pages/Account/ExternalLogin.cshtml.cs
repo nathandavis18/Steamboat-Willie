@@ -109,15 +109,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            var user = await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email));
-            if (user != null)
-            {
-                if (!await _userManager.IsEmailConfirmedAsync(user))
-                {
-                    TempData["error"] = "You must confirm your email. Check your email for a verification link. Be sure to check your Spam Folder if you don't see it.";
-                    return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
-                }
-            }
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
@@ -211,39 +202,23 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     {
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-                        var userId = await _userManager.GetUserIdAsync(user);
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(code));
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code },
-                            protocol: Request.Scheme);
-
-                        var message = EmailFormats.ConfirmEmail.Replace("[ConfirmEmailLink]", HtmlEncoder.Default.Encode(callbackUrl));
-
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", message);
-
                         await _userManager.AddToRoleAsync(user, SD.CLIENT_ROLE);
 
                         var client = new Client();
-                        client.AppUserId = userId;
+                        client.AppUserId = user.Id;
                         client.IsWeberStudent = WeberStudentInput.IsWeberStudent;
                         if (WeberStudentInput.IsWeberStudent)
                         {
-                            client.DepartmentId = Int32.Parse(WeberStudentInput.DepartmentId);
+                            client.DepartmentId = int.Parse(WeberStudentInput.DepartmentId);
                             client.ClassLevel = WeberStudentInput.ClassLevel;
                             client.StudentType = WeberStudentInput.StudentType;
                         }
                         _unitOfWork.Client.Add(client);
 
-                        await _unitOfWork.CommitAsync();
+                        user.EmailConfirmed = true; //External login means user's email is theirs. Don't need to confirm.
+                        _unitOfWork.AppUser.Update(user);
 
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
-                        }
+                        await _unitOfWork.CommitAsync();
 
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
                         return LocalRedirect(returnUrl);

@@ -39,7 +39,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
         public AppointmentViewModel? InputModel { get; set; }
 
         [BindProperty]
-        public FilterModel? FilterModelInput { get; set; }
+        public FilterModel FilterModelInput { get; set; }
 
         public class FilterModel
         {
