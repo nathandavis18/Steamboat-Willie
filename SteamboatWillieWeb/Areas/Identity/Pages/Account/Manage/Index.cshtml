@@ -216,6 +216,9 @@
     </script>
 
     <script> //Profile Image Stuff
+
+        var modalOpened = false;
+
         $('#pfp').on('click', function () {
             $('#pfp-upload-btn').click();
         });
@@ -246,7 +249,7 @@
 
         function cropFile() {
             $('#details-modal').modal('show');
-
+            modalOpened = true;
             var file = document.getElementById('pfp-upload-btn').files[0];
             var reader = new FileReader();
             reader.onload = function (event) {
@@ -266,6 +269,10 @@
                 $('#croppieForm').submit();
             });
         }
+
+        $('#details-modal').on('hidden.bs.modal', function () {
+            location.reload();
+        });
     </script>
 
     <script>
