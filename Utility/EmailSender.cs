@@ -9,7 +9,6 @@ namespace Utility
     public class EmailSender : IEmailSender
     {
         private readonly IConfiguration _configuration;
-        private const int SmtpHostPort = 25;
         public EmailSender(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -23,7 +22,8 @@ namespace Utility
                 string host = emailSender.GetValue(typeof(string), "Host") as string;
                 string sender = emailSender.GetValue(typeof(string), "Email") as string;
                 string pass = emailSender.GetValue(typeof(string), "Password") as string;
-                var client = new SmtpClient(host, SmtpHostPort)
+                int port = (int)emailSender.GetValue(typeof(int), "Port");
+                var client = new SmtpClient(host, port)
                 {
                     Credentials = new NetworkCredential(sender, pass),
                 };
