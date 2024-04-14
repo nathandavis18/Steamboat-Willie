@@ -210,16 +210,16 @@ namespace SteamboatWillieWeb.Pages.Appointments
             if (_unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(providerId).FullName;
-                Event @event = EventCreater.MakeEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
-                string clientCalendarId = await _googleCalendarService.CreateEvent(@event, clientId, new CancellationToken(false));
+                Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
+                string clientCalendarId = await _googleCalendarService.AddEvent(@event, clientId, new CancellationToken(false));
                 appointment.ClientEventId = clientCalendarId;
             }
 
             if (_unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(clientId).FullName;
-                Event @event = EventCreater.MakeEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
-                string providerCalendarId = await _googleCalendarService.CreateEvent(@event, providerId, new CancellationToken(false));
+                Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
+                string providerCalendarId = await _googleCalendarService.AddEvent(@event, providerId, new CancellationToken(false));
                 appointment.ProviderEventId = providerCalendarId;
             }
 
