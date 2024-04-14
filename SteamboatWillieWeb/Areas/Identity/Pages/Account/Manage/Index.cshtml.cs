@@ -9,9 +9,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System.ComponentModel.DataAnnotations;
 using Utility;
 using Utility.GoogleCalendar;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 {
@@ -222,34 +226,25 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostImageAsync()
         {
-            if (FileInput.ImgFile == null)
-            {
-                TempData["error"] = "Error: No Image Selected";
-                return RedirectToPage();
-            }
-            var extension = Path.GetExtension(FileInput.ImgFile.FileName);
-            if(!(extension.Equals(".png") || extension.Equals(".jpg") || extension.Equals(".jpeg")))
-            {
-                TempData["error"] = "Error: Image file type not supported.";
-                return RedirectToPage();
-            }
-            var user = await _userManager.GetUserAsync(User);
-            var fileName = user.Id.Substring(0, 10) + user.FName.Substring(0, 3) + user.LName.Substring(0, 1) + "pfpImage.png";
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/profileimages", fileName);
-            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
-            {
-                user.ProfilePictureURL = fileName;
-                await FileInput.ImgFile.CopyToAsync(fs);
-                _unitOfWork.AppUser.Update(user);
-                await _unitOfWork.CommitAsync();
-            }
-            TempData["success"] = "Profile picture updated successfully!";
-            return RedirectToPage();
-        }
+            var imageBase64 = Request.Form["blob"].ToString();
+            var startIndex = imageBase64.LastIndexOf("base64,") + 7;
+            var base64String = imageBase64.Substring(startIndex, imageBase64.Length - startIndex);
+            var imgContents = WebEncoders.Base64UrlDecode(base64String);
 
-        public IActionResult OnPostTestCroppie(string filename, IFormFile blob)
-        {
-            return RedirectToPage();
+            Image finalImage = Image.Load<Rgba32>(imgContents);
+
+            var user = await _userManager.GetUserAsync(User);
+            var fileName = user.Id.Substring(0, 10) + "pfpImage.png";
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/profileimages", fileName);
+            await finalImage.SaveAsync(path);
+
+            user.ProfilePictureURL = fileName;
+            _unitOfWork.AppUser.Update(user);
+            await _unitOfWork.CommitAsync();
+
+            TempData["success"] = "Profile picture updated successfully!";
+
+            return RedirectToPage("./Index");
         }
 
         public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate)

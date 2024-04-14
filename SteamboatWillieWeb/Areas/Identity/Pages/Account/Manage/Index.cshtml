@@ -13,11 +13,16 @@
 
 @*Image Cropping Stuff Going Here*@
 
-<form asp-page-handler="TestCroppie" id="testCroppieForm" method="post" enctype="multipart/form-data">
-</form>
-<div id="cropper"></div>
-<button id="testCropper" onclick="testCropper()">Test Cropper</button>
-
+<div class="modal" tabindex="-1" role="dialog" id="details-modal" style="margin-top: 5%;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div id="cropper"></div>
+            <button id="saveCropper" onclick="saveImage()" class="btn btn-success">Update Image</button>
+            <form asp-page-handler="Image" id="croppieForm" method="post" enctype="multipart/form-data">
+            </form>
+        </div>
+    </div>
+</div>
 
 
 <div class="row">
@@ -230,15 +235,18 @@
                 cropFile();
             }
         }
+        var croppedImage = $('#cropper').croppie({
+            viewport: { width: 250, height: 250, type: 'circle' },
+            boundary: { width: 400, height: 400 },
+            showZoomer: true,
+            url: '/',
+            format: 'png',
+
+        });
 
         function cropFile() {
-            var croppedImage = $('#cropper').croppie({
-                viewport: { width: 250, height: 250 },
-                boundary: { width: 800, height: 600 },
-                showZoomer: false,
-                url: '/',
-                format: 'png'
-            });
+            $('#details-modal').modal('show');
+
             var file = document.getElementById('pfp-upload-btn').files[0];
             var reader = new FileReader();
             reader.onload = function (event) {
@@ -251,14 +259,11 @@
 
         }
 
-        function testCropper(){
-            alert('made it inside this');
-            croppedImage.croppie('result', 'blob').then(function (blob) {
-                var input1 = $("<input>").attr("type", "hidden").attr("name", "filename").val("cropped_image.png");
-                var input2 = $("<input>").attr("type", "hidden").attr("name", "blob").val(blob);
-                $('#testCroppieForm').append(input1);
-                $('#testCroppieForm').append(input2);
-                $('#testCroppieForm').submit();
+        function saveImage(){
+            croppedImage.croppie('result', 'base64').then(function (blob) {
+                var input = $("<input>").attr("type", "hidden").attr("name", "blob").val(blob);
+                $('#croppieForm').append(input);
+                $('#croppieForm').submit();
             });
         }
     </script>
