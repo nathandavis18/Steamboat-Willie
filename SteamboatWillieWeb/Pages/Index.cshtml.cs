@@ -30,7 +30,9 @@ namespace SteamboatWillieWeb.Pages
         [BindProperty]
         public AvailabilityModel? AvailabilityModelInput { get; set; }
 
-        public bool IntegratePopup {  get; set; }
+        public bool IntegrateModal {  get; set; }
+        public string? PartialViewName {  get; set; }
+        public string? CurrentView {  get; set; }
 
         public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService, IConfiguration configuration)
         {
@@ -44,18 +46,16 @@ namespace SteamboatWillieWeb.Pages
             _configuration = configuration;
         }
 
-        public async Task<IActionResult> OnGetAsync(string integratePopup = "")
+        public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
             if(user != null)
             {
-                if (integratePopup.Equals("Integrate"))
-                {
-                    return Partial("_GoogleCalendarPartial", this);
-                }
                 if(user.GoogleCalendarIntegration == null)
                 {
-                    IntegratePopup = true;
+                    IntegrateModal = true;
+                    PartialViewName = nameof(Shared.Pages_Shared__GoogleCalendarPartial);
+                    return Page();
                 }
             }
 
@@ -82,6 +82,7 @@ namespace SteamboatWillieWeb.Pages
                         var x = Appointments.Last();
                         x.Color = GetColor(x.AppointmentType);
                     }
+                    CurrentView = "Client";
                 }
             }
             if(User.IsInRole(SD.PROVIDER_ROLE))
@@ -117,7 +118,7 @@ namespace SteamboatWillieWeb.Pages
                         CalendarObj.Add(new AppointmentCalendarModel { Id = availability.Id.ToString(), ProviderType = scheduleTitle, StartTime = DateTimeParser.ParseDateTime(availability.StartTime), EndTime = DateTimeParser.ParseDateTime(availability.EndTime), Type = "Availability" });
                     }
                 }
-
+                CurrentView = "Provider";
             }
             return Page();
         }
