@@ -54,7 +54,7 @@ namespace SteamboatWillieWeb.Pages
                 if(user.GoogleCalendarIntegration == null)
                 {
                     IntegrateModal = true;
-                    PartialViewName = nameof(Shared.Pages_Shared__GoogleCalendarPartial);
+                    PartialViewName = "_GoogleCalendarPartial";
                     return Page();
                 }
             }

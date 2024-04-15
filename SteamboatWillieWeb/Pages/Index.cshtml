@@ -22,6 +22,10 @@ else
     <div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
+                @if (Model.IntegrateModal)
+                {
+                    <partial name="@Model.PartialViewName" />
+                }
             </div>
         </div>
     </div>
@@ -32,7 +36,7 @@ else
     if (Model.IntegrateModal)
     {
         <script>
-            $('.modal-content').load(`/Index?integratePopup=${'Integrate'}`, function () {
+            $(document).ready(function () {
                 $('#details-modal').modal('show');
             });
         </script>
