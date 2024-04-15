@@ -10,12 +10,6 @@
 <input type="hidden" id="currentUserStartTime" value="@Model.CurrentUserStartTime" />
 <input type="hidden" id="currentUserEndTime" value="@Model.CurrentUserEndTime" />
 
-<div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        </div>
-    </div>
-</div>
 @if (!User.Identity.IsAuthenticated)
 {
     <div class="text-center">
@@ -23,285 +17,172 @@
         <p class="display-4 login-signup">Please, <a asp-page="/Account/Login" asp-area="Identity">log in</a> or <a asp-page="/Account/Register" asp-area="Identity">sign up</a> to continue</p>
     </div>
 }
-else if (Model.IntegratePopup)
+else
 {
-    <script>
-        $('.modal-content').load(`/Index?integratePopup=${'Integrate'}`, function () {
-            $('#details-modal').modal('show');
-        });
-    </script>
-}
-else if (User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
-{
-    <div class="text-center row">
-        <div class="tutor-slider-inner col-md-4 provider-view">
-            <label>Provider View</label>
-        </div>
-        <div class="tutor-slider-div col">
-            <label class="switch">
-                <input type="checkbox" id="tutor-slider" onchange="tutorSlider()">
-                <span class="slider round"></span>
-            </label>
-        </div>
-        <div class="tutor-slider-inner col-md-4 student-view">
-            <label>Student View</label>
+    <div class="modal fade" tabindex="-1" role="dialog" id="details-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            </div>
         </div>
     </div>
-    <div id="tutor-provider-view" style="display: contents">
-        <head>
-            <meta charset='utf-8' />
-            <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    var currentUserStartTime = document.getElementById('currentUserStartTime').value;
-                    var currentUserEndTime = document.getElementById('currentUserEndTime').value;
-                    var calendarEl = document.getElementById('calendar');
-                    var calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: 'dayGridMonth',
-                        allDaySlot: false,
-                        slotMinTime: '@Model.CurrentUserStartTime',
-                        slotMaxTime: '@Model.CurrentUserEndTime',
-                        height: 'auto',
-                        headerToolbar: {
-                            left: 'prev,next',
-                            center: 'title',
-                            right: 'today dayGridMonth,timeGridWeek' // user can switch between the two
-                        },
-                        /*navLinks: true,
-                        navLinkDayClick: function (date) {
-                            var currentDate = new Date();
-                            currentDate = currentDate.setDate(currentDate.getDate() - 1);
-                            if (date < currentDate) {
-                                return;
-                            }
-                            var year = date.getFullYear();
-                            var month = String(date.getMonth() + 1).padStart(2, '0');
-                            var day = String(date.getDate()).padStart(2, '0');
-                            var formattedDate = year + '-' + month + '-' + day;
-                            var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
-                            window.location.href = redirectTo;
-                        },*/
-                        views: {
-                            dayGridMonth: {
-                                dayMaxEvents: 5,
-                                moreLinkClick: 'timeGridDay'
-                            },
-                        },
-                        eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
-                            alert('hi');
-                            $('modal-content').load(`/ViewAvailability?id=${info.event.id}`, function () {
-                                $('#details-modal').modal('show');
-                            });
-                        }
-                    });
-                @foreach (var obj in Model.CalendarObj)
-                {
-                    var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
-                    <text>
-                        var e = { id: '@obj.Id.ToString()', title: '@obj.ProviderType.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()', backgroundColor: '@backgroundColor', url: '#' };
-                        calendar.addEvent(e);
-                    </text>
-                }
-                calendar.render();
-            });
-            </script>
-        </head>
-        <body>
-            <div class="text-end">
-                <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
-            </div>
-            <div id='calendar'></div>
-        </body>
-    </div>
-
-    <div id="tutor-student-view" style="display: none;">
-        <div class="text-center">
-            <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
-        </div>
-        <br />
-
-        @if (!Model.Appointments.Any())
-        {
-            <div class="text-center">
-                <p>Scheduled appointments will appear here!</p>
-            </div>
-        }
-        else
-        {
-            <div class="row align-content-center">
-                @foreach (var app in Model.Appointments)
-                {
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
-                            <div class="card-body">
-                                <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
-                                <strong>When:</strong>
-                                @app.Date <br />
-                                <pre>       @app.StartTime - @app.EndTime</pre>
-                                <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net")))
-                                {
-                                    @if (app.Location.Contains("http"))
-                                    {
-                                        <a href="@app.Location" target="_blank">@app.Location</a>
-                                    }
-                                    else
-                                    {
-                                        <a href="http://@app.Location" target="_blank">@app.Location</a>
-                                    }
-                                }
-                                else
-                                {
-                                    @app.Location
-                                }
-                                <br />
-                                <a class="btn btn-primary" asp-page="/Appointments/Details" asp-route-id="@app.Id">Details</a>
-                                <a class="btn btn-danger" asp-page="/Appointments/ConfirmDelete" asp-route-id="@app.Id">Cancel Appointment</a>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-    </div>
-}
-else if (User.IsInRole(SD.PROVIDER_ROLE))
-{
-    <head>
-        <meta charset='utf-8' />
-        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var calendarEl = document.getElementById('calendar');
-                var calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
-                    allDaySlot: false,
-                    slotMinTime: '@Model.CurrentUserStartTime',
-                    slotMaxTime: '@Model.CurrentUserEndTime',
-                    height: 'auto',
-                    headerToolbar: {
-                        left: 'prev,next',
-                        center: 'title',
-                        right: 'today dayGridMonth,timeGridWeek' // user can switch between the two
-                    },
-                    navLinks: true,
-                    navLinkDayClick: function (date) {
-                        var currentDate = new Date();
-                        currentDate = currentDate.setDate(currentDate.getDate() - 1);
-                        if (date < currentDate) {
-                            return;
-                        }
-                        var year = date.getFullYear();
-                        var month = String(date.getMonth() + 1).padStart(2, '0');
-                        var day = String(date.getDate()).padStart(2, '0');
-                        var formattedDate = year + '-' + month + '-' + day;
-                        var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
-                        window.location.href = redirectTo;
-                    },
-                    views: {
-                        dayGridMonth: {
-                            dayMaxEvents: 5,
-                            moreLinkClick: 'timeGridDay'
-                        },
-                    },
-                    eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
-                        viewAvailability(info.event.id);
-                    }
-                });
-                @foreach (var obj in Model.CalendarObj)
-                {
-                    var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
-                    <text>
-                        var e = { id: '@obj.Id.ToString()', title: '@obj.ProviderType.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()', backgroundColor: '@backgroundColor', url:'#'};
-                        calendar.addEvent(e);
-                    </text>
-                }
-                calendar.render();
-            });
-        </script>
-    </head>
-    <body>
-        <div class="text-end">
-            <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
-        </div>
-        <div id='calendar'></div>
-    </body>
-}
-else if (User.IsInRole(SD.CLIENT_ROLE))
-{
     <div class="text-center">
         <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
     </div>
     <br />
-
-    @if (!Model.Appointments.Any())
+    if (Model.IntegrateModal)
     {
-        <div class="text-center">
-            <p>Scheduled appointments will appear here!</p>
+        <script>
+            $('.modal-content').load(`/Index?integratePopup=${'Integrate'}`, function () {
+                $('#details-modal').modal('show');
+            });
+        </script>
+    }
+    if(User.IsInRole(SD.PROVIDER_ROLE) && User.IsInRole(SD.CLIENT_ROLE))
+    {
+        <div class="text-center row">
+            <div class="tutor-slider-inner col-md-4 provider-view">
+                <label>Provider View</label>
+            </div>
+            <div class="tutor-slider-div col">
+                <label class="switch">
+                    <input type="checkbox" id="tutor-slider" onchange="tutorSlider()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="tutor-slider-inner col-md-4 student-view">
+                <label>Student View</label>
+            </div>
         </div>
     }
-    else
+    if (User.IsInRole(SD.PROVIDER_ROLE))
     {
-        <div class="row align-content-center">
-            @foreach (var app in Model.Appointments)
+        <div id="provider-view" style="display: contents">
+            <head>
+                <meta charset='utf-8' />
+                <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var calendarEl = document.getElementById('calendar');
+                        var calendar = new FullCalendar.Calendar(calendarEl, {
+                            initialView: 'dayGridMonth',
+                            allDaySlot: false,
+                            slotMinTime: '@Model.CurrentUserStartTime',
+                            slotMaxTime: '@Model.CurrentUserEndTime',
+                            height: 'auto',
+                            headerToolbar: {
+                                left: 'prev,next',
+                                center: 'title',
+                                right: 'today dayGridMonth,timeGridWeek' // user can switch between the two
+                            },
+                            navLinks: true,
+                            navLinkDayClick: function (date) {
+                                var currentDate = new Date();
+                                currentDate = currentDate.setDate(currentDate.getDate() - 1);
+                                if (date < currentDate) {
+                                    return;
+                                }
+                                var year = date.getFullYear();
+                                var month = String(date.getMonth() + 1).padStart(2, '0');
+                                var day = String(date.getDate()).padStart(2, '0');
+                                var formattedDate = year + '-' + month + '-' + day;
+                                var redirectTo = 'Availability/Index?date=' + encodeURIComponent(formattedDate);
+                                window.location.href = redirectTo;
+                            },
+                            views: {
+                                dayGridMonth: {
+                                    dayMaxEvents: 5,
+                                    moreLinkClick: 'timeGridDay'
+                                },
+                            },
+                            eventClick: function (info) { //Needs to be updated with whatever info we want to show on click
+                                viewAvailability(info.event.id);
+                            }
+                        });
+                        @foreach (var obj in Model.CalendarObj)
+                        {
+                            var backgroundColor = @obj.Type == "Appointment" ? "#32DE84" : "#135DD8";
+                            <text>
+                                var e = { id: '@obj.Id.ToString()', title: '@obj.ProviderType.ToString()', start: '@obj.StartTime.ToString()', end: '@obj.EndTime.ToString()', backgroundColor: '@backgroundColor', url:'#'};
+                                calendar.addEvent(e);
+                            </text>
+                        }
+                        calendar.render();
+                    });
+                </script>
+            </head>
+            <body>
+                <div class="text-end">
+                    <a class="btn btn-secondary mb-3" asp-area="" asp-page="Availability/Index">Set Availability</a>
+                </div>
+                <div id='calendar'></div>
+            </body>
+        </div>
+    }
+    if (User.IsInRole(SD.CLIENT_ROLE))
+    {
+        <div id="client-view" style="display: @(User.IsInRole(SD.PROVIDER_ROLE) ? "none" : "contents")">
+
+            @if (!Model.Appointments.Any())
             {
-                <div class="col-md-3 mb-3">
-                    <div class="card">
-                        <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
-                        <div class="card-body">
-                            <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
-                            <strong>When:</strong>
-                            @app.Date <br />
-                            <pre>       @app.StartTime - @app.EndTime</pre>
-                            <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net") || app.Location.Contains(".us") || app.Location.Contains("zoom.")))
-                            {
-                                @if (app.Location.Contains("http"))
-                                {
-                                    <a href="@app.Location" target="_blank">@app.Location</a>
-                                }
-                                else
-                                {
-                                    <a href="http://@app.Location" target="_blank">@app.Location</a>
-                                }
-                            }
-                            else
-                            {
-                                @app.Location
-                            }
-                            <br />
-                            <hr />
-                            <button class="btn btn-danger cancel-btn" data-id="@app.Id" data-toggle="modal" data-target="#details-modal" style="margin-right: 20px; margin-left: 12%;">Cancel</button>
-                            <button class="btn btn-primary details-btn" data-id="@app.Id" data-toggle="modal" data-target="#details-modal">Details</button>
+                <br />
+                <div class="text-center">
+                    <h5>Scheduled appointments will appear here!</h5>
+                </div>
+            }
+            else
+            {
+                <div class="row align-content-center">
+                    @foreach (var app in Model.Appointments)
+                    {
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-header" style="background-color: @app.Color">@app.AppointmentType Appointment</div>
+                                <div class="card-body">
+                                    <strong>@(app.AppointmentType):</strong> @app.ProviderName <br /> <br />
+                                    <strong>When:</strong>
+                                    @app.Date <br />
+                                    <pre>       @app.StartTime - @app.EndTime</pre>
+                                    <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net") || app.Location.Contains(".us") || app.Location.Contains("zoom.")))
+                                    {
+                                        @if (app.Location.Contains("http"))
+                                        {
+                                            <a href="@app.Location" target="_blank">@app.Location</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="http://@app.Location" target="_blank">@app.Location</a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @app.Location
+                                    }
+                                    <br />
+                                    <hr />
+                                    <button class="btn btn-danger cancel-btn" data-id="@app.Id" data-toggle="modal" data-target="#details-modal" style="margin-right: 20px; margin-left: 12%;">Cancel</button>
+                                    <button class="btn btn-primary details-btn" data-id="@app.Id" data-toggle="modal" data-target="#details-modal">Details</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             }
         </div>
     }
 }
-else
-{
-    <div class="text-center">
-        <h1 class="display-4">Welcome, @(UserManager.GetUserAsync(User).GetAwaiter().GetResult() != null ? UserManager.GetUserAsync(User).GetAwaiter().GetResult().FullName : "")</h1>
-    </div>
-}
 
 @section Scripts {
     <script>
-        var slider = document.getElementById('tutor-slider');
-        var provider = document.getElementById('tutor-provider-view');
-        var client = document.getElementById('tutor-student-view');
+        $(document).ready(function () {
+            if ('@Model.CurrentView' == 'Client') {
+                $('#tutor-slider').click();
+            }
+        });
 
-        function tutorSlider() {
-            if (slider.checked) {
-                client.style.display = "block";
-                provider.style.display = "none";
-            }
-            else {
-                provider.style.display = "contents";
-                client.style.display = "none";
-            }
-        }
+        $('#tutor-slider').on('change', function () {
+            $('#provider-view').toggle();
+            $('#client-view').toggle();
+        });
 
         sessionStorage.clear();
     </script>
