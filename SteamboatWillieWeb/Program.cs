@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using QuestPDF.Infrastructure;
 using Utility;
 using Utility.GoogleCalendar;
+using Hangfire;
+using Hangfire.SqlServer;
+using Hangfire.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +55,15 @@ builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
 
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<DbInitializer>();
+builder.Services.AddScoped<EmailReminder>();
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("SmarterASP")));
+
+builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
@@ -82,6 +93,7 @@ app.MapControllerRoute(
 );
 
 SeedDatabase();
+StartBackgroundTasks();
 
 app.Run();
 
@@ -91,4 +103,11 @@ void SeedDatabase()
     using var scope = app.Services.CreateScope();
     var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
     dbInitializer.Initialize();
+}
+
+void StartBackgroundTasks()
+{
+    using var scope = app.Services.CreateScope();
+    var backgroundTask = scope.ServiceProvider.GetRequiredService<EmailReminder>();
+    backgroundTask.StartBackgroundTask();
 }
