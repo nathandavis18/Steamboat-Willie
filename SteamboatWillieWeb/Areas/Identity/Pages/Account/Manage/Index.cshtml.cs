@@ -153,30 +153,33 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 return RedirectToPage("../Login", new { ReturnUrl = "~/Identity/Account/Manage/Index" });
             }
 
-            var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
-            CurrentUserTitle = currentUser.Title;
+            if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
+            {
+                var provider = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
+                CurrentUserTitle = provider.Title;
 
-            var classes = _unitOfWork.Class
-                .GetAll()
-                .Distinct()
-                .ToList();
+                var classes = _unitOfWork.Class
+                    .GetAll()
+                    .Distinct()
+                    .ToList();
 
-            Classes = _unitOfWork.Class
-                .GetAll()
-                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
-                .ToList();
+                Classes = _unitOfWork.Class
+                    .GetAll()
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                    .ToList();
 
-            var providerClasses = _unitOfWork.ProviderClass
-                .GetAll()
-                .Where(pc => pc.ProviderId == user.Id)
-                .Select(pc => pc.ClassId)
-                .ToList();
+                var providerClasses = _unitOfWork.ProviderClass
+                    .GetAll()
+                    .Where(pc => pc.ProviderId == user.Id)
+                    .Select(pc => pc.ClassId)
+                    .ToList();
 
-            ProviderClasses = _unitOfWork.ProviderClass
-                .GetAll()
-                .Where(p => providerClasses.Contains(p.ClassId))
-                .Select(p => new SelectListItem { Value = p.ClassId.ToString(), Text = p.ClassId.ToString() })
-                .ToList();
+                ProviderClasses = _unitOfWork.ProviderClass
+                    .GetAll()
+                    .Where(p => providerClasses.Contains(p.ClassId))
+                    .Select(p => new SelectListItem { Value = p.ClassId.ToString(), Text = p.ClassId.ToString() })
+                    .ToList();
+            }
 
             await LoadAsync(user);
             return Page();
