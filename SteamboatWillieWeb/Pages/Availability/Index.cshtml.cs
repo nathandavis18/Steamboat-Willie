@@ -14,7 +14,6 @@ namespace SteamboatWillieWeb.Pages.Availability
     {
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        public string? CurrentUserTitle;
 
         [BindProperty]
         public IEnumerable<SelectListItem>? Locations { get; set; }
@@ -70,6 +69,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             public bool NewLocation { get; set; }
 
             public string? Campus { get; set; }
+            public string? CurrentUserTitle { get; set; }
         }
 
         public class RecurrenceModel
@@ -106,7 +106,6 @@ namespace SteamboatWillieWeb.Pages.Availability
         {
             var currentUserId = _userManager.GetUserId(User);
             var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
-            CurrentUserTitle = currentUser.Title;
 
             if (!User.Identity!.IsAuthenticated)
             {
@@ -159,7 +158,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                 StartTime = _unitOfWork.Provider.GetById(user.Id).StartTime.Value.TimeOfDay,
                 ProviderId = user.Id,
                 NumAppointments = 1,
-                NewLocation = true
+                NewLocation = true,
+                CurrentUserTitle = currentUser.Title
             };
 
             return Page();
@@ -249,14 +249,14 @@ namespace SteamboatWillieWeb.Pages.Availability
                 AvailabilityModelInput.LocationId = newLocation.Id.ToString();
             }
 
-            if(CurrentUserTitle == "Instructor")
+            if(provider.Title == "Instructor")
             { 
                 if (AvailabilityModelInput.AppointmentType != "Office Hours")
                 {
                     AvailabilityModelInput.AppointmentType = "Office Hours for " + _unitOfWork.Class.GetById(int.Parse(AvailabilityModelInput.AppointmentType)).Name;
                 }
             }
-            else if(CurrentUserTitle == "Tutor")
+            else if(provider.Title == "Tutor")
             {
                 AvailabilityModelInput.AppointmentType = "Tutoring for " + _unitOfWork.Class.GetById(int.Parse(AvailabilityModelInput.AppointmentType)).Name;
             }

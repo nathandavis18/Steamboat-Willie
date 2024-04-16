@@ -12,5 +12,6 @@
         public string? Location { get; set; }
         public string? Color { get; set; }
         public string? Type { get; set; } //appointment or availability, for provider calendar
+        public string? Campus {  get; set; }
     }
 }

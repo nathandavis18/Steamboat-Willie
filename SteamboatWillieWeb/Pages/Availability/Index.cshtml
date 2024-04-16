@@ -72,7 +72,7 @@
                 </div>
             </div>
         </div>
-        @if (Model.CurrentUserTitle == "Advisor")
+        @if (Model.AvailabilityModelInput.CurrentUserTitle == "Advisor")
         {
             <div class="form-group mb-3">
                 <label class="text-white">Select Advising Type</label>
@@ -84,13 +84,13 @@
                 </select>
             </div>
         }
-        @if (Model.CurrentUserTitle != "Advisor")
+        @if (Model.AvailabilityModelInput.CurrentUserTitle != "Advisor")
         {
             <div class="form-group mb-3">
                 <label asp-for="AvailabilityModelInput.AppointmentType" class="text-white"></label>
 
                 <select class="form-select bg-secondary text-white" asp-for="AvailabilityModelInput.AppointmentType" asp-items="Model.Classes">
-                    @if (Model.CurrentUserTitle == "Instructor")
+                    @if (Model.AvailabilityModelInput.CurrentUserTitle == "Instructor")
                     {
                         <option selected value="Office Hours">Office Hours</option>
                     }

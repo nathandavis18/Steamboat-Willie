@@ -14,5 +14,6 @@
         public string? CancelReason { get; set; }
         public bool StudentNoShow { get; set; }
         public DateTime TimeDate { get; set; }
+        public string? Campus {  get; set; }
     }
 }

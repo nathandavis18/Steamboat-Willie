@@ -77,7 +77,8 @@ namespace SteamboatWillieWeb.Pages
                             Date = app.ProviderAvailability.StartTime.ToLongDateString(),
                             StartTime = app.ProviderAvailability.StartTime.ToShortTimeString(),
                             EndTime = app.ProviderAvailability.EndTime.ToShortTimeString(),
-                            Location = _unitOfWork.Location.GetById(app.ProviderAvailability.LocationId).LocationValue
+                            Location = _unitOfWork.Location.GetById(app.ProviderAvailability.LocationId).LocationValue,
+                            Campus = _unitOfWork.Location.GetById(app.ProviderAvailability.LocationId).LocationValue
                         });
                         var x = Appointments.Last();
                         x.Color = GetColor(x.AppointmentType);
@@ -275,6 +276,7 @@ namespace SteamboatWillieWeb.Pages
             AvailabilityModelInput = new AvailabilityModel
             {
                 AvailabilityId = id,
+                Campus = availability.Location.Campus,
                 Location = availability.Location.LocationValue,
                 Date = availability.StartTime.ToLongDateString(),
                 Time = availability.StartTime.ToShortTimeString(),
