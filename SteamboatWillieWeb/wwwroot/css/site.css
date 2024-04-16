@@ -363,3 +363,12 @@ input:checked + .slider:before {
 .modal-dialog {
     color: white;
 }
+
+#dropdownMenuButton.dropdown-toggle.btn-secondary::after {
+    border-top-color: black; /* Dark gray color */
+}
+
+/* Right-align the specific dropdown toggle */
+#dropdownMenuButton.dropdown-toggle {
+    right: auto; /* Adjust the value as needed */
+}

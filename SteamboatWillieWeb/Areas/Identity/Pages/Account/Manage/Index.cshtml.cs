@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Utility;
 using Utility.GoogleCalendar;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -25,6 +26,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
+        public string? CurrentUserTitle;
+
+        [BindProperty]
+        public IEnumerable<SelectListItem>? Classes { get; set; }
+
+        [BindProperty]
+        public IEnumerable<SelectListItem>? ProviderClasses { get; set; }
 
         public IndexModel(
             UserManager<AppUser> userManager,
@@ -138,10 +146,39 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
+            var currentUserId = _userManager.GetUserId(User);
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return RedirectToPage("../Login", new { ReturnUrl = "~/Identity/Account/Manage/Index" });
+            }
+
+            if(await _userManager.IsInRoleAsync(user, SD.PROVIDER_ROLE))
+            {
+                var provider = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
+                CurrentUserTitle = provider.Title;
+
+                var classes = _unitOfWork.Class
+                    .GetAll()
+                    .Distinct()
+                    .ToList();
+
+                Classes = _unitOfWork.Class
+                    .GetAll()
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                    .ToList();
+
+                var providerClasses = _unitOfWork.ProviderClass
+                    .GetAll()
+                    .Where(pc => pc.ProviderId == user.Id)
+                    .Select(pc => pc.ClassId)
+                    .ToList();
+
+                ProviderClasses = _unitOfWork.ProviderClass
+                    .GetAll()
+                    .Where(p => providerClasses.Contains(p.ClassId))
+                    .Select(p => new SelectListItem { Value = p.ClassId.ToString(), Text = p.ClassId.ToString() })
+                    .ToList();
             }
 
             await LoadAsync(user);
@@ -192,6 +229,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             var provider = await _unitOfWork.Provider.GetAsync(p => p.AppUserId == user.Id);
             if (provider != null)
             {
+
                 provider.Title = ProviderInput.Title;
                 provider.StartTime = ProviderInput.StartTime;
                 provider.EndTime = ProviderInput.EndTime;
@@ -212,9 +250,39 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 {
                     provider.AdvisementTypes = ",";
                 }
-                provider.DepartmentId = int.Parse(ProviderInput.DepartmentId);
+                provider.DepartmentId = ProviderInput.DepartmentId != null ?
+                       int.Parse(ProviderInput.DepartmentId) :
+                       int.Parse(WeberStudentInput.DepartmentId);
                 provider.HexColor = ProviderInput.Color;
                 _unitOfWork.Provider.Update(provider);
+
+                foreach (var classId in Request.Form["Classes"])
+                {
+                    var providerClasses = _unitOfWork.ProviderClass.GetAll().Where(pc => pc.ProviderId == user.Id);
+                    int id = int.Parse(classId);
+                    bool isChecked = Request.Form["Classes"].Contains(classId);
+                    var existingProviderClasses = _unitOfWork.ProviderClass.GetAll().Where(pc => pc.ProviderId == user.Id);
+                    bool exists = existingProviderClasses.Any(pc => pc.ClassId == id);
+                    if (isChecked && !exists)
+                    {
+                        var newProviderClass = new ProviderClass
+                        {
+                            ProviderId = user.Id,
+                            ClassId = id
+                        };
+                        _unitOfWork.ProviderClass.Add(newProviderClass);
+                    }
+                    var classesToRemove = providerClasses.Where(pc => !Request.Form["Classes"].Contains(pc.ClassId.ToString()));
+                    foreach (var classToRemove in classesToRemove)
+                    {
+                        _unitOfWork.ProviderClass.Delete(classToRemove);
+                    }
+                }
+
+
+
+
+                
             }
 
             await _unitOfWork.CommitAsync();

@@ -41,11 +41,15 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
+    <Folder Include="Pages\Classes\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Pages\Availability\_ViewAvailabilityPartial.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Pages\Classes\" />
   </ItemGroup>
 </Project>

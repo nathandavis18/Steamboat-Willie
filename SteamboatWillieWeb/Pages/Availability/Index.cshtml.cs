@@ -18,6 +18,9 @@ namespace SteamboatWillieWeb.Pages.Availability
         [BindProperty]
         public IEnumerable<SelectListItem>? Locations { get; set; }
 
+        [BindProperty]
+        public IEnumerable<SelectListItem>? Classes { get; set; }
+
         public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
@@ -54,6 +57,9 @@ namespace SteamboatWillieWeb.Pages.Availability
             [DataType(DataType.Time)]
             public TimeSpan StartTime { get; set; }
 
+            [Required]
+            [Display(Name = "Class")]
+            public string? AppointmentType { get; set; }
 
             [Required]
             [Display(Name = "Location")]
@@ -61,6 +67,9 @@ namespace SteamboatWillieWeb.Pages.Availability
             public string? Location { get; set; }
 
             public bool NewLocation { get; set; }
+
+            public string? Campus { get; set; }
+            public string? CurrentUserTitle { get; set; }
         }
 
         public class RecurrenceModel
@@ -95,6 +104,9 @@ namespace SteamboatWillieWeb.Pages.Availability
 
         public IActionResult OnGet(int? id, string? date)
         {
+            var currentUserId = _userManager.GetUserId(User);
+            var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId);
+
             if (!User.Identity!.IsAuthenticated)
             {
                 return RedirectToPage("/Account/Login", new { ReturnUrl = "/Availability/Index", Area = "Identity" });
@@ -118,6 +130,18 @@ namespace SteamboatWillieWeb.Pages.Availability
                 .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
                 .ToList();
 
+            var providerClasses = _unitOfWork.ProviderClass
+                .GetAll()
+                .Where(pc => pc.ProviderId == user.Id)
+                .Select(pc => pc.ClassId)
+                .Distinct()
+                .ToList();
+            Classes = _unitOfWork.Class
+                .GetAll()
+                .Where(c => providerClasses.Contains(c.Id))
+                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                .ToList();
+
             DateTime startDate = DateTime.Now.AddDays(1);
             if(date != null)
             {
@@ -134,7 +158,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                 StartTime = _unitOfWork.Provider.GetById(user.Id).StartTime.Value.TimeOfDay,
                 ProviderId = user.Id,
                 NumAppointments = 1,
-                NewLocation = true
+                NewLocation = true,
+                CurrentUserTitle = currentUser.Title
             };
 
             return Page();
@@ -216,11 +241,31 @@ namespace SteamboatWillieWeb.Pages.Availability
             {
                 Location newLocation = new Location()
                 {
-                    LocationValue = AvailabilityModelInput.Location
+                    LocationValue = AvailabilityModelInput.Location,
+                    Campus = AvailabilityModelInput.Campus
                 };
                 _unitOfWork.Location.Add(newLocation);
                 _unitOfWork.Commit();
                 AvailabilityModelInput.LocationId = newLocation.Id.ToString();
+            }
+
+            if(provider.Title == "Instructor")
+            { 
+                if (AvailabilityModelInput.AppointmentType != "Office Hours")
+                {
+                    AvailabilityModelInput.AppointmentType = "Office Hours for " + _unitOfWork.Class.GetById(int.Parse(AvailabilityModelInput.AppointmentType)).Name;
+                }
+            }
+            else if(provider.Title == "Tutor")
+            {
+                AvailabilityModelInput.AppointmentType = "Tutoring for " + _unitOfWork.Class.GetById(int.Parse(AvailabilityModelInput.AppointmentType)).Name;
+            }
+            else
+            {
+                if(AvailabilityModelInput.AppointmentType != "General Advising")
+                {
+                    AvailabilityModelInput.AppointmentType = "Advising for " + AvailabilityModelInput.AppointmentType;
+                }
             }
 
             DateTime startDate = AvailabilityModelInput.StartDate + AvailabilityModelInput.StartTime;
@@ -235,7 +280,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                         StartTime = startDate + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                         EndTime = startDate.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                         Duration = AvailabilityModelInput.Duration,
-                        Scheduled = false
+                        Scheduled = false,
+                        AppointmentType = AvailabilityModelInput.AppointmentType
                     };
                     _unitOfWork.ProviderAvailability.Add(pa);
                 }
@@ -258,7 +304,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                                     StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                                     EndTime = x.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                                     Duration = AvailabilityModelInput.Duration,
-                                    Scheduled = false
+                                    Scheduled = false,
+                                    AppointmentType = AvailabilityModelInput.AppointmentType
                                 };
                                 _unitOfWork.ProviderAvailability.Add(pa);
                             }
@@ -280,7 +327,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                                     StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                                     EndTime = x.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
                                     Duration = AvailabilityModelInput.Duration,
-                                    Scheduled = false
+                                    Scheduled = false,
+                                    AppointmentType = AvailabilityModelInput.AppointmentType
                                 };
                                 _unitOfWork.ProviderAvailability.Add(pa);
                             }
