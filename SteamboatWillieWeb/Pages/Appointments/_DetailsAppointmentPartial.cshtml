@@ -3,6 +3,7 @@
 }
 
 <div class="modal-header">
+    <!-- Appointment Details header -->
     <div class="col-md-6 text-end"><h5 class="modal-title">Appointment Details</h5></div>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
@@ -17,6 +18,7 @@
                     <span class="d-inline-block"><strong>Comments: </strong></span>
                 </div>
                 <div class="col-md-9">
+                    <!-- Info about appointments-->
                     <span>@Model.AppointmentModelInput.Date @Model.AppointmentModelInput.Time </span> <br />
                     <span>@Model.AppointmentModelInput.ProviderName </span> <br />
                     <span>@Model.AppointmentModelInput.Location </span> <br />
@@ -29,6 +31,7 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <!-- Buttons for popup -->
                 <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                 <div id="editBtnDiv">
                     <button form="none" class="btn btn-warning" onclick="editComments()">Edit Comments</button>

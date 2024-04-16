@@ -126,7 +126,7 @@ else
     {
         <div id="client-view" style="display: @(User.IsInRole(SD.PROVIDER_ROLE) ? "none" : "contents")">
 
-            @if (!Model.Appointments.Any())
+            @if (!Model.Appointments.Any())     //no appointments
             {
                 <br />
                 <div class="text-center">
@@ -134,7 +134,7 @@ else
                 </div>
             }
             else
-            {
+            {   //appointments exist
                 <div class="row align-content-center">
                     @foreach (var app in Model.Appointments)
                     {
@@ -164,6 +164,7 @@ else
                                     <br />
                                     <hr />
                                     <button class="btn btn-danger cancel-btn" data-id="@app.Id" data-toggle="modal" data-target="#details-modal" style="margin-right: 20px; margin-left: 12%;">Cancel</button>
+                                    <!-- Triggers to _DetailsAppointmentPartial -->
                                     <button class="btn btn-primary details-btn" data-id="@app.Id" data-toggle="modal" data-target="#details-modal">Details</button>
                                 </div>
                             </div>
