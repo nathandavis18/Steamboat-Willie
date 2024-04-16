@@ -30,6 +30,7 @@ namespace SteamboatWillieWeb.Pages.Classes
         public class ClassModel
         { 
             [BindProperty]
+            [Display(Name = "Class")]
             [RegularExpression(@"^\d{4}$", ErrorMessage = "Class must be exactly four digits.")]
             public string? ClassName { get; set; }
         }
@@ -52,15 +53,7 @@ namespace SteamboatWillieWeb.Pages.Classes
                 return RedirectToPage("../Index");
             }
 
-            if (id != null)
-            {
-                Class = _unitOfWork.Class.GetById(id);
-            }
-            else
-            {
-                Class = new Class();
-                Class.Id = 0;
-            }
+            ClassModelInput = new ClassModel();
 
             var departments = _unitOfWork.Department
                 .GetAll()
@@ -71,6 +64,20 @@ namespace SteamboatWillieWeb.Pages.Classes
                 .GetAll()
                 .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.DepartmentName })
                 .ToList();
+
+            if (id != null)
+            {
+                Class = _unitOfWork.Class.GetById(id);
+                var split = Class.Name.Split(" ");
+                var dept = split[0];
+                var classNum = split[1];
+                ClassModelInput.ClassName = classNum.ToString();
+            }
+            else
+            {
+                Class = new Class();
+                Class.Id = 0;
+            }
 
             ReturnUrl = returnUrl;
             return Page();
