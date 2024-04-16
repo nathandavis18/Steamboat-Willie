@@ -7,6 +7,7 @@ namespace Infrastructure.Models
         [Key]
         public int Id { get; set; }
 
+        [Display(Name = "Department")]
         public string? DepartmentName { get; set; }
 
         public bool? IsDisabled { get; set; }
