@@ -1,0 +1,65 @@
+﻿@page
+@model SteamboatWillieWeb.Pages.Classes.IndexModel
+@{
+}
+<div class="border backgroundWhite container">
+    <div class="row">
+        <div class="col-6">
+            <h2 class="text-primary">Class List</h2>
+        </div>
+        <div class="col-6">
+            <a asp-page="/Classes/Upsert" asp-route-returnUrl="~/Classes/Index" class="btn btn-primary create-provider-btn">Add Class</a>
+        </div>
+    </div>
+    <br /><br />
+    <table class="table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Class Name</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @{
+                foreach (var clas in Model.Classes)
+                {
+                    <tr>
+                        <td>@clas.Id</td>
+                        <td>@clas.Name</td>
+                        <td>
+                            <a class="btn btn-outline-success" asp-page="/Classes/Upsert" asp-route-id="@clas.Id">Update</a>
+                        </td>
+                        <td>
+                            <form method="post">
+                                <button type="submit" class="btn btn-outline-warning" asp-route-id="@clas.Id">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+
+    @{
+        var prevDisabled = !Model.Classes.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.Classes.HasNextPage ? "disabled" : "";
+    }
+    <div class="mb-2">
+        <a asp-page="./Index" asp-route-pageIndex="1" class="btn btn-primary @prevDisabled">
+            First
+        </a>
+        <a asp-page="./Index" asp-route-pageIndex="@(Model.Classes.PageIndex - 1)" class="btn btn-primary @prevDisabled">
+            Previous
+        </a>
+        <a asp-page="./Index" asp-route-pageIndex="@(Model.Classes.PageIndex + 1)" class="btn btn-primary @nextDisabled">
+            Next
+        </a>
+        <a asp-page="./Index" asp-route-pageIndex="@(Model.Classes.TotalPages)" class="btn btn-primary @nextDisabled">
+            Last
+        </a>
+    </div>
+</div>

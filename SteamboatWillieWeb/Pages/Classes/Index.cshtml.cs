@@ -1,16 +1,16 @@
-using DataAccess;
+﻿using DataAccess;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utility;
 
-namespace SteamboatWillieWeb.Pages.Departments
+namespace SteamboatWillieWeb.Pages.Classes
 {
-    public class IndexModel : PageModel
+	public class IndexModel : PageModel
     {
         private readonly UnitOfWork _unitOfWork;
-        public PaginatedList<Department>? Departments { get; set; }
+        public PaginatedList<Class>? Classes;
 
         public IndexModel(UnitOfWork unitOfWork)
         {
@@ -28,22 +28,22 @@ namespace SteamboatWillieWeb.Pages.Departments
                 TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
-            List<Department> departmentsList = _unitOfWork.Department.GetAll().OrderBy(dept => dept.DepartmentName).ToList();
+            List<Class> classList = _unitOfWork.Class.GetAll().OrderBy(clas => clas.Name).ToList();
 
             int pageSize = 10;
-            Departments = PaginatedList<Department>.Create(departmentsList, pageIndex ?? 1, pageSize);
+            Classes = PaginatedList<Class>.Create(classList, pageIndex ?? 1, pageSize);
 
             return Page();
         }
         public IActionResult OnPost(int id)
         {
-            var department = _unitOfWork.Department.GetById(id);
-            if (department == null)
+            var clas = _unitOfWork.Class.GetById(id);
+            if (clas == null)
             {
                 return RedirectToPage();
             }
 
-            _unitOfWork.Department.Delete(department);
+            _unitOfWork.Class.Delete(clas);
             _unitOfWork.Commit();
             return RedirectToPage();
         }

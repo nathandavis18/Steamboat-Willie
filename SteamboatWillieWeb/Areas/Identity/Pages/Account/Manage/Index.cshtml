@@ -146,6 +146,27 @@
                     </div>
                 </div>
             }
+            @if (User.IsInRole(SD.PROVIDER_ROLE) && Model.CurrentUserTitle != "Advisor")
+            {
+                <div class="mb-3 form-floating" id="classes">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary form-control text-start dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="float-start">Select Classes</span>
+                            <span class="float-end"><i class="bi bi-caret-down-fill"></i></span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @foreach (var classItem in Model.Classes)
+                            {
+                                bool isChecked = Model.ProviderClasses.Any(item => item.Value == classItem.Value);
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="@(classItem.Value)" value="@(classItem.Value)" name="Classes" @(isChecked ? "checked" : "")>
+                                    <label class="form-check-label" for="@(classItem.Value)">@classItem.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
             @if (User.IsInRole(SD.PROVIDER_ROLE))
             {
                 <div style="width:100%" class="mb-3 form-control-color form-control bg-secondary text-muted">
@@ -206,10 +227,14 @@
         function titleChange(value) {
             if (value == 'Advisor') {
                 var p = document.getElementById('advisementTypes');
+                var c = document.getElementById('classes');
                 p.style.display = 'block';
+                c.style.display = 'none';
             }
             else {
                 var p = document.getElementById('advisementTypes');
+                var c = document.getElementById('classes');
+                c.style.display = 'block';
                 p.style.display = 'none';
             }
         }
