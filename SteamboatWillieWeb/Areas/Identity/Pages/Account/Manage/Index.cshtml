@@ -52,11 +52,6 @@
             @if(User.IsInRole(SD.PROVIDER_ROLE))
             {
                 <div class="form-floating mb-3">
-                    <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required/>
-                    <label asp-for="Input.WNumber">W#</label>
-                    <span asp-validation-for="Input.WNumber" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
                     <input asp-for="ProviderInput.StartTime" class="form-control bg-secondary text-white" required />
                     <label asp-for="ProviderInput.StartTime" class="form-label"></label>
                     <span asp-validation-for="ProviderInput.StartTime" class="text-danger"></span>
@@ -69,6 +64,11 @@
             }
             @if (User.IsInRole(SD.PROVIDER_ROLE) && !User.IsInRole(SD.CLIENT_ROLE)) //Just Provider Role, not tutor
             {
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.WNumber" class="form-control bg-secondary text-white" autocomplete="wnumber" aria-required="true" placeholder="W#" required />
+                    <label asp-for="Input.WNumber">W#</label>
+                    <span asp-validation-for="Input.WNumber" class="text-danger"></span>
+                </div>
                 <div class="form-floating mb-3">
                     <select asp-for="ProviderInput.DepartmentId" asp-items="@Model.ProviderInput.Departments" class="form-select bg-secondary text-white"></select>
                     <label asp-for="ProviderInput.DepartmentId" class="form-label"></label>

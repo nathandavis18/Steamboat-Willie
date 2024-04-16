@@ -43,7 +43,8 @@ namespace SteamboatWillieWeb.Pages.Departments
                 return RedirectToPage();
             }
 
-            _unitOfWork.Department.Delete(department);
+            department.IsDisabled = !department.IsDisabled; //Inverts the result. If it is false, it sets it to true, and vice versa.
+            _unitOfWork.Department.Update(department);
             _unitOfWork.Commit();
             return RedirectToPage();
         }

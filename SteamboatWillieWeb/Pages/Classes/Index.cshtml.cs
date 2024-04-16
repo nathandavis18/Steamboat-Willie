@@ -43,7 +43,8 @@ namespace SteamboatWillieWeb.Pages.Classes
                 return RedirectToPage();
             }
 
-            _unitOfWork.Class.Delete(clas);
+            clas.IsDisabled = !clas.IsDisabled; //Inverts the result. If it is false, it sets it to true, and vice versa.
+            _unitOfWork.Class.Update(clas);
             _unitOfWork.Commit();
             return RedirectToPage();
         }
