@@ -9,17 +9,17 @@
             <input type="hidden" value="@Model.OldRoles.ToList()" asp-for="@Model.OldRoles" />
             <div class="form-group col-md-6">
                 <label asp-for="@Model.AppUser.FName">First Name</label>
-                <input class="form-control" asp-for="@Model.AppUser.FName" value="@Model.AppUser.FName" />
+                <input class="form-control bg-secondary text-white" asp-for="@Model.AppUser.FName" value="@Model.AppUser.FName" />
             </div>
             <div class="form-group col-md-6">
                 <label asp-for="@Model.AppUser.LName">Last Name</label>
-                <input class="form-control" asp-for="@Model.AppUser.LName" value="@Model.AppUser.LName" />
+                <input class="form-control bg-secondary text-white" asp-for="@Model.AppUser.LName" value="@Model.AppUser.LName" />
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-6">
                 <label asp-for="@Model.AppUser.Email">Email</label>
-                <input class="form-control" asp-for="@Model.AppUser.Email" value="@Model.AppUser.Email" />
+                <input class="form-control bg-secondary text-white" asp-for="@Model.AppUser.Email" value="@Model.AppUser.Email" />
             </div>
         </div>
         @{
@@ -29,12 +29,12 @@
                     @{
                         if (Model.UsersRoles.Contains(r))
                         {
-                            <input class="form-check-input" name="roles" type="checkbox" id="@r" value="@r" checked>
+                            <input class="form-check-input bg-secondary text-white" name="roles" type="checkbox" id="@r" value="@r" checked>
                             <label class="form-check-label">@r</label>
                         }
                         else
                         {
-                            <input class="form-check-input" name="roles" type="checkbox" id="@r" value="@r">
+                            <input class="form-check-input bg-secondary text-white" name="roles" type="checkbox" id="@r" value="@r">
                             <label class="form-check-label">@r</label>
                         }
                     }
