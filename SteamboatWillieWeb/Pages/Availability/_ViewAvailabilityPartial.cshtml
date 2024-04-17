@@ -5,11 +5,11 @@
 <div class="modal-header">
     @if (Model.AvailabilityModelInput.IsAppointment)
     {
-        <div class="col-md-6 text-end"><h5 class="modal-title">Appointment Details</h5></div>
+        <div class="col-md-11 text-center"><h5 class="modal-title">Appointment Details</h5></div>
     }
     else
     {
-        <div class="col-md-6 text-end"><h5 class="modal-title">Availability Details</h5></div>
+        <div class="col-md-11 text-center"><h5 class="modal-title">Availability Details</h5></div>
     }
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
@@ -17,33 +17,53 @@
     <div>
         <form method="post">
             <div class="row">
-                <div class="col-md-3 text-end">
+                <div class="col-md-5 text-end">
                     <span class="d-inline-block"><strong>When: </strong> </span> <br />
-                    @if (Model.AvailabilityModelInput.IsAppointment)
-                    {
-                        <span class="d-inline-block"><strong>Client Name: </strong> </span> <br />
-                        <span class="d-inline-block"><strong>Client W#: </strong> </span> <br />
-                        <span class="d-inline-block"><strong>Client Email: </strong> </span> <br />
-                    }
-                    <span class="d-inline-block"><strong>Campus: </strong> </span> <br />
-                    <span class="d-inline-block"><strong>@(Model.AvailabilityModelInput.Campus.Equals("Online") ? "Link" : "Building"):: </strong> </span> <br />
-                    @if (Model.AvailabilityModelInput.IsAppointment)
-                    {
-                        <span class="d-inline-block"><strong>Comments: </strong></span> <br />
-                    }
-                    <div id="reason" style="display: none;">
-                        <span class="d-inline-block"><strong>Reason: </strong></span>
-                    </div> <br />
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-7">
                     <span>@Model.AvailabilityModelInput.Date @Model.AvailabilityModelInput.Time</span> <br />
-                    @if (Model.AvailabilityModelInput.IsAppointment)
-                    {
-                        <span>@Model.AvailabilityModelInput.ClientName</span> <br />
-                        <span>@Model.AvailabilityModelInput.WNumber</span> <br />
-                        <span>@Model.AvailabilityModelInput.ClientEmail</span> <br />
-                    }
-                    <span>@Model.AvailabilityModelInput.Campus</span> <br />
+                </div>
+            </div>
+            @if (Model.AvailabilityModelInput.IsAppointment)
+            {
+                <div class="row mt-2">
+                    <div class="col-md-5 text-end">
+                        <span class="d-inline-block"><strong>Client Name: </strong> </span>
+                    </div>
+                    <div class="col-md-7">
+                        <span>@Model.AvailabilityModelInput.ClientName</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-5 text-end">
+                        <span class="d-inline-block"><strong>Client W#: </strong> </span>
+                    </div>
+                    <div class="col-md-7">
+                        <span>@Model.AvailabilityModelInput.WNumber</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-5 text-end">
+                        <span class="d-inline-block"><strong>Client Email: </strong> </span>
+                    </div>
+                    <div class="col-md-7">
+                        <span>@Model.AvailabilityModelInput.ClientEmail</span>
+                    </div>
+                </div>
+            }
+            <div class="row mt-2">
+                <div class="col-md-5 text-end">
+                    <span class="d-inline-block"><strong>Campus: </strong> </span>
+                </div>
+                <div class="col-md-7">
+                    <span>@Model.AvailabilityModelInput.Campus</span>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-5 text-end">
+                    <span class="d-inline-block"><strong>@(Model.AvailabilityModelInput.Campus.Equals("Online") ? "Link" : "Building"): </strong> </span>
+                </div>
+                <div class="col-md-7">
                     @if (Model.AvailabilityModelInput.Campus == "Online")
                     {
                         @if (Model.AvailabilityModelInput.Location.Contains("http"))
@@ -57,15 +77,53 @@
                     }
                     else
                     {
-                        <span>@Model.AvailabilityModelInput.Location</span> <br />
+                        <span>@Model.AvailabilityModelInput.Location</span>
                     }
-                    
-                   @*  <span>@Model.AvailabilityModelInput.Location</span> <br /> *@
-                    @if (Model.AvailabilityModelInput.IsAppointment)
-                    {
-                        <span>@Model.AvailabilityModelInput.Comments</span> <br />
-                    }
-                    <textarea asp-for="AvailabilityModelInput.CancelReason" cols="1" value="Test" style="width: 95%; display: none;" id="reasonBox"></textarea>
+                </div>
+            </div>
+            @if (Model.AvailabilityModelInput.IsAppointment)
+            {
+                <div class="row mt-2">
+                    <div class="col-md-5 text-end">
+                        <span class="d-inline-block"><strong>Student Attachment:</strong></span>
+                    </div>
+                    <div class="col-md-7">
+                        <span class="d-inline-block">
+                            <a href="#">Student Attachment</a>
+                        </span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-5 text-end">
+                        <span class="d-inline-block"><strong>Provider Attachment:</strong></span>
+                    </div>
+                    <div class="col-md-7">
+                        <span class="d-inline-block">
+                            <input type="file" class="form-control form-control-sm bg-secondary text-white" />
+                            <a href="#">Provider Attachment</a>
+                        </span>
+                    </div>
+                </div>
+            }
+            @if (Model.AvailabilityModelInput.IsAppointment)
+            {
+                <div class="row mt-2">
+                    <div class="col-md-5 text-end">
+                        <span class="d-inline-block"><strong>Comments: </strong></span>
+                    </div>
+                    <div class="col-md-7">
+                        <span>@Model.AvailabilityModelInput.Comments</span>
+                    </div>
+                </div>
+            }
+            <div class="row mt-2">
+                <div class="col-md-5 text-end">
+                    <div id="reason" style="display: none;">
+                        <span class="d-inline-block"><strong>Reason: </strong></span>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <textarea class="bg-secondary text-white" asp-for="AvailabilityModelInput.CancelReason" cols="1" value="Test" style="width: 95%; display: none;" id="reasonBox"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -97,8 +155,8 @@
                             <button form="none" class="btn btn-warning" id="btnAll" onclick="btnCancelClick()">Cancel</button>
                         }
                         <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                        
-                        
+
+
                     </div>
                 }
             </div>
