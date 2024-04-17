@@ -21,7 +21,7 @@
                     <span>@Model.InputModel.Date @Model.InputModel.Time</span> <br />
                     <span>@Model.InputModel.ProviderName</span> <br />
                     <span>@Model.InputModel.Campus</span> <br />
-                    <span>@Model.InputModel.Location</span> <br />
+                    <span>@(Model.InputModel.Campus.Equals("Online") ? "Link" : "Building"):</span> <br />
                     <textarea cols="3" style="width: 95%" asp-for="InputModel.Comments"></textarea>
                 </div>
             </div>
