@@ -96,23 +96,40 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 availabilities = availabilities.Where(a => !a.AppointmentType.Contains("Advising for Flex Students")).ToList();
             }
 
+            if (!client.IsWeberStudent)
+            {
+                availabilities = availabilities.Where(a => a.AppointmentType.Contains("General Advising") || a.AppointmentType.Contains("Advising for New Students")).ToList();
+            }
+
             var appointmentTypes = new List<xTypes>
             {
-                new xTypes { Text = "Office Hours", Value = "Office Hours"},
-                new xTypes { Text = "General Advising", Value = "Advising for New Students"},
-                new xTypes { Text = "Current Student Advising", Value = "Advising for Current Students"},
-                new xTypes { Text = "Tutoring", Value = "Tutoring"}
+                new xTypes { Text = "General Advising", Value = String.Empty },
+                new xTypes {Text = "New Student Advising", Value = "Advising for New Students"}
             };
+            if (client.IsWeberStudent)
+            {
+                appointmentTypes.Add(new xTypes { Text = "Tutoring", Value = "Tutoring" });
+                appointmentTypes.Add(new xTypes { Text = "Current Student Advising", Value = "Advising for Current Students" });
+                appointmentTypes.Add(new xTypes { Text = "Office Hours", Value = "Office Hours" });
+            }
             if (client.StudentType.Contains("Flex"))
             {
                 appointmentTypes.Add(new xTypes { Text = "Flex Student Advising", Value = "Advising for Flex Students" }); //Only flex students can get this option.
             }
             var providerTypes = new List<xTypes>
             {
-                new xTypes { Text = "Tutor", Value = "Tutor"},
-                new xTypes { Text = "Instructor", Value = "Instructor"},
                 new xTypes { Text = "Advisor", Value = "Advisor"}
             };
+            if (client.IsWeberStudent)
+            {
+                providerTypes.Add(new xTypes { Text = "Tutor", Value = "Tutor" });
+                providerTypes.Add(new xTypes { Text = "Instructor", Value = "Instructor" });
+            }
+            else
+            {
+                providers = providers.Where(p => p.Title.Equals("Advisor")).ToList();
+                classes.Clear();
+            }
 
             if (!String.IsNullOrEmpty(providerType))
             {
