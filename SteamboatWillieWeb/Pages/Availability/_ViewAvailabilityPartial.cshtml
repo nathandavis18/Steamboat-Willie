@@ -15,7 +15,7 @@
 </div>
 <div class="modal-body">
     <div>
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-5 text-end">
                     <span class="d-inline-block"><strong>When: </strong> </span> <br />
@@ -87,22 +87,46 @@
                     <div class="col-md-5 text-end">
                         <span class="d-inline-block"><strong>Student Attachment:</strong></span>
                     </div>
+                    
+                @if (Model.AvailabilityModelInput.studentAttachment != null)
+                {
                     <div class="col-md-7">
                         <span class="d-inline-block">
-                            <a href="#">Student Attachment</a>
+                            <a href="~/attachments/@Model.AvailabilityModelInput.studentAttachment" download="@(Model.AvailabilityModelInput.studentAttachment)">Student Attachment</a>
                         </span>
                     </div>
+                }
+                else
+                {
+                    <div class="col-md-7">
+                        <span class="d-inline-block">
+                            No Student Attachment
+                        </span>
+                    </div>
+                }
                 </div>
                 <div class="row mt-2">
                     <div class="col-md-5 text-end">
-                        <span class="d-inline-block"><strong>Provider Attachment:</strong></span>
+                        <span class="d-inline-block"><strong>Provider Attachment: </strong></span>
                     </div>
+                @if (Model.AvailabilityModelInput.providerAttachment != null)
+                {
                     <div class="col-md-7">
                         <span class="d-inline-block">
-                            <input type="file" class="form-control form-control-sm bg-secondary text-white" />
-                            <a href="#">Provider Attachment</a>
+                            <input type="file" class="form-control form-control-sm bg-secondary text-white" asp-for="AvailabilityModelInput.providerFile" />
+                            <a href="~/attachments/@Model.AvailabilityModelInput.providerAttachment" download="@(Model.AvailabilityModelInput.providerAttachment)">Provider Attachment</a>
                         </span>
                     </div>
+                }
+                else
+                {
+                    <div class="col-md-7">
+                        <span class="d-inline-block">
+                            <input type="file" class="form-control form-control-sm bg-secondary text-white" asp-for="AvailabilityModelInput.providerFile" />
+                            No Provider Attachment
+                        </span>
+                    </div>
+                }
                 </div>
             }
             @if (Model.AvailabilityModelInput.IsAppointment)
@@ -155,7 +179,10 @@
                             <button form="none" class="btn btn-warning" id="btnAll" onclick="btnCancelClick()">Cancel</button>
                         }
                         <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-
+                        @if (Model.AvailabilityModelInput.IsAppointment && Model.AvailabilityModelInput.TimeDate >= DateTime.Today)
+                        {
+                            <input type="submit" class="btn btn-success" value="Save Changes" asp-page-handler="AvailabilityDetails" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" />
+                        }
 
                     </div>
                 }

@@ -9,7 +9,7 @@
 </div>
 <div class="modal-body">
     <div>
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-3 text-end">
                     <span class="d-inline-block"><strong>When: </strong> </span> <br />
@@ -61,12 +61,45 @@
                 <div class="col-md-3 text-end">
                     <span class="d-inline-block"><strong>Student Attachment:</strong></span>
                 </div>
-                <div class="col-md-9">
-                    <span class="d-inline-block">
-                        <input type="file" class="form-control form-control-sm bg-secondary text-white" />
-                        <a href="#">Student Attachment</a>
-                    </span>
+                @if (Model.AppointmentModelInput.studentAttachment != null)
+                {
+                    <div class="col-md-9">
+                        <span class="d-inline-block">
+                            <input type="file" class="form-control form-control-sm bg-secondary text-white" asp-for="AppointmentModelInput.studentFile" />
+                            <a href="~/attachments/@Model.AppointmentModelInput.studentAttachment" download="@(Model.AppointmentModelInput.studentAttachment)">Student Attachment</a>
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-9">
+                        <span class="d-inline-block">
+                            <input type="file" class="form-control form-control-sm bg-secondary text-white" asp-for="AppointmentModelInput.studentFile" />
+                            No Student Attachment
+                        </span>
+                    </div>
+                }
                 </div>
+                <div class="row mt-2">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>Provider Attachment: </strong></span>
+                </div>               
+                @if (Model.AppointmentModelInput.providerAttachment != null)
+                {
+                    <div class="col-md-9">
+                        <span class="d-inline-block">
+                            <a href="~/attachments/@Model.AppointmentModelInput.providerAttachment" download="@(Model.AppointmentModelInput.providerAttachment)">Provider Attachment</a>
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-9">
+                        <span class="d-inline-block">
+                            No Provider Attachment
+                        </span>
+                    </div>
+                }
             </div>
             <div class="row">
                 <div class="col-md-3 text-end">
@@ -88,7 +121,7 @@
                 <div id="editBtnDiv">
                     <button form="none" class="btn btn-warning" onclick="editComments()">Edit Comments</button>
                 </div>
-                <div id="saveBtnDiv" style="display: none">
+                <div id="saveBtnDiv">
                     <input type="submit" class="btn btn-success" value="Save Changes" asp-page-handler="AppointmentDetails" asp-route-id="@Model.AppointmentModelInput.AvailabilityId" />
                 </div>
             </div>

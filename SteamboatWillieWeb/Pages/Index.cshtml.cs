@@ -26,6 +26,7 @@ namespace SteamboatWillieWeb.Pages
         public List<AppointmentCalendarModel> Appointments { get; set; }
         private IEnumerable<ProviderAvailability> providerAvailabilities;
         public List<AppointmentCalendarModel> CalendarObj { get; set; }
+        public IWebHostEnvironment WebHostEnvironment { get; set; }
 
         [BindProperty]
         public AvailabilityModel? AvailabilityModelInput { get; set; }
@@ -34,7 +35,7 @@ namespace SteamboatWillieWeb.Pages
         public string? PartialViewName {  get; set; }
         public string? CurrentView {  get; set; }
 
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService, IConfiguration configuration)
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService, IConfiguration configuration, IWebHostEnvironment web)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -44,6 +45,7 @@ namespace SteamboatWillieWeb.Pages
             providerAvailabilities = new List<ProviderAvailability>();
             CalendarObj = new List<AppointmentCalendarModel>();
             _configuration = configuration;
+            WebHostEnvironment = web;
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -210,7 +212,7 @@ namespace SteamboatWillieWeb.Pages
             return RedirectToPage("./Index");
         }
 
-        
+
 
         //Details Button Popup Methods
         public async Task<IActionResult> OnGetAppointmentDetailsAsync(string? id)
@@ -241,7 +243,11 @@ namespace SteamboatWillieWeb.Pages
                 ProviderName = _unitOfWork.AppUser.GetById(provider.AppUserId).FullName,
                 Comments = appointment.StudentComments,
                 IsScheduled = appointment.ProviderAvailability.Scheduled,
-                Campus = _unitOfWork.Location.GetById(appointment.ProviderAvailability.LocationId).Campus
+                Campus = _unitOfWork.Location.GetById(appointment.ProviderAvailability.LocationId).Campus,
+                studentAttachment = appointment.StudentAttachment,
+                providerAttachment = appointment.ProviderAttachment,
+                studentFile = null,
+                providerFile = null
             };
             return Partial("./Appointments/_DetailsAppointmentPartial", this);
         }
@@ -249,8 +255,64 @@ namespace SteamboatWillieWeb.Pages
         public IActionResult OnPostAppointmentDetails(string? id, string? comments)
         {
             var appointment = _unitOfWork.Appointment.GetById(id);
-            appointment.StudentComments = AppointmentModelInput.Comments;
+            if (comments != null)
+            {
+                appointment.StudentComments = AppointmentModelInput.Comments;
+            }
+            if (AppointmentModelInput.studentFile != null)
+            {
+                var folder = Path.Combine(WebHostEnvironment.WebRootPath, "attachments");
+                var baseFileName = appointment.ProviderAvailabilityId + "student";
+                var filesToDelete = Directory.GetFiles(folder)
+                                              .Where(filePath => Path.GetFileNameWithoutExtension(filePath) == baseFileName);
 
+                foreach (var fileToDelete in filesToDelete)
+                {
+                    System.IO.File.Delete(fileToDelete);
+                }
+
+                var attachmentName = baseFileName + Path.GetExtension(AppointmentModelInput.studentFile.FileName);
+                var filePath = Path.Combine(folder, attachmentName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    AppointmentModelInput.studentFile.CopyTo(fileStream);
+                }
+
+                appointment.StudentAttachment = attachmentName;
+            }
+            _unitOfWork.Appointment.Update(appointment);
+            _unitOfWork.Commit();
+
+            return RedirectToPage("./Index");
+        }
+
+        public IActionResult OnPostAvailabilityDetails(string? id)
+        {
+            var appointment = _unitOfWork.Appointment.GetById(id);
+
+            if (AvailabilityModelInput.providerFile != null)
+            {
+                var folder = Path.Combine(WebHostEnvironment.WebRootPath, "attachments");
+                var baseFileName = appointment.ProviderAvailabilityId + "provider";
+                var filesToDelete = Directory.GetFiles(folder)
+                                              .Where(filePath => Path.GetFileNameWithoutExtension(filePath) == baseFileName);
+
+                foreach (var fileToDelete in filesToDelete)
+                {
+                    System.IO.File.Delete(fileToDelete);
+                }
+
+                var attachmentName = baseFileName + Path.GetExtension(AvailabilityModelInput.providerFile.FileName);
+                var filePath = Path.Combine(folder, attachmentName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    AvailabilityModelInput.providerFile.CopyTo(fileStream);
+                }
+
+                appointment.ProviderAttachment = attachmentName;
+            }
             _unitOfWork.Appointment.Update(appointment);
             _unitOfWork.Commit();
 
@@ -292,6 +354,8 @@ namespace SteamboatWillieWeb.Pages
                 AvailabilityModelInput.ClientEmail = client.AppUser.Email;
                 AvailabilityModelInput.IsAppointment = true;
                 AvailabilityModelInput.StudentNoShow = appointment.StudentNoShow;
+                AvailabilityModelInput.studentAttachment = appointment.StudentAttachment;
+                AvailabilityModelInput.providerAttachment = appointment.ProviderAttachment;
             }
             return Partial("./Availability/_ViewAvailabilityPartial", this);
         }

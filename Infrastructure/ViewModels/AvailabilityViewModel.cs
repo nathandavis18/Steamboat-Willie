@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.ViewModels
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Infrastructure.ViewModels
 {
     public class AvailabilityModel
     {
@@ -15,5 +17,9 @@
         public bool StudentNoShow { get; set; }
         public DateTime TimeDate { get; set; }
         public string? Campus {  get; set; }
+        public string studentAttachment { get; set; }
+        public string providerAttachment { get; set; }
+        public IFormFile studentFile { get; set; }
+        public IFormFile providerFile { get; set; }
     }
 }
