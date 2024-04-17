@@ -26,7 +26,7 @@
                         <span class="d-inline-block"><strong>Client Email: </strong> </span> <br />
                     }
                     <span class="d-inline-block"><strong>Campus: </strong> </span> <br />
-                    <span class="d-inline-block"><strong>Location: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>@(Model.AvailabilityModelInput.Campus.Equals("Online") ? "Link" : "Building"):: </strong> </span> <br />
                     @if (Model.AvailabilityModelInput.IsAppointment)
                     {
                         <span class="d-inline-block"><strong>Comments: </strong></span> <br />
