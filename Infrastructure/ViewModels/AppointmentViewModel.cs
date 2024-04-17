@@ -15,5 +15,6 @@ namespace Infrastructure.ViewModels
         public string Comments { get; set; }
 
         public bool IsScheduled { get; set; }
+        public string Campus { get; set; }
     }
 }

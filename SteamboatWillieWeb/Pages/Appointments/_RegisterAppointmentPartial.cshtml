@@ -13,12 +13,14 @@
                 <div class="col-md-3 text-end">
                     <span class="d-inline-block"><strong>When: </strong> </span> <br />
                     <span class="d-inline-block"><strong>With: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>Campus: </strong> </span> <br />
                     <span class="d-inline-block"><strong>Location: </strong> </span> <br />
                     <span class="d-inline-block"><strong>Comments: </strong></span>
                 </div>
                 <div class="col-md-9">
                     <span>@Model.InputModel.Date @Model.InputModel.Time</span> <br />
                     <span>@Model.InputModel.ProviderName</span> <br />
+                    <span>@Model.InputModel.Campus</span> <br />
                     <span>@Model.InputModel.Location</span> <br />
                     <textarea cols="3" style="width: 95%" asp-for="InputModel.Comments"></textarea>
                 </div>

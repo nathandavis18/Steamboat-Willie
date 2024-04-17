@@ -78,7 +78,7 @@ namespace SteamboatWillieWeb.Pages
                             StartTime = app.ProviderAvailability.StartTime.ToShortTimeString(),
                             EndTime = app.ProviderAvailability.EndTime.ToShortTimeString(),
                             Location = _unitOfWork.Location.GetById(app.ProviderAvailability.LocationId).LocationValue,
-                            Campus = _unitOfWork.Location.GetById(app.ProviderAvailability.LocationId).LocationValue
+                            Campus = _unitOfWork.Location.GetById(app.ProviderAvailability.LocationId).Campus
                         });
                         var x = Appointments.Last();
                         x.Color = GetColor(x.AppointmentType);
@@ -240,7 +240,8 @@ namespace SteamboatWillieWeb.Pages
                 ProviderType = provider.Title,
                 ProviderName = _unitOfWork.AppUser.GetById(provider.AppUserId).FullName,
                 Comments = appointment.StudentComments,
-                IsScheduled = appointment.ProviderAvailability.Scheduled
+                IsScheduled = appointment.ProviderAvailability.Scheduled,
+                Campus = _unitOfWork.Location.GetById(appointment.ProviderAvailability.LocationId).Campus
             };
             return Partial("./Appointments/_DetailsAppointmentPartial", this);
         }
