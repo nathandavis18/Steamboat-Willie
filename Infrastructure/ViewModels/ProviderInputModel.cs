@@ -18,11 +18,11 @@ namespace Infrastructure.ViewModels
 
         [Display(Name = "Working Start Time")]
         [DataType(DataType.Time)]
-        public DateTime StartTime { get; set; }
+        public TimeSpan StartTime { get; set; }
 
         [Display(Name = "Working End Time")]
         [DataType(DataType.Time)]
-        public DateTime EndTime { get; set; }
+        public TimeSpan EndTime { get; set; }
 
         [Display(Name = "Advisement Types")]
         public string AdvisementTypes { get; set; }

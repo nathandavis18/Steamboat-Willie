@@ -236,8 +236,8 @@ namespace DataAccess
                 DepartmentId = 6,
                 Title = "Instructor",
                 AdvisementTypes = ",",
-                StartTime = new DateTime(0),
-                EndTime = new DateTime(0)
+                StartTime = TimeSpan.Zero,
+                EndTime = TimeSpan.Zero
             };
 
             _context.Providers.Add(p);

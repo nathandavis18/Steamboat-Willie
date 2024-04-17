@@ -7,9 +7,10 @@ namespace Infrastructure.Models
     [PrimaryKey(nameof(ProviderId), nameof(ClassId))]
     public class ProviderClass
     {
+        [Required]
         public string? ProviderId { get; set; }
 
-        public int? ClassId { get; set; }
+        public int ClassId { get; set; }
 
         [ForeignKey(nameof(ClassId))]
         [Display(Name = "Class")]

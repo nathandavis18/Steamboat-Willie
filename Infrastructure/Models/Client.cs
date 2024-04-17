@@ -6,7 +6,7 @@ namespace Infrastructure.Models
     public class Client
     {
         [Key]
-        public string? AppUserId { get; set; }
+        public string AppUserId { get; set; } = default!;
 
         public int? DepartmentId { get; set; }
 
@@ -15,7 +15,7 @@ namespace Infrastructure.Models
         [Display(Name = "Student Type")]
         public string? StudentType { get; set; }
 
-        public bool? IsWeberStudent { get; set; }
+        public bool IsWeberStudent { get; set; }
 
         [ForeignKey(nameof(AppUserId))]
         public AppUser? AppUser { get; set; }

@@ -9,6 +9,7 @@
             <div class="department-form">
                 <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
                     <input asp-for="@Model.Class.Id" hidden />
+                    <input asp-for="@Model.Class.Name" hidden />
                     <div class="department-form-label">
                         @if (Model.Class.Name != null)
                         {
@@ -37,3 +38,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

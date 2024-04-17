@@ -6,8 +6,10 @@ namespace Infrastructure.Models
     public class Appointment
     {
         [Key]
+        [Required]
         public string? ProviderAvailabilityId { get; set; }
 
+        [Required]
         public string? ClientId { get; set; }
 
         public string? Description { get; set; }

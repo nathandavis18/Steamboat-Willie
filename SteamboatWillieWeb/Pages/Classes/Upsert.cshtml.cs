@@ -72,11 +72,14 @@ namespace SteamboatWillieWeb.Pages.Classes
                 var dept = split[0];
                 var classNum = split[1];
                 ClassModelInput.ClassName = classNum.ToString();
+                department = new Department();
+                department.DepartmentName = _unitOfWork.Department.Get(d => d.DepartmentName.Equals(dept)).DepartmentName;
             }
             else
             {
                 Class = new Class();
                 Class.Id = 0;
+                Class.Name = "Test";
             }
 
             ReturnUrl = returnUrl;

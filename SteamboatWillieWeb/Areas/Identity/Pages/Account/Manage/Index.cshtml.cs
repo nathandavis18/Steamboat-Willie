@@ -108,14 +108,14 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             {
                 WeberStudentInput = new WeberStudentInputModel()
                 {
-                    IsWeberStudent = client.IsWeberStudent.Value,
+                    IsWeberStudent = client.IsWeberStudent,
                     Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
                     {
                         Text = x.DepartmentName,
                         Value = x.Id.ToString()
                     })
                 };
-                if (client.IsWeberStudent.Value)
+                if (client.IsWeberStudent)
                 {
                     WeberStudentInput.DepartmentId = client.DepartmentId.ToString();
                     WeberStudentInput.ClassLevel = client.ClassLevel;
@@ -133,8 +133,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                     }),
                     DepartmentId = provider.DepartmentId.ToString(),
                     Title = provider.Title,
-                    StartTime = provider.StartTime.Value,
-                    EndTime = provider.EndTime.Value,
+                    StartTime = provider.StartTime,
+                    EndTime = provider.EndTime,
                     NewStudent = provider.AdvisementTypes.Split(",").Contains("NewStudent"),
                     ExistingStudent = provider.AdvisementTypes.Split(",").Contains("ExistingStudent"),
                     FlexStudent = provider.AdvisementTypes.Split(",").Contains("FlexStudent"),

@@ -45,7 +45,7 @@ namespace SteamboatWillieWeb.Pages.Availability
 
             [Required]
             [Display(Name = "Appointment Duration")]
-            public DateTime Duration { get; set; }
+            public TimeSpan Duration { get; set; }
 
             [Required]
             [Display(Name = "Number of Appointments")]
@@ -155,7 +155,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             AvailabilityModelInput = new AvailabilityModel()
             {
                 StartDate = startDate,
-                StartTime = _unitOfWork.Provider.GetById(user.Id).StartTime.Value.TimeOfDay,
+                StartTime = _unitOfWork.Provider.GetById(user.Id).StartTime,
                 ProviderId = user.Id,
                 NumAppointments = 1,
                 NewLocation = true,
@@ -171,13 +171,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             var currentUserId = _userManager.GetUserId(User);
             var provider = _unitOfWork.Provider.GetById(currentUserId);
 
-            //Checking 15 minute increment time intervals
-            if(!(AvailabilityModelInput.StartTime.Minutes.Equals(0) || AvailabilityModelInput.StartTime.Minutes.Equals(15) || AvailabilityModelInput.StartTime.Minutes.Equals(30) || AvailabilityModelInput.StartTime.Minutes.Equals(45)))
-            {
-                ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time must be in 15 minute intervals");
-            }
-
-            if (AvailabilityModelInput.StartTime < provider.StartTime.Value.TimeOfDay)
+            if (AvailabilityModelInput.StartTime < provider.StartTime)
             {
                 ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time cannot be before office hours start");
             }
@@ -185,8 +179,8 @@ namespace SteamboatWillieWeb.Pages.Availability
             {
                 for (int i = 1; i <= AvailabilityModelInput.NumAppointments; ++i)
                 {
-                    TimeSpan meetingEnd = new TimeSpan(AvailabilityModelInput.StartTime.Ticks + (AvailabilityModelInput.Duration.TimeOfDay.Ticks * i));
-                    if (meetingEnd > provider.EndTime.Value.TimeOfDay)
+                    TimeSpan meetingEnd = new TimeSpan(AvailabilityModelInput.StartTime.Ticks + (AvailabilityModelInput.Duration.Ticks * i));
+                    if (meetingEnd > provider.EndTime)
                     {
                         ModelState.AddModelError("AvailabilityModelInput.StartTime", "All meetings must end before office hours end");
                     }
@@ -284,8 +278,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                     {
                         ProviderId = AvailabilityModelInput.ProviderId,
                         LocationId = int.Parse(AvailabilityModelInput.LocationId),
-                        StartTime = startDate + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
-                        EndTime = startDate.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                        StartTime = startDate + (AvailabilityModelInput.Duration * (i - 1)),
+                        EndTime = startDate.AddHours(AvailabilityModelInput.Duration.Hours).AddMinutes(AvailabilityModelInput.Duration.Minutes) + (AvailabilityModelInput.Duration * (i - 1)),
                         Duration = AvailabilityModelInput.Duration,
                         Scheduled = false,
                         AppointmentType = AvailabilityModelInput.AppointmentType
@@ -308,8 +302,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                                 {
                                     ProviderId = AvailabilityModelInput.ProviderId,
                                     LocationId = int.Parse(AvailabilityModelInput.LocationId),
-                                    StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
-                                    EndTime = x.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    StartTime = x + (AvailabilityModelInput.Duration * (i - 1)),
+                                    EndTime = x.AddHours(AvailabilityModelInput.Duration.Hours).AddMinutes(AvailabilityModelInput.Duration.Minutes) + (AvailabilityModelInput.Duration * (i - 1)),
                                     Duration = AvailabilityModelInput.Duration,
                                     Scheduled = false,
                                     AppointmentType = AvailabilityModelInput.AppointmentType
@@ -331,8 +325,8 @@ namespace SteamboatWillieWeb.Pages.Availability
                                 {
                                     ProviderId = AvailabilityModelInput.ProviderId,
                                     LocationId = int.Parse(AvailabilityModelInput.LocationId),
-                                    StartTime = x + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
-                                    EndTime = x.AddHours(AvailabilityModelInput.Duration.Hour).AddMinutes(AvailabilityModelInput.Duration.Minute) + (AvailabilityModelInput.Duration.TimeOfDay * (i - 1)),
+                                    StartTime = x + (AvailabilityModelInput.Duration * (i - 1)),
+                                    EndTime = x.AddHours(AvailabilityModelInput.Duration.Hours).AddMinutes(AvailabilityModelInput.Duration.Minutes) + (AvailabilityModelInput.Duration * (i - 1)),
                                     Duration = AvailabilityModelInput.Duration,
                                     Scheduled = false,
                                     AppointmentType = AvailabilityModelInput.AppointmentType
