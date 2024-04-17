@@ -171,6 +171,17 @@ namespace SteamboatWillieWeb.Pages.Availability
             var currentUserId = _userManager.GetUserId(User);
             var provider = _unitOfWork.Provider.GetById(currentUserId);
 
+            if(!(AvailabilityModelInput.StartTime.Minutes.Equals(0) || AvailabilityModelInput.StartTime.Minutes.Equals(15) 
+                || AvailabilityModelInput.StartTime.Minutes.Equals(30) || AvailabilityModelInput.StartTime.Minutes.Equals(45)))
+            {
+                ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time must be on a 15 minute interval! (xx:00, xx:15, xx:30, xx:45");
+            }
+
+            if(AvailabilityTimeExists(AvailabilityModelInput.StartDate + AvailabilityModelInput.StartTime, AvailabilityModelInput.Duration, AvailabilityModelInput.NumAppointments))
+            {
+                ModelState.AddModelError("AvailabilityModelInput.StartTime", "One or more availabilities conflict with an existing availability.");
+            }
+
             if (AvailabilityModelInput.StartTime < provider.StartTime)
             {
                 ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time cannot be before office hours start");
@@ -234,6 +245,19 @@ namespace SteamboatWillieWeb.Pages.Availability
                     .Where(l => providerLocations.Contains(l.Id))
                     .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
                     .ToList();
+
+                var providerClasses = _unitOfWork.ProviderClass
+                .GetAll()
+                .Where(pc => pc.ProviderId == currentUserId)
+                .Select(pc => pc.ClassId)
+                .Distinct()
+                .ToList();
+                Classes = _unitOfWork.Class
+                    .GetAll()
+                    .Where(c => providerClasses.Contains(c.Id))
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                    .ToList();
+
 
                 return Page();
             }
@@ -378,6 +402,28 @@ namespace SteamboatWillieWeb.Pages.Availability
                 daysOfWeek.Add("Sunday");
             }
             return daysOfWeek;
+        }
+
+        private bool AvailabilityTimeExists(DateTime startTime, TimeSpan duration, int numAppointments)
+        {
+            var currentUserId = _userManager.GetUserId(User);
+            var providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll(pa => pa.ProviderId == currentUserId && pa.StartTime >= DateTime.Now); //Only check current/future availabilities
+            foreach(var pa in providerAvailabilities)
+            {
+                var existingStart = pa.StartTime;
+                var existingEnd = pa.EndTime;
+
+                for(int i = 0; i < numAppointments; ++i)
+                {
+                    var newStart = startTime + (i * duration);
+                    var newEnd = newStart + duration;
+                    if((existingStart > newStart && existingStart < newEnd) || (existingEnd > newStart && existingEnd < newEnd))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

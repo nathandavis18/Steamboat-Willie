@@ -81,23 +81,23 @@
                     </select>
                     <label asp-for="ProviderInput.Title" class="form-label"></label>
                 </div>
-                <div class="form-floating mb-3" style="@(Model.ProviderInput.Title.Equals("Advisor") == false ? "display: none" : "display: block")" id="advisementTypes">
-                    <div>
-                    <label asp-for="ProviderInput.AdvisementTypes" class="form-label"></label>
-                    </div>
-                    <div class="form-check">
-                    <label asp-for="ProviderInput.NewStudent" class="form-check-label"></label>
-                    <input asp-for="ProviderInput.NewStudent" class="form-check-input bg-secondary text-white" />
-                    </div>
-                    <div class="form-check">
-                    <label asp-for="ProviderInput.ExistingStudent" class="form-check-label"></label>
-                    <input asp-for="ProviderInput.ExistingStudent" class="form-check-input bg-secondary text-white" />
-                    </div>
-                    <div class="form-check">
-                    <label asp-for="ProviderInput.FlexStudent" class="form-check-label"></label>
-                    <input asp-for="ProviderInput.FlexStudent" class="form-check-input bg-secondary text-white" />
-                    </div>
+                /*<div class="form-floating mb-3" style="@(Model.ProviderInput.Title.Equals("Advisor") == false ? "display: none" : "display: block")" id="advisementTypes">
+                <div>
+                <label asp-for="ProviderInput.AdvisementTypes" class="form-label"></label>
                 </div>
+                <div class="form-check">
+                <label asp-for="ProviderInput.NewStudent" class="form-check-label"></label>
+                <input asp-for="ProviderInput.NewStudent" class="form-check-input bg-secondary text-white" />
+                </div>
+                <div class="form-check">                                                                            //We don't need this anymore i dont think
+                <label asp-for="ProviderInput.ExistingStudent" class="form-check-label"></label>
+                <input asp-for="ProviderInput.ExistingStudent" class="form-check-input bg-secondary text-white" />
+                </div>
+                <div class="form-check">
+                <label asp-for="ProviderInput.FlexStudent" class="form-check-label"></label>
+                <input asp-for="ProviderInput.FlexStudent" class="form-check-input bg-secondary text-white" />
+                </div>
+                </div>*/
             }
             @if (User.IsInRole(SD.CLIENT_ROLE)) //Can't do else if, since this can apply to tutors
             {
@@ -226,16 +226,16 @@
 
         function titleChange(value) {
             if (value == 'Advisor') {
-                var p = document.getElementById('advisementTypes');
+                //var p = document.getElementById('advisementTypes');
                 var c = document.getElementById('classes');
-                p.style.display = 'block';
+                //p.style.display = 'block';
                 c.style.display = 'none';
             }
             else {
-                var p = document.getElementById('advisementTypes');
+                //var p = document.getElementById('advisementTypes');
                 var c = document.getElementById('classes');
                 c.style.display = 'block';
-                p.style.display = 'none';
+                //p.style.display = 'none';
             }
         }
     </script>
