@@ -10,6 +10,6 @@ namespace Infrastructure.Models
         [Display(Name = "Department")]
         public string? DepartmentName { get; set; }
 
-        public bool? IsDisabled { get; set; }
+        public bool IsDisabled { get; set; }
     }
 }

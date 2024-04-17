@@ -170,6 +170,13 @@ namespace SteamboatWillieWeb.Pages.Availability
             bool makeLocation = false;
             var currentUserId = _userManager.GetUserId(User);
             var provider = _unitOfWork.Provider.GetById(currentUserId);
+
+            //Checking 15 minute increment time intervals
+            if(!(AvailabilityModelInput.StartTime.Minutes.Equals(0) || AvailabilityModelInput.StartTime.Minutes.Equals(15) || AvailabilityModelInput.StartTime.Minutes.Equals(30) || AvailabilityModelInput.StartTime.Minutes.Equals(45)))
+            {
+                ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time must be in 15 minute intervals");
+            }
+
             if (AvailabilityModelInput.StartTime < provider.StartTime.Value.TimeOfDay)
             {
                 ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time cannot be before office hours start");

@@ -34,7 +34,7 @@
                         </td>
                         <td>
                             <form method="post">
-                                <button type="submit" class="btn btn-outline-warning" asp-route-id="@department.Id">Disable</button>
+                                <button type="submit" class="btn btn-outline-@(department.IsDisabled ? "success" : "warning")" asp-route-id="@department.Id">@(department.IsDisabled ? "Enable" : "Disable")</button>
                             </form>
                         </td>
                     </tr>

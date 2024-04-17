@@ -55,7 +55,8 @@ namespace SteamboatWillieWeb.Pages.Departments
             {
                 var department = new Department
                 {
-                    DepartmentName = Department.DepartmentName
+                    DepartmentName = Department.DepartmentName,
+                    IsDisabled = false
                 };
                 _unitOfWork.Department.Add(department);
             }

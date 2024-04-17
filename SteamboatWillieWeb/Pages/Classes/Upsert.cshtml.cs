@@ -111,7 +111,8 @@ namespace SteamboatWillieWeb.Pages.Classes
             {
                 var classs = new Class
                 {
-                    Name = departmentName + " " + ClassModelInput.ClassName
+                    Name = departmentName + " " + ClassModelInput.ClassName,
+                    IsDisabled = false
                 };
                 _unitOfWork.Class.Add(classs);
             }
