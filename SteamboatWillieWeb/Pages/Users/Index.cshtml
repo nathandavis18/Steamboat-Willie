@@ -13,20 +13,25 @@
     </div>
     <br /><br />
 
-    <form asp-page="./Index" method="get">
+    <form asp-page="./Index" method="get" id="roleForm">
         <div class="form-actions no-color form-group row">
             <p>
                 <div class="col-sm-2">
                     <label for="SearchString">Find by name:</label>
-                    <input class="form-control bg-secondary text-white" type="text" name="SearchString" value="@Model.CurrentFilter" />
+                    <input class="form-control bg-secondary text-white" type="text" name="SearchString" value="@Model.CurrentSearch" />
                 </div>
-                <div class="col-sm-4 align-self-end">
+                <div class="col-sm-2">
+                    <label for="WSearch">Find by W#:</label>
+                    <input class="form-control bg-secondary text-white" type="text" name="WSearch" value="@Model.CurrentWSearch" />
+                </div>
+                <div class="col-sm-1 align-self-end">
                     <input type="submit" value="Search" class="btn btn-primary" />
+                </div>
+                <div class="col-sm-2 align-self-end">
+                    <a asp-page="./Index" class="btn btn-warning">Clear Filters</a>
                 </div>
             </p>
         </div>
-    </form>
-    <form asp-page="./Index" method="get" id="roleForm">
         <div class="form-actions no-color form-group row">
             <p>
                 <div class="col-sm-4">
@@ -44,6 +49,7 @@
             <tr>
                 <th scope="col">Full Name</th>
                 <th scope="col">E-Mail</th>
+                <th scope="col">W#</th>
                 <th scope="col">Role(s)</th>
                 <th scope="col">Lock/Unlock</th>
                 <th scope="col">Actions</th>
@@ -57,6 +63,7 @@
                         <tr>
                             <td>@user.FullName</td>
                             <td>@user.Email</td>
+                            <td>@(!String.IsNullOrEmpty(user.WNumber) ? user.WNumber : "N/A")</td>
                             <td>
                                 @{
                                 if (Model.UserRoles[user.Id].Count() == 1)

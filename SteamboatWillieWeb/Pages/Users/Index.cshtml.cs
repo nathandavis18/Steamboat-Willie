@@ -26,10 +26,11 @@ namespace SteamboatWillieWeb.Pages.Users
         public Dictionary<string, List<string>>? UserRoles { get; set; }
         public List<SelectListItem>? Roles {  get; set; }
 
-        public string? CurrentFilter { get; set; }
+        public string? CurrentSearch { get; set; }
         public string? CurrentRole { get; set; }
+        public string? CurrentWSearch {  get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? pageIndex, string searchString, string roleSort)
+        public async Task<IActionResult> OnGetAsync(int? pageIndex, string searchString, string roleSort, string wSearch)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -40,8 +41,9 @@ namespace SteamboatWillieWeb.Pages.Users
                 TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
-            CurrentFilter = searchString;
+            CurrentSearch = searchString;
             CurrentRole = roleSort;
+            CurrentWSearch = wSearch;
             Roles = _roleManager.Roles.Select(x => new SelectListItem
             {
                 Text = x.Name,
@@ -59,6 +61,12 @@ namespace SteamboatWillieWeb.Pages.Users
             {
                 appUsers = appUsers.Where(a => _userManager.GetRolesAsync(a).GetAwaiter().GetResult().Contains(roleSort)).ToList();
             }
+            if(!String.IsNullOrEmpty(wSearch))
+            {
+                appUsers = appUsers.Where(a => !(String.IsNullOrEmpty(a.WNumber))).ToList();
+                appUsers = appUsers.Where(a => a.WNumber!.Contains(wSearch.ToUpper())).ToList();
+            }
+            appUsers = appUsers.OrderBy(x => x.LName).ThenBy(x => x.FName).ThenBy(x => x.WNumber).ToList();
             ApplicationUsers = PaginatedList<AppUser>.Create(appUsers, pageIndex ?? 1, pageSize);
             foreach (var user in ApplicationUsers)
             {
