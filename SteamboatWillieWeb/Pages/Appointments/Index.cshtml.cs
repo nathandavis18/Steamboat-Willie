@@ -90,7 +90,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
             var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").ToList();
             var classes = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").ToList();
-            var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider,Location").ToList();
+            var availabilities = _unitOfWork.ProviderAvailability.GetAll(a => !a.Scheduled && a.ProviderId != user.Id, includes: "Provider,Location").ToList();
             if (!client.StudentType.Contains("Flex"))
             {
                 availabilities = availabilities.Where(a => !a.AppointmentType.Contains("Advising for Flex Students")).ToList();
@@ -199,12 +199,15 @@ namespace SteamboatWillieWeb.Pages.Appointments
             {
                 availabilities = availabilities.Where(a => a.AppointmentType.Contains(cls)).ToList();
             }
+            providers = providers.OrderBy(x => x.AppUser.LName).ThenBy(x => x.AppUser.FName).ToList();
+            classes = classes.OrderBy(x => x.Class.Name).ToList();
 
             FilterModelInput.Classes = classes.Select(x => new SelectListItem
             {
                 Text = x.Class.Name,
                 Value = x.Class.Name
             }).DistinctBy(x => x.Value).ToList();
+
 
             FilterModelInput.Providers = providers.Select(x => new SelectListItem
             {
