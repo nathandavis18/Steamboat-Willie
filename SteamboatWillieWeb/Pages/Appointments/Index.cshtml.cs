@@ -225,7 +225,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 Time = availability.StartTime.ToShortTimeString(),
                 Location = _unitOfWork.Location.GetById(availability.LocationId).LocationValue,
                 ProviderType = provider.Title,
-                ProviderName = _unitOfWork.AppUser.GetById(provider.AppUserId).FullName
+                ProviderName = _unitOfWork.AppUser.GetById(provider.AppUserId).FullName,
+                Campus = _unitOfWork.Location.GetById(availability.LocationId).Campus
             };
             return Partial("./_RegisterAppointmentPartial", this);
         }

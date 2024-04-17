@@ -44,7 +44,23 @@
                         <span>@Model.AvailabilityModelInput.ClientEmail</span> <br />
                     }
                     <span>@Model.AvailabilityModelInput.Campus</span> <br />
-                    <span>@Model.AvailabilityModelInput.Location</span> <br />
+                    @if (Model.AvailabilityModelInput.Campus == "Online")
+                    {
+                        @if (Model.AvailabilityModelInput.Location.Contains("http"))
+                        {
+                            <a href="@Model.AvailabilityModelInput.Location" target="_blank">@Model.AvailabilityModelInput.Location</a>
+                        }
+                        else
+                        {
+                            <a href="http://@Model.AvailabilityModelInput.Location" target="_blank">@Model.AvailabilityModelInput.Location</a>
+                        }
+                    }
+                    else
+                    {
+                        <span>@Model.AvailabilityModelInput.Location</span> <br />
+                    }
+                    
+                   @*  <span>@Model.AvailabilityModelInput.Location</span> <br /> *@
                     @if (Model.AvailabilityModelInput.IsAppointment)
                     {
                         <span>@Model.AvailabilityModelInput.Comments</span> <br />

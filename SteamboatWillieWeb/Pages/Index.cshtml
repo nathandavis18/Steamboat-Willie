@@ -146,7 +146,7 @@ else
                                     <strong>When:</strong>
                                     @app.Date <br />
                                     <pre>       @app.StartTime - @app.EndTime</pre>
-                                    <strong>Where:</strong> @if ((app.Location.Contains("www") || app.Location.Contains("http") || app.Location.Contains(".com") || app.Location.Contains(".edu") || app.Location.Contains(".org") || app.Location.Contains(".gov") || app.Location.Contains(".gg") || app.Location.Contains(".net") || app.Location.Contains(".us") || app.Location.Contains("zoom.")))
+                                    <strong>Where:</strong> @if (app.Campus == "Online")
                                     {
                                         @if (app.Location.Contains("http"))
                                         {

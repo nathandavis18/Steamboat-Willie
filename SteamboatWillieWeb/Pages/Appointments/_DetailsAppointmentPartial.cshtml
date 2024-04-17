@@ -14,6 +14,7 @@
                 <div class="col-md-3 text-end">
                     <span class="d-inline-block"><strong>When: </strong> </span> <br />
                     <span class="d-inline-block"><strong>With: </strong> </span> <br />
+                    <span class="d-inline-block"><strong>Campus: </strong> </span> <br />
                     <span class="d-inline-block"><strong>Location: </strong> </span> <br />
                     <span class="d-inline-block"><strong>Comments: </strong></span>
                 </div>
@@ -21,7 +22,22 @@
                     <!-- Info about appointments-->
                     <span>@Model.AppointmentModelInput.Date @Model.AppointmentModelInput.Time </span> <br />
                     <span>@Model.AppointmentModelInput.ProviderName </span> <br />
-                    <span>@Model.AppointmentModelInput.Location </span> <br />
+                    <span>@Model.AppointmentModelInput.Campus</span> <br />
+                    @if (Model.AppointmentModelInput.Campus == "Online")
+                    {
+                        @if (Model.AppointmentModelInput.Location.Contains("http"))
+                        {
+                            <a href="@Model.AppointmentModelInput.Location" target="_blank">@Model.AppointmentModelInput.Location</a>
+                        }
+                        else
+                        {
+                            <a href="http://@Model.AppointmentModelInput.Location" target="_blank">@Model.AppointmentModelInput.Location</a>
+                        }
+                    }
+                    else
+                    {
+                        <span>@Model.AppointmentModelInput.Location</span> <br />
+                    }
                     <div id="notEdit">
                         <span>@Model.AppointmentModelInput.Comments </span>
                     </div>
