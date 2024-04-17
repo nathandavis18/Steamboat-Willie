@@ -117,7 +117,7 @@ namespace SteamboatWillieWeb.Pages.Users
                     client = await _unitOfWork.Client.GetAsync(c => c.AppUserId == AppUser.Id);
                     if (client != null)
                     {
-                        providerEntry.DepartmentId = client.DepartmentId;
+                        providerEntry.DepartmentId = client.DepartmentId.Value;
                         providerEntry.Title = "Tutor";
 
                     }
@@ -127,8 +127,8 @@ namespace SteamboatWillieWeb.Pages.Users
                         providerEntry.Title = "Instructor";
                     }
                     providerEntry.AdvisementTypes = ",";
-                    providerEntry.StartTime = DateTime.Parse("01/01/0001 08:00:00");
-                    providerEntry.EndTime = DateTime.Parse("01/01/0001 18:00:00");
+                    providerEntry.StartTime = TimeSpan.Parse("08:00:00");
+                    providerEntry.EndTime = TimeSpan.Parse("18:00:00");
                     _unitOfWork.Provider.Add(providerEntry);
                 }
             }

@@ -8,8 +8,9 @@ namespace Infrastructure.Models
         public int Id { get; set; }
 
         [Display(Name = "Department")]
+        [Required]
         public string? DepartmentName { get; set; }
 
-        public bool? IsDisabled { get; set; }
+        public bool IsDisabled { get; set; }
     }
 }

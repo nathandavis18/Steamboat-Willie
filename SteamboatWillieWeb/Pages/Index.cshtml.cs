@@ -101,8 +101,8 @@ namespace SteamboatWillieWeb.Pages
                 var currentUser = _unitOfWork.Provider.Get(p => p.AppUserId == currentUserId, false, "Department");
                 if (currentUser != null)
                 {
-                    CurrentUserStartTime = currentUser.StartTime?.ToString("HH:mm:ss") ?? "07:00:00"; // Default to 07:00:00 if start time is null
-                    CurrentUserEndTime = currentUser.EndTime?.ToString("HH:mm:ss") ?? "19:00:00"; // Default to 19:00:00 if end time is null
+                    CurrentUserStartTime = currentUser.StartTime.ToString() ?? "07:00:00"; // Default to 07:00:00 if start time is null
+                    CurrentUserEndTime = currentUser.EndTime.ToString() ?? "19:00:00"; // Default to 19:00:00 if end time is null
                 }
 
                 foreach (var availability in providerAvailabilities)

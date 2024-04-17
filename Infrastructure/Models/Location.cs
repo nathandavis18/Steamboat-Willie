@@ -7,8 +7,10 @@ namespace Infrastructure.Models
         [Key]
         public int Id { get; set; }
 
-        public string? LocationValue { get; set; } 
+        [Required]
+        public string? LocationValue { get; set; }
 
+        [Required]
         public string? Campus { get; set; } //Ogden, Davis, Online, SLCC
     }
 }

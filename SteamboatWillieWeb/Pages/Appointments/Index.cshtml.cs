@@ -49,14 +49,14 @@ namespace SteamboatWillieWeb.Pages.Appointments
             public string? CurrentAppointmentType { get; set; }
             public string? CurrentClasses { get; set; }
 
-            public List<SelectListItem> Classes { get; set; }
-            public List<SelectListItem> Providers { get; set; }
-            public List<SelectListItem> AppointmentTypes { get; set; }
-            public List<SelectListItem> Campuses { get; set; }
-            public List<SelectListItem> ProviderTypes { get; set; }
+            public List<SelectListItem> Classes { get; set; } = new List<SelectListItem>();
+            public List<SelectListItem> Providers { get; set; } = new List<SelectListItem>();
+            public List<SelectListItem> AppointmentTypes { get; set; } = new List<SelectListItem>();
+            public List<SelectListItem> Campuses { get; set; } = new List<SelectListItem>();
+            public List<SelectListItem> ProviderTypes { get; set; } = new List<SelectListItem>();
         }
 
-        public IActionResult OnGet(string? campus, string? providerId, string? providerType, string? appointmentType, string? classes, string? prevProviderType)
+        public IActionResult OnGet(string? campus, string? providerId, string? providerType, string? appointmentType, string? cls, string? prevProviderType)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -68,25 +68,109 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
             }
-            if(prevProviderType != providerType)
+            if (prevProviderType != providerType)
             {
                 providerId = String.Empty;
             }
 
             FilterModelInput.CurrentCampus = campus;
             FilterModelInput.CurrentProvider = providerId;
-            FilterModelInput.CurrentClasses = classes;
+            FilterModelInput.CurrentClasses = cls;
             FilterModelInput.CurrentProviderType = providerType;
             FilterModelInput.CurrentAppointmentType = appointmentType;
 
 
-            FilterModelInput.AppointmentTypes = new List<SelectListItem>()
+
+            var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").ToList();
+            var classes = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").ToList();
+            var availabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider,Location").ToList();
+
+            if (!String.IsNullOrEmpty(providerId))
             {
-                new SelectListItem { Text = "Office Hours", Value = "Office Hours"},
-                new SelectListItem { Text = "General Advisement", Value = "General Advisement"},
-                new SelectListItem { Text = "New Student Advisement", Value = "New Student"},
-                new SelectListItem { Text = "Flex Student Advisement", Value = "Flex Student"}
-            };
+                availabilities = availabilities.Where(a => a.ProviderId.Equals(providerId)).ToList();
+            }
+
+            if (!String.IsNullOrEmpty(providerType))
+            {
+                switch (providerType)
+                {
+                    case "Instructor":
+                        FilterModelInput.AppointmentTypes.Add(new SelectListItem{ Text = "Office Hours", Value = "Office Hours"});
+                        break;
+                    case "Advisor":
+                        FilterModelInput.AppointmentTypes.Add(new SelectListItem{ Text = "General Advising", Value = "Advising" });
+                        FilterModelInput.AppointmentTypes.Add(new SelectListItem { Text = "New Student Advising", Value = "Advising for New Students" });
+                        FilterModelInput.AppointmentTypes.Add(new SelectListItem { Text = "Current Student Advising", Value = "Advising for Current Students" });
+                        FilterModelInput.AppointmentTypes.Add(new SelectListItem { Text = "Flex Student Advising", Value = "Advising for Flex Students" });
+                        classes.Clear();
+                        break;
+                    case "Tutor":
+                        FilterModelInput.AppointmentTypes.Add(new SelectListItem { Text = "Tutoring", Value = "Tutoring" });
+                        break;
+                    default:
+                        break;
+                }
+                FilterModelInput.Providers.Clear();
+                foreach (var p in providers)
+                {
+                    if (p.Title.Equals(providerType))
+                    {
+                        FilterModelInput.Providers.Add(new SelectListItem { Text = p.AppUser.FullName, Value = p.AppUserId });
+                    }
+                }
+                availabilities = availabilities.Where(a => a.Provider.Title.Equals(providerType)).ToList();
+            }
+            else
+            {
+                FilterModelInput.AppointmentTypes.AddRange(new List<SelectListItem> {
+                    new SelectListItem{ Text = "General Advising", Value = "Advising" },
+                    new SelectListItem { Text = "New Student Advising", Value = "Advising for New Students" },
+                    new SelectListItem { Text = "Current Student Advising", Value = "Advising for Current Students" },
+                    new SelectListItem { Text = "Flex Student Advising", Value = "Advising for Flex Students" },
+                    new SelectListItem{ Text = "Office Hours", Value = "Office Hours"},
+                    new SelectListItem { Text = "Tutoring", Value = "Tutoring" }
+                    }
+                );
+                FilterModelInput.Providers.Clear();
+                foreach (var p in providers)
+                {
+                    FilterModelInput.Providers.Add(new SelectListItem { Text = p.AppUser.FullName, Value = p.AppUserId });
+                }
+            }
+
+            if (!String.IsNullOrEmpty(appointmentType))
+            {
+                switch (appointmentType)
+                {
+                    case "Office Hours":
+                        FilterModelInput.Classes.Clear();
+                        foreach(var c in classes)
+                        {
+                            if(c.Provider.Title.Equals("Instructor"))
+                            {
+                                FilterModelInput.Classes.Add(new SelectListItem { Text = c.Class.Name, Value = c.Class.Name });
+                            }
+                        }
+                        break;
+                    case "Tutoring":
+                        FilterModelInput.Classes.Clear();
+                        foreach (var c in classes)
+                        {
+                            if (c.Provider.Title.Equals("Tutor"))
+                            {
+                                FilterModelInput.Classes.Add(new SelectListItem { Text = c.Class.Name, Value = c.Class.Name });
+                            }
+                        }
+                        break;
+                }
+                availabilities = availabilities.Where(a => a.AppointmentType.Contains(appointmentType)).ToList();
+            }
+
+            if (!String.IsNullOrEmpty(campus))
+            {
+                availabilities = availabilities.Where(a => a.Location.Campus.Equals(campus)).ToList();
+            }
+
             FilterModelInput.Campuses = new List<SelectListItem>()
             {
                 new SelectListItem { Text = "Ogden Campus", Value = "Ogden" },
@@ -94,66 +178,26 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 new SelectListItem { Text = "SLCC Campus", Value = "SLCC"},
                 new SelectListItem {Text = "Online", Value = "Online"}
             };
+
             FilterModelInput.ProviderTypes = new List<SelectListItem>()
             {
-                new SelectListItem { Text = "Advisement", Value = "Advisor" },
+                new SelectListItem { Text = "Advising", Value = "Advisor" },
                 new SelectListItem { Text = "Instructing", Value = "Instructor" },
                 new SelectListItem { Text = "Tutoring", Value = "Tutor" }
             };
 
-            var allAvailabilities = _unitOfWork.ProviderAvailability.GetAll(includes: "Provider,Location").Where(p => !p.Scheduled && !(p.Provider.AppUserId == user.Id) && p.StartTime >= DateTime.Now);
-            var availabilities = allAvailabilities;
-            var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").Where(p => allAvailabilities.Select(a => a.ProviderId).Contains(p.AppUserId));
-            var allClasses = _unitOfWork.ProviderClass.GetAll(includes: "Class,Provider").Where(pc => availabilities.Select(a => a.ProviderId).Contains(pc.ProviderId)).DistinctBy(pc => pc.Class.Name);
-            FilterModelInput.Classes = allClasses.Select(pc => new SelectListItem
+            foreach(var a in availabilities)
+            {
+                CalendarObj.Add(new Calendar
                 {
-                    Text = pc.Class.Id.ToString(),
-                    Value = pc.Class.Name
-                }).ToList();
-            FilterModelInput.Providers = providers.Select(p => new SelectListItem
-                {
-                    Text = p.AppUser.FullName,
-                    Value = p.AppUserId
-                }).ToList();
-            
-            if (!String.IsNullOrEmpty(campus))
-            {
-                availabilities = availabilities.Where(a => a.Location.Campus == campus);
+                    Id = a.Id,
+                    Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
+                    StartTime = DateTimeParser.ParseDateTime(a.StartTime),
+                    EndTime = DateTimeParser.ParseDateTime(a.EndTime),
+                    Color = a.Provider.HexColor
+                });
             }
-            if (!String.IsNullOrEmpty(providerId))
-            {
-                availabilities = availabilities.Where(a => a.ProviderId == providerId);
-            }
-            if (!String.IsNullOrEmpty(providerType))
-            {
-                availabilities = availabilities.Where(a => a.Provider.Title == providerType);
-                providers = providers.Where(p => p.Title == providerType);
-                FilterModelInput.Providers = providers.Select(p => new SelectListItem
-                    {
-                        Text = p.AppUser.FullName,
-                        Value = p.AppUserId
-                    }).ToList();
-            }
-            if (!String.IsNullOrEmpty(appointmentType))
-            {
-                availabilities = availabilities.Where(a => a.AppointmentType == appointmentType);
-            }
-            if (!String.IsNullOrEmpty(classes))
-            {
-                var providerClasses = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").Where(pc => classes.Contains(pc.Class.Name));
-                availabilities = availabilities.Where(a => providerClasses.Select(pc => pc.ProviderId).Contains(a.ProviderId));
-            }
-            foreach (var a in availabilities)
-            {
-                    CalendarObj.Add(new Calendar
-                    {
-                        Id = a.Id,
-                        Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
-                        StartTime = DateTimeParser.ParseDateTime(a.StartTime),
-                        EndTime = DateTimeParser.ParseDateTime(a.EndTime),
-                        Color = a.Provider.HexColor
-                    });
-              }
+
             return Page();
         }
 

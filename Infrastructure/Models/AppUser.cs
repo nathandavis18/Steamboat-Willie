@@ -18,7 +18,8 @@ namespace Infrastructure.Models
         public string? WNumber { get; set; }
 
         [DisplayName("Profile Picture")]
-        public string? ProfilePictureURL { get; set; } 
+        [Required]
+        public string ProfilePictureURL { get; set; } = "default.png";
 
         public bool? GoogleCalendarIntegration { get; set; }
 

@@ -31,6 +31,7 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ClientId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
@@ -66,10 +67,11 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("IsDisabled")
+                    b.Property<bool>("IsDisabled")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -85,10 +87,10 @@ namespace DataAccess.Migrations
                     b.Property<string>("ClassLevel")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DepartmentId")
+                    b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsWeberStudent")
+                    b.Property<bool>("IsWeberStudent")
                         .HasColumnType("bit");
 
                     b.Property<string>("StudentType")
@@ -110,9 +112,10 @@ namespace DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("DepartmentName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsDisabled")
+                    b.Property<bool>("IsDisabled")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
@@ -129,9 +132,11 @@ namespace DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Campus")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LocationValue")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -147,19 +152,20 @@ namespace DataAccess.Migrations
                     b.Property<string>("AdvisementTypes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DepartmentId")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("datetime2");
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
 
                     b.Property<string>("HexColor")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("StartTime")
-                        .HasColumnType("datetime2");
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AppUserId");
@@ -175,10 +181,11 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AppointmentType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Duration")
-                        .HasColumnType("datetime2");
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
@@ -187,6 +194,7 @@ namespace DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ProviderId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("Scheduled")
@@ -209,7 +217,7 @@ namespace DataAccess.Migrations
                     b.Property<string>("ProviderId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("ClassId")
+                    b.Property<int>("ClassId")
                         .HasColumnType("int");
 
                     b.HasKey("ProviderId", "ClassId");
@@ -460,6 +468,7 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProfilePictureURL")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WNumber")
@@ -472,7 +481,9 @@ namespace DataAccess.Migrations
                 {
                     b.HasOne("Infrastructure.Models.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientId");
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Infrastructure.Models.ProviderAvailability", "ProviderAvailability")
                         .WithMany()
@@ -495,9 +506,7 @@ namespace DataAccess.Migrations
 
                     b.HasOne("Infrastructure.Models.Department", "Department")
                         .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DepartmentId");
 
                     b.Navigation("AppUser");
 
@@ -514,7 +523,9 @@ namespace DataAccess.Migrations
 
                     b.HasOne("Infrastructure.Models.Department", "Department")
                         .WithMany()
-                        .HasForeignKey("DepartmentId");
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AppUser");
 
@@ -531,7 +542,9 @@ namespace DataAccess.Migrations
 
                     b.HasOne("Infrastructure.Models.Provider", "Provider")
                         .WithMany()
-                        .HasForeignKey("ProviderId");
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Location");
 

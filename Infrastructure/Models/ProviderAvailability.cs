@@ -10,8 +10,9 @@ namespace Infrastructure.Models
             Id = Guid.NewGuid().ToString(); //Creates an Id for the availability
         }
         [Key]
-        public string? Id { get; set; } = default!;
+        public string Id { get; set; } = default!;
 
+        [Required]
         public string? ProviderId { get; set; }
 
         [Required]
@@ -23,12 +24,13 @@ namespace Infrastructure.Models
         public DateTime EndTime { get; set; }
 
         [Required]
-        public DateTime Duration { get; set; }
+        public TimeSpan Duration { get; set; } = TimeSpan.Zero;
 
         public int LocationId { get; set; }
 
         public bool Scheduled { get; set; }
 
+        [Required]
         public string? AppointmentType { get; set; }
 
         [ForeignKey(nameof(ProviderId))]

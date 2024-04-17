@@ -187,8 +187,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         providerEntry.DepartmentId = Int32.Parse(ProviderInput.DepartmentId);
                         providerEntry.Title = ProviderInput.Title;
                         providerEntry.AdvisementTypes = ",";
-                        providerEntry.StartTime = DateTime.Parse("01/01/0001 08:00:00");
-                        providerEntry.EndTime = DateTime.Parse("01/01/0001 20:00:00");
+                        providerEntry.StartTime = TimeSpan.Parse("08:00:00");
+                        providerEntry.EndTime = TimeSpan.Parse("20:00:00");
                         Input.CreatingProvider = true;
                         _unitOfWork.Provider.Add(providerEntry);
                     }

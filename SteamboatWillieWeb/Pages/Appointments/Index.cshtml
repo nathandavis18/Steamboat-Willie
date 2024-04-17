@@ -100,7 +100,7 @@
             <div class="col-md-2">
                 @if (Model.FilterModelInput.Classes.Any())
                 {
-                    <select asp-for="FilterModelInput.CurrentClasses" asp-items="@Model.FilterModelInput.Classes" name="Classes" id="classes" class="form-select bg-secondary text-white">
+                    <select asp-for="FilterModelInput.CurrentClasses" asp-items="@Model.FilterModelInput.Classes" name="Cls" id="cls" class="form-select bg-secondary text-white">
                         <option value="@String.Empty" selected>All Classes</option>
                     </select>
                 }
