@@ -38,10 +38,12 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\images\" />
+    <Content Remove="wwwroot\images\aboutusimages\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
     <Folder Include="Pages\Classes\" />
+    <Folder Include="wwwroot\images\aboutusimages\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Pages\Availability\_ViewAvailabilityPartial.cshtml">
