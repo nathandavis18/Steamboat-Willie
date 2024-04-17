@@ -17,12 +17,12 @@ namespace DataAccess
         }
         public void StartBackgroundTask()
         {
-            _recurringJobManager.AddOrUpdate("emailReminder", () => SendEmail(), "*/15 6-20 * * *");
+            _recurringJobManager.AddOrUpdate("emailReminder", () => SendEmail(), "*/15 6-20 * * *"); //Every 15 minutes from 6am - 8pm, every day, every month, every year
         }
         public void SendEmail()
         {
             var allUpcomingAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability") //Getting all appointments that are ~ 1 hour away
-                .Where(a => a.ProviderAvailability.StartTime <= DateTime.Now.AddHours(1) && a.ProviderAvailability.StartTime > DateTime.Now.AddMinutes(55));
+                .Where(a => a.ProviderAvailability.StartTime <= DateTime.Now.AddHours(1).AddMinutes(5) && a.ProviderAvailability.StartTime > DateTime.Now.AddMinutes(55));
             foreach (var appointment in allUpcomingAppointments)
             {
                 var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;

@@ -170,6 +170,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             bool makeLocation = false;
             var currentUserId = _userManager.GetUserId(User);
             var provider = _unitOfWork.Provider.GetById(currentUserId);
+
             if (AvailabilityModelInput.StartTime < provider.StartTime)
             {
                 ModelState.AddModelError("AvailabilityModelInput.StartTime", "Start Time cannot be before office hours start");
