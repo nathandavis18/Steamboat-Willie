@@ -8,10 +8,9 @@
         <div class="col-md-12">
             <div class="department-form">
                 <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                    <input asp-for="@Model.Class.Id" hidden />
-                    <input asp-for="@Model.Class.Name" hidden />
+                    <input asp-for="@Model.ClassModelInput.Id" hidden />
                     <div class="department-form-label">
-                        @if (Model.Class.Name != null)
+                        @if (Model.ClassModelInput.ClassName != null)
                         {
                             <label>Edit Class</label>
                         }
@@ -21,8 +20,8 @@
                         }
                     </div>
                     <div class="form-floating mb-3 department-form-input">
-                        <select asp-items="@Model.Departments" asp-for="@Model.department.DepartmentName" class="form-control bg-secondary text-white"></select>
-                        <label asp-for="@Model.department.DepartmentName"></label>
+                        <select asp-items="@Model.ClassModelInput.Departments" asp-for="@Model.ClassModelInput.DepartmentId" class="form-control bg-secondary text-white"></select>
+                        <label asp-for="@Model.ClassModelInput.DepartmentId"></label>
                     </div>
                     <div class="form-floating mb-12 department-form-input">
                         <input asp-for="@Model.ClassModelInput.ClassName" class="form-control bg-secondary text-white" />
@@ -31,7 +30,7 @@
                     </div>
 
                     <div class="department-submit">
-                        <input type="submit" class="w-100 btn btn-lg btn-primary" value="@(Model.Class.Name != null ? "Save" : "Create") Class" />
+                        <input type="submit" class="w-100 btn btn-lg btn-primary" value="@(Model.ClassModelInput.ClassName != null ? "Save" : "Create") Class" />
                     </div>
                 </form>
             </div>

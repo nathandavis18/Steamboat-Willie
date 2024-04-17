@@ -22,24 +22,24 @@ namespace SteamboatWillieWeb.Pages.Classes
         public string? ReturnUrl { get; set; }
 
         [BindProperty]
-        public Class Class { get; set; }
-
-        [BindProperty]
         public ClassModel ClassModelInput { get; set; }
 
         public class ClassModel
-        { 
-            [BindProperty]
+        {
+            public string? Id { get; set; } = "0";
+
+            [Required]
             [Display(Name = "Class")]
             [RegularExpression(@"^\d{4}$", ErrorMessage = "Class must be exactly four digits.")]
+            [StringLength(4, MinimumLength = 4, ErrorMessage = "Class must be exactly four digits.")]
             public string? ClassName { get; set; }
+
+            [Required]
+            [Display(Name = "Department")]
+            public string? DepartmentId { get; set; }
+            public IEnumerable<SelectListItem>? Departments { get; set; }
         }
 
-        [BindProperty]
-        [Display(Name = "Department")]
-        public Department department { get; set; }
-
-        public IEnumerable<SelectListItem> Departments; 
 
         public IActionResult OnGet(int? id = null, string? returnUrl = null)
         {
@@ -53,33 +53,23 @@ namespace SteamboatWillieWeb.Pages.Classes
                 return RedirectToPage("../Index");
             }
 
-            ClassModelInput = new ClassModel();
+            ClassModelInput = new ClassModel()
+            {
+                Departments = _unitOfWork.Department
+                    .GetAll()
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.DepartmentName })
 
-            var departments = _unitOfWork.Department
-                .GetAll()
-                .Distinct()
-                .ToList();
-
-            Departments = _unitOfWork.Department
-                .GetAll()
-                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.DepartmentName })
-                .ToList();
+            };
 
             if (id != null)
             {
-                Class = _unitOfWork.Class.GetById(id);
-                var split = Class.Name.Split(" ");
+                var cls = _unitOfWork.Class.GetById(id);
+                var split = cls.Name.Split(" ");
                 var dept = split[0];
                 var classNum = split[1];
+                ClassModelInput.Id = cls.Id.ToString();
+                ClassModelInput.DepartmentId = _unitOfWork.Department.Get(d => d.DepartmentName.Equals(dept)).Id.ToString();
                 ClassModelInput.ClassName = classNum.ToString();
-                department = new Department();
-                department.DepartmentName = _unitOfWork.Department.Get(d => d.DepartmentName.Equals(dept)).DepartmentName;
-            }
-            else
-            {
-                Class = new Class();
-                Class.Id = 0;
-                Class.Name = "Test";
             }
 
             ReturnUrl = returnUrl;
@@ -90,23 +80,17 @@ namespace SteamboatWillieWeb.Pages.Classes
         {
             if (!ModelState.IsValid)
             {
-                var departments = _unitOfWork.Department
-                .GetAll()
-                .Distinct()
-                .ToList();
-
-                Departments = _unitOfWork.Department
+                ClassModelInput.Departments = _unitOfWork.Department
                     .GetAll()
-                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.DepartmentName })
-                    .ToList();
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.DepartmentName });
 
                 return Page();
             }
 
-            var departmentName = _unitOfWork.Department.GetById(int.Parse(department.DepartmentName)).DepartmentName;
-            if (Class.Id != 0)
+            var departmentName = _unitOfWork.Department.GetById(int.Parse(ClassModelInput.DepartmentId)).DepartmentName;
+            if (int.Parse(ClassModelInput.Id) != 0)
             {
-                var classs = _unitOfWork.Class.GetById(Class.Id);
+                var classs = _unitOfWork.Class.GetById(int.Parse(ClassModelInput.Id));
                 classs.Name = departmentName + " " + ClassModelInput.ClassName;
                 _unitOfWork.Class.Update(classs);
             }

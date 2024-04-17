@@ -66,44 +66,32 @@
             <br />
             <br />
             <div class="col-md-2">
-                @if (Model.FilterModelInput.Providers.Any())
-                {
-                    <select asp-for="FilterModelInput.CurrentProvider" asp-items="@Model.FilterModelInput.Providers" name="ProviderId" id="providerId" class="form-select bg-secondary text-white">
-                        <option value="@String.Empty" selected>All Providers</option>
-                    </select>
-                }
+                <select asp-for="FilterModelInput.CurrentProvider" asp-items="@Model.FilterModelInput.Providers" name="ProviderId" id="providerId" class="form-select bg-secondary text-white">
+                    <option value="@String.Empty" selected>All Providers</option>
+                </select>
             </div>
             <div class="col-md-2">
-                @if (Model.FilterModelInput.Campuses.Any())
-                {
-                    <select asp-for="FilterModelInput.CurrentCampus" asp-items="@Model.FilterModelInput.Campuses" name="Campus" id="campus" class="form-select bg-secondary text-white">
-                        <option value="@String.Empty" selected>All Campuses</option>
-                    </select>
-                }
+                <select asp-for="FilterModelInput.CurrentCampus" asp-items="@Model.FilterModelInput.Campuses" name="Campus" id="campus" class="form-select bg-secondary text-white">
+                    <option value="@String.Empty" selected>All Campuses</option>
+                </select>
             </div>
             <div class="col-md-3">
-                @if (Model.FilterModelInput.AppointmentTypes.Any())
-                {
-                    <select asp-for="FilterModelInput.CurrentAppointmentType" asp-items="@Model.FilterModelInput.AppointmentTypes" name="AppointmentType" id="appointmentType" class="form-select bg-secondary text-white">
-                        <option value="@String.Empty" selected>All Appointment Types</option>
-                    </select>
-                }
+                <select asp-for="FilterModelInput.CurrentAppointmentType" asp-items="@Model.FilterModelInput.AppointmentTypes" name="AppointmentType" id="appointmentType" class="form-select bg-secondary text-white">
+                    <option value="@String.Empty" selected>All Appointment Types</option>
+                </select>
                 </div>
             <div class="col-md-2">
-                @if (Model.FilterModelInput.ProviderTypes.Any())
-                {
-                    <select asp-for="FilterModelInput.CurrentProviderType" asp-items="@Model.FilterModelInput.ProviderTypes" name="ProviderType" id="providerType" class="form-select bg-secondary text-white">
-                        <option value="@String.Empty" selected>All Provider Types</option>
-                    </select>
-                }
+                <select asp-for="FilterModelInput.CurrentProviderType" asp-items="@Model.FilterModelInput.ProviderTypes" name="ProviderType" id="providerType" class="form-select bg-secondary text-white">
+                    <option value="@String.Empty" selected>All Provider Types</option>
+                </select>
             </div>
             <div class="col-md-2">
-                @if (Model.FilterModelInput.Classes.Any())
-                {
-                    <select asp-for="FilterModelInput.CurrentClasses" asp-items="@Model.FilterModelInput.Classes" name="Cls" id="cls" class="form-select bg-secondary text-white">
-                        <option value="@String.Empty" selected>All Classes</option>
-                    </select>
-                }
+                <select asp-for="FilterModelInput.CurrentClasses" asp-items="@Model.FilterModelInput.Classes" name="Cls" id="cls" class="form-select bg-secondary text-white">
+                    <option value="@String.Empty" selected>All Classes</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <a class="btn btn-warning" asp-page="./Index">Clear</a>
             </div>
         </div>
     </form>

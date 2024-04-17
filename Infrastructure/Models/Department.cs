@@ -8,6 +8,7 @@ namespace Infrastructure.Models
         public int Id { get; set; }
 
         [Display(Name = "Department")]
+        [StringLength(4)]
         [Required]
         public string? DepartmentName { get; set; }
 
