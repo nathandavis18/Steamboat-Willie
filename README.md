@@ -2,18 +2,56 @@
 
 Welcome to Steamboat Willie, a SimplyBook.Me alternative, tailored for Weber State University students and faculty.
 
-Features to be included:
+All release versions are live at [this site](https://steamboatwillie.nathandavis18.com/)
 
-    
-    Link Appointments to your Google Calendar
-    Register for an appointment as Student
-    Create appointment as Faculty
+### What you can use this site for:
+This is an appointment scheduling system, designed to allow Current Weber State University Students/Prospective WSU Students to schedule an appointment with their instructor/advisor, or schedule a tutoring session.
+
+#### All available features:
+
+    Register for an Appointment as a Client
+    Cancel Appointment as Client
+    Create an Availablity Slot as a Provider
+    Cancel Appointment/Delete Availability as Provider
+    Create Provider Accounts as System Admin
+
+    View current/future appointments as client
+    View past/present/future appointments as provider
+    Generate report for your filled appointments as provider
+
+    Integrate appointments with your Google Calendar (authentication required)
+    Sign up using your Google or Microsoft account
+
     Edit/View your profile
-    Edit/View appointments
-    Delete/Cancel appointments
-    As admin, edit user roles to differentiate between faculty/student
-    Filter appointments based on your needs:
-        Need an advising appointment? Select this filter and browse through the available advisors
-        Need to meet with your instructor? Filter based on your instructor
-        Want to meet with a tutor? Filter by tutor```
+    Enable/Disable Google Calendar Integration from your profile
+    Change your WSU student status from your profile
+
+#### QOL Features
+
+    Filter appointment type to find exactly what you need
+        Filter by specific provider
+        Filter by provider type (Tutoring, Advising, Instructing)
+        Filter by appointment type (General Advising, Class Office Hours, etc)
+        Filter by class
+        Filter by campus location (Davis, Ogden, SLCC, and Online)
+
+    As an admin, search for a specific user by:
+        Name
+        Role
+        W#
+        Email
+
+    Image cropping for your profile picture
+    Clickable links for online appointments
+    Automatic Google Calendar Integration upon register/cancel appointment
+        (Requires Authentication)
+
+    Signing up with an external service does not require email confirmation!
+
+
+When signing up for an account, you must confirm your email before you can use the site. If you sign up using an external service (Google/Microsoft), you are not required to confirm your email.
+
+If you have any questions, don't :P
+
+All contact info can be found on the website listed above.
     

@@ -148,21 +148,22 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-
                     var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
 
-                    var htmlMessage = EmailFormats.ConfirmEmail.Replace("[ConfirmEmailLink]", HtmlEncoder.Default.Encode(callbackUrl));
+                    if (!Input.CreatingProvider)
+                    {
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var callbackUrl = Url.Page(
+                            "/Account/ConfirmEmail",
+                            pageHandler: null,
+                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                            protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", htmlMessage);
+                        var htmlMessage = EmailFormats.ConfirmEmail.Replace("[ConfirmEmailLink]", HtmlEncoder.Default.Encode(callbackUrl));
 
-                    //We can change this so it doesn't automatically send the email confirmation
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email", htmlMessage);
+                    }
 
                     await _userManager.AddToRoleAsync(user, (Input.Role == null) ? SD.CLIENT_ROLE : Input.Role); //Adds user to Client Role by default,
                                                                                                                  //or adds them to the chosen role if selection was made by admin
@@ -191,10 +192,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         providerEntry.EndTime = TimeSpan.Parse("20:00:00");
                         Input.CreatingProvider = true;
                         _unitOfWork.Provider.Add(providerEntry);
+
+                        user.EmailConfirmed = true;
+                        _unitOfWork.AppUser.Update(user); //Provider Accounts don't need to verify their email.
                     }
                     await _unitOfWork.CommitAsync();
 
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    if (!Input.CreatingProvider && _userManager.Options.SignIn.RequireConfirmedAccount)
                     {
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     }
