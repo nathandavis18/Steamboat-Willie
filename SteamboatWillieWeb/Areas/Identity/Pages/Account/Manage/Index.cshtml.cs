@@ -165,6 +165,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 
                 Classes = _unitOfWork.Class
                     .GetAll()
+                    .Where(c => c.IsDisabled != true)
                     .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
                     .ToList();
 

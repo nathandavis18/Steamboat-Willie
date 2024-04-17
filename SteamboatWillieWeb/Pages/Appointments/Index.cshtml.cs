@@ -89,7 +89,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             FilterModelInput.CurrentAppointmentType = appointmentType;
 
             var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").ToList();
-            var classes = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").ToList();
+            var classes = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").Where(c => c.Class.IsDisabled != true).ToList();
             var availabilities = _unitOfWork.ProviderAvailability.GetAll(a => !a.Scheduled && a.ProviderId != user.Id, includes: "Provider,Location").ToList();
             if (!client.StudentType.Contains("Flex"))
             {
