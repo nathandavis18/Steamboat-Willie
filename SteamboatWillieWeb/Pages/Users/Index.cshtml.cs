@@ -29,8 +29,9 @@ namespace SteamboatWillieWeb.Pages.Users
         public string? CurrentSearch { get; set; }
         public string? CurrentRole { get; set; }
         public string? CurrentWSearch {  get; set; }
+        public string? CurrentEmail {  get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? pageIndex, string searchString, string roleSort, string wSearch)
+        public async Task<IActionResult> OnGetAsync(int? pageIndex, string searchString, string roleSort, string wSearch, string emailSearch)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -44,6 +45,7 @@ namespace SteamboatWillieWeb.Pages.Users
             CurrentSearch = searchString;
             CurrentRole = roleSort;
             CurrentWSearch = wSearch;
+            CurrentEmail = emailSearch;
             Roles = _roleManager.Roles.Select(x => new SelectListItem
             {
                 Text = x.Name,
@@ -65,6 +67,10 @@ namespace SteamboatWillieWeb.Pages.Users
             {
                 appUsers = appUsers.Where(a => !(String.IsNullOrEmpty(a.WNumber))).ToList();
                 appUsers = appUsers.Where(a => a.WNumber!.Contains(wSearch.ToUpper())).ToList();
+            }
+            if (!String.IsNullOrEmpty(emailSearch))
+            {
+                appUsers = appUsers.Where(a => a.NormalizedEmail.Contains(emailSearch.ToUpper())).ToList();
             }
             appUsers = appUsers.OrderBy(x => x.LName).ThenBy(x => x.FName).ThenBy(x => x.WNumber).ToList();
             ApplicationUsers = PaginatedList<AppUser>.Create(appUsers, pageIndex ?? 1, pageSize);
