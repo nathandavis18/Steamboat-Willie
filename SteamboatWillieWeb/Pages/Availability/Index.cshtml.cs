@@ -138,7 +138,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                 .ToList();
             Classes = _unitOfWork.Class
                 .GetAll()
-                .Where(c => providerClasses.Contains(c.Id))
+                .Where(c => providerClasses.Contains(c.Id) && c.IsDisabled != true)
                 .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
                 .ToList();
 

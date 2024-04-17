@@ -57,7 +57,9 @@ namespace SteamboatWillieWeb.Pages.Classes
             {
                 Departments = _unitOfWork.Department
                     .GetAll()
+                    .Where(c => c.IsDisabled != true)
                     .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.DepartmentName })
+                    
 
             };
 
