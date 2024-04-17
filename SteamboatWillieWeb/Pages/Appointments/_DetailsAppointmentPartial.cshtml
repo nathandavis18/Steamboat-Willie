@@ -13,39 +13,75 @@
             <div class="row">
                 <div class="col-md-3 text-end">
                     <span class="d-inline-block"><strong>When: </strong> </span> <br />
-                    <span class="d-inline-block"><strong>With: </strong> </span> <br />
-                    <span class="d-inline-block"><strong>Campus: </strong> </span> <br />
-                    <span class="d-inline-block"><strong>@(Model.AppointmentModelInput.Campus.Equals("Online") ? "Link" : "Building"): </strong> </span> <br />
-                    <span class="d-inline-block"><strong>Comments: </strong></span>
                 </div>
                 <div class="col-md-9">
-                    <!-- Info about appointments-->
-                    <span>@Model.AppointmentModelInput.Date @Model.AppointmentModelInput.Time </span> <br />
-                    <span>@Model.AppointmentModelInput.ProviderName </span> <br />
-                    <span>@Model.AppointmentModelInput.Campus</span> <br />
+                    <span class="d-inline-block">@Model.AppointmentModelInput.Date @Model.AppointmentModelInput.Time </span> <br />
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>With: </strong> </span> <br />
+                </div>
+                <div class="col-md-9">
+                    <span class="d-inline-block">@Model.AppointmentModelInput.ProviderName </span> <br />
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>Campus: </strong> </span> <br />
+                </div>
+                <div class="col-md-9">
+                    <span class="d-inline-block">@Model.AppointmentModelInput.Campus</span> <br />
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>@(Model.AppointmentModelInput.Campus.Equals("Online") ? "Link" : "Building"): </strong> </span> <br />
+                </div>
+                <div class="col-md-9">
+                    <span class="d-inline-block">@Model.AppointmentModelInput.Campus</span>
                     @if (Model.AppointmentModelInput.Campus == "Online")
                     {
                         @if (Model.AppointmentModelInput.Location.Contains("http"))
                         {
-                            <a href="@Model.AppointmentModelInput.Location" target="_blank">@Model.AppointmentModelInput.Location</a>
+                            <a class="d-inline-block" href="@Model.AppointmentModelInput.Location" target="_blank">@Model.AppointmentModelInput.Location</a>
                         }
                         else
                         {
-                            <a href="http://@Model.AppointmentModelInput.Location" target="_blank">@Model.AppointmentModelInput.Location</a>
+                            <a class="d-inline-block" href="http://@Model.AppointmentModelInput.Location" target="_blank">@Model.AppointmentModelInput.Location</a>
                         }
                     }
                     else
                     {
-                        <span>@Model.AppointmentModelInput.Location</span> <br />
+                        <span class="d-inline-block">@Model.AppointmentModelInput.Location</span> <br />
                     }
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block"><strong>Student Attachment:</strong></span>
+                </div>
+                <div class="col-md-9">
+                    <span class="d-inline-block">
+                        <input type="file" class="form-control form-control-sm bg-secondary text-white" />
+                        <a href="#">Student Attachment</a>
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 text-end">
+                    <span class="d-inline-block mt-2"><strong>Comments: </strong></span>
+                </div>
+                <div class="col-md-9">
                     <div id="notEdit">
-                        <span>@Model.AppointmentModelInput.Comments </span>
+                        <span class="d-inline-block mt-2">@Model.AppointmentModelInput.Comments </span>
                     </div>
                     <div id="edit" style="display: none">
-                        <textarea cols="3" style="width: 95%" asp-for="AppointmentModelInput.Comments"></textarea>
+                        <textarea class="mt-2 bg-secondary text-white" cols="3" style="width: 95%" asp-for="AppointmentModelInput.Comments"></textarea>
                     </div>
                 </div>
             </div>
+                
             <div class="modal-footer">
                 <!-- Buttons for popup -->
                 <button form="none" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
