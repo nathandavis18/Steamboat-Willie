@@ -150,7 +150,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                     Input.PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.OtherPhone);
                 }
 
-                WeberStudentInput.Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(d => new SelectListItem
+                WeberStudentInput.Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).OrderBy(x => x.DepartmentName).Select(d => new SelectListItem
                 {
                     Text = d.DepartmentName,
                     Value = d.Id.ToString()

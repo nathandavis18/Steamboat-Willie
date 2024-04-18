@@ -9,23 +9,32 @@ namespace Utility.GoogleCalendar
         //If no such user exists, it creates a new credential for that user, once they link their google account and accept the terms.
         public static async Task<UserCredential?> ValidateUserCalendar(string userId, IConfiguration configuration)
         {
-            var settings = configuration.GetSection("Authentication:Google");
-            UserCredential? credential = null;
-            if (settings.Exists())
+            try
             {
-                string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
-                credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                CancellationToken token = cancellationTokenSource.Token;
+                var settings = configuration.GetSection("Authentication:Google");
+                UserCredential? credential = null;
+                if (settings.Exists())
                 {
-                    ClientId = settings.GetValue(typeof(string), "ClientId") as string,
-                    ClientSecret = settings.GetValue(typeof(string), "ClientSecret") as string,
-                },
-                    scope,
-                    userId,
-                    new CancellationToken(false));
+                    string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
+                    credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
+                    {
+                        ClientId = settings.GetValue(typeof(string), "ClientId") as string,
+                        ClientSecret = settings.GetValue(typeof(string), "ClientSecret") as string,
+                    },
+                        scope,
+                        userId,
+                        token);
 
-                return credential;
+                    return credential;
+                }
             }
-            return credential;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return null;
         }
 
         //If the access token is null, the user has not been validated, and processes requiring the credential should not continue.

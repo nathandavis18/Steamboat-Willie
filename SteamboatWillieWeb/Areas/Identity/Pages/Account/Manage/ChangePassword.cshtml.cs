@@ -112,7 +112,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             _logger.LogInformation("User changed their password successfully.");
             TempData["success"] = "Your password has been changed.";
 
-            return RedirectToPage();
+            return RedirectToPage("./Index");
         }
     }
 }

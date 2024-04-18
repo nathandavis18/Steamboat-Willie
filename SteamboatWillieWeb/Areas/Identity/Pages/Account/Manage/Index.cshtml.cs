@@ -109,7 +109,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 WeberStudentInput = new WeberStudentInputModel()
                 {
                     IsWeberStudent = client.IsWeberStudent,
-                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).OrderBy(x => x.DepartmentName).Select(x => new SelectListItem
                     {
                         Text = x.DepartmentName,
                         Value = x.Id.ToString()
@@ -126,7 +126,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             {
                 ProviderInput = new ProviderInputModel()
                 {
-                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).OrderBy(x => x.DepartmentName).Select(x => new SelectListItem
                     {
                         Text = x.DepartmentName,
                         Value = x.Id.ToString()
@@ -323,23 +323,24 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             {
                 var credential = await ValidateUser.ValidateUserCalendar(user.Id, _configuration);
                 user.GoogleCalendarIntegration = ValidateUser.IsUserValidated(credential);
+                if (user.GoogleCalendarIntegration == true)
+                {
+                    TempData["success"] = "You have successfully integrated with Google Calendar!";
+                }
+                else
+                {
+                    TempData["error"] = "Something went wrong. Please try again!";
+                }
             }
             else
             {
                 user.GoogleCalendarIntegration = false;
+                TempData["warning"] = "Your appointments will no longer automatically integrate with your Google Calendar.";
             }
 
             _unitOfWork.AppUser.Update(user);
             await _unitOfWork.CommitAsync();
 
-            if(user.GoogleCalendarIntegration == true)
-            {
-                TempData["success"] = "You have successfully integrated with Google Calendar!";
-            }
-            else
-            {
-                TempData["warning"] = "Your appointments will no longer automatically integrate with your Google Calendar.";
-            }
             return RedirectToPage("./Index");
         }
     }

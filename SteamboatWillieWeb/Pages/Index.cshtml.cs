@@ -139,6 +139,14 @@ namespace SteamboatWillieWeb.Pages
             {
                 var credential = await ValidateUser.ValidateUserCalendar(user!.Id, _configuration);
                 user.GoogleCalendarIntegration = ValidateUser.IsUserValidated(credential);
+                if(user.GoogleCalendarIntegration == false)
+                {
+                    TempData["error"] = "Google Calendar Integration failed. You can try again from your profile settings.";
+                }
+                else
+                {
+                    TempData["success"] = "You have successfully integrated with Google Calendar!";
+                }
             }
             else
             {
