@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\Classes\" />
-    <Folder Include="wwwroot\attachments\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Pages\Availability\_ViewAvailabilityPartial.cshtml">
