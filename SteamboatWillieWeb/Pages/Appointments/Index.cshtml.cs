@@ -89,7 +89,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
             var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").ToList();
             var classes = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").Where(c => c.Class.IsDisabled != true).ToList();
-            var availabilities = _unitOfWork.ProviderAvailability.GetAll(a => !a.Scheduled && a.ProviderId != user.Id && a.StartTime >= DateTime.Today, includes: "Provider,Location").ToList();
+            var availabilities = _unitOfWork.ProviderAvailability.GetAll(a => !a.Scheduled && a.ProviderId != user.Id && a.StartTime >= DateTime.Today.AddDays(1), includes: "Provider,Location").ToList();
             if (!client.StudentType.Contains("Flex"))
             {
                 availabilities = availabilities.Where(a => !a.AppointmentType.Contains("Advising for Flex Students")).ToList();
