@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net.Mail;
 using Utility;
 using Utility.GoogleCalendar;
 
@@ -252,9 +253,29 @@ namespace SteamboatWillieWeb.Pages
             return Partial("./Appointments/_DetailsAppointmentPartial", this);
         }
 
-        public IActionResult OnPostAppointmentDetails(string? id, string? comments)
+        public IActionResult OnPostAppointmentDetails(string? id, string? comments, bool file)
         {
             var appointment = _unitOfWork.Appointment.GetById(id);
+
+            if (file)
+            {
+                var folder = Path.Combine(WebHostEnvironment.WebRootPath, "attachments");
+                var baseFileName = appointment.ProviderAvailabilityId + "student";
+                var filesToDelete = Directory.GetFiles(folder)
+                                              .Where(filePath => Path.GetFileNameWithoutExtension(filePath) == baseFileName);
+
+                foreach (var fileToDelete in filesToDelete)
+                {
+                    System.IO.File.Delete(fileToDelete);
+                }
+
+                appointment.StudentAttachment = null;
+                _unitOfWork.Appointment.Update(appointment);
+                _unitOfWork.Commit();
+
+                return RedirectToPage("./Index");
+            }
+
             if (comments != null)
             {
                 appointment.StudentComments = AppointmentModelInput.Comments;
@@ -287,9 +308,28 @@ namespace SteamboatWillieWeb.Pages
             return RedirectToPage("./Index");
         }
 
-        public IActionResult OnPostAvailabilityDetails(string? id)
+        public IActionResult OnPostAvailabilityDetails(string? id, bool file)
         {
             var appointment = _unitOfWork.Appointment.GetById(id);
+
+            if (file)
+            {
+                var folder = Path.Combine(WebHostEnvironment.WebRootPath, "attachments");
+                var baseFileName = appointment.ProviderAvailabilityId + "provider";
+                var filesToDelete = Directory.GetFiles(folder)
+                                              .Where(filePath => Path.GetFileNameWithoutExtension(filePath) == baseFileName);
+
+                foreach (var fileToDelete in filesToDelete)
+                {
+                    System.IO.File.Delete(fileToDelete);
+                }
+
+                appointment.ProviderAttachment = null;
+                _unitOfWork.Appointment.Update(appointment);
+                _unitOfWork.Commit();
+
+                return RedirectToPage("./Index");
+            }
 
             if (AvailabilityModelInput.providerFile != null)
             {

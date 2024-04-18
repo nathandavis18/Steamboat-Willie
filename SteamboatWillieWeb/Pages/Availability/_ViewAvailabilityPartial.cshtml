@@ -92,7 +92,7 @@
                 {
                     <div class="col-md-7">
                         <span class="d-inline-block">
-                            <a href="~/attachments/@Model.AvailabilityModelInput.studentAttachment" download="@(Model.AvailabilityModelInput.studentAttachment)">Student Attachment</a>
+                                <a href="~/attachments/@Model.AvailabilityModelInput.studentAttachment" download="@(Model.AvailabilityModelInput.studentAttachment)">Student Attachment</a>
                         </span>
                     </div>
                 }
@@ -114,7 +114,7 @@
                     <div class="col-md-7">
                         <span class="d-inline-block">
                             <input type="file" class="form-control form-control-sm bg-secondary text-white" asp-for="AvailabilityModelInput.providerFile" />
-                            <a href="~/attachments/@Model.AvailabilityModelInput.providerAttachment" download="@(Model.AvailabilityModelInput.providerAttachment)">Provider Attachment</a>
+                                <a style="margin-right: 10px;" href="~/attachments/@Model.AvailabilityModelInput.providerAttachment" download="@(Model.AvailabilityModelInput.providerAttachment)">Provider Attachment</a><input type="submit" class="btn btn-danger" value="Delete File" asp-page-handler="AvailabilityDetails" asp-route-id="@Model.AvailabilityModelInput.AvailabilityId" asp-route-file="true" />
                         </span>
                     </div>
                 }
