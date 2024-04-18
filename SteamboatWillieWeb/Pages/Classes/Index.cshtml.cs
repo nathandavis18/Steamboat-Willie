@@ -35,7 +35,7 @@ namespace SteamboatWillieWeb.Pages.Classes
 
             return Page();
         }
-        public IActionResult OnPost(int id)
+        public IActionResult OnPost(int id, int pageNum)
         {
             var clas = _unitOfWork.Class.GetById(id);
             if (clas == null)
@@ -46,7 +46,7 @@ namespace SteamboatWillieWeb.Pages.Classes
             clas.IsDisabled = !clas.IsDisabled; //Inverts the result. If it is false, it sets it to true, and vice versa.
             _unitOfWork.Class.Update(clas);
             _unitOfWork.Commit();
-            return RedirectToPage();
+            return RedirectToPage("./Index", new {pageIndex = pageNum});
         }
     }
 }

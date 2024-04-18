@@ -35,7 +35,7 @@ namespace SteamboatWillieWeb.Pages.Departments
 
             return Page();
         }
-        public IActionResult OnPost(int id)
+        public IActionResult OnPost(int id, int pageNum)
         {
             var department = _unitOfWork.Department.GetById(id);
             if (department == null)
@@ -46,7 +46,7 @@ namespace SteamboatWillieWeb.Pages.Departments
             department.IsDisabled = !department.IsDisabled; //Inverts the result. If it is false, it sets it to true, and vice versa.
             _unitOfWork.Department.Update(department);
             _unitOfWork.Commit();
-            return RedirectToPage();
+            return RedirectToPage("./Index", new {pageIndex = pageNum});
         }
     }
 }
