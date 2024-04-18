@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Utility;
 
@@ -26,7 +27,9 @@ namespace DataAccess
             foreach (var appointment in allUpcomingAppointments)
             {
                 var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
-                _emailSender.SendEmailAsync(clientEmail, "Appointment Reminder", EmailFormats.ReminderEmail);
+                var link = "\"https://steamboatwillie.nathandavis18.com\"";
+                var message = EmailFormats.ReminderEmail.Replace("[Provider]", _unitOfWork.AppUser.GetById(appointment.ProviderAvailability.ProviderId).FullName).Replace("[Link]", link);
+                _emailSender.SendEmailAsync(clientEmail, "Appointment Reminder", message);
             }
         }
     }
