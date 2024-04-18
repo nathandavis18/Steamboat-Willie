@@ -127,7 +127,7 @@ namespace SteamboatWillieWeb.Pages.Availability
             Locations = _unitOfWork.Location
                 .GetAll()
                 .Where(l => providerLocations.Contains(l.Id))
-                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue })
+                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.LocationValue + " - " + l.Campus})
                 .ToList();
 
             var providerClasses = _unitOfWork.ProviderClass
@@ -258,6 +258,7 @@ namespace SteamboatWillieWeb.Pages.Availability
                     .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
                     .ToList();
 
+                AvailabilityModelInput.CurrentUserTitle = _unitOfWork.Provider.GetById(currentUserId).Title;
 
                 return Page();
             }
