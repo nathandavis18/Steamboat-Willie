@@ -99,7 +99,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             {
                 WeberStudentInput = new WeberStudentInputModel()
                 {
-                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).OrderBy(x => x.DepartmentName).Select(x => new SelectListItem
                     {
                         Text = x.DepartmentName,
                         Value = x.Id.ToString()
@@ -111,7 +111,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             {
                 ProviderInput = new ProviderInputModel()
                 {
-                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).Select(x => new SelectListItem
+                    Departments = _unitOfWork.Department.GetAll().Where(d => d.IsDisabled != true).OrderBy(x => x.DepartmentName).Select(x => new SelectListItem
                     {
                         Text = x.DepartmentName,
                         Value = x.Id.ToString()
@@ -194,6 +194,11 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         _unitOfWork.Provider.Add(providerEntry);
 
                         user.EmailConfirmed = true;
+
+                        var callbackLink = Url.Page("/Account/Login", pageHandler: null, values: new { area = "Identity" }, protocol: Request.Scheme);
+                        var message = EmailFormats.ProviderAccountCreated.Replace("[Email]", Input.Email).Replace("[Password]", Input.Password).Replace("[Link]", HtmlEncoder.Default.Encode(callbackLink));
+
+                        await _emailSender.SendEmailAsync(Input.Email, "Account Created!", message);
                         _unitOfWork.AppUser.Update(user); //Provider Accounts don't need to verify their email.
                     }
                     await _unitOfWork.CommitAsync();
