@@ -247,7 +247,6 @@ namespace SteamboatWillieWeb.Pages.Appointments
                 });
             }
 
-
             return Page();
         }
 

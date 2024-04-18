@@ -92,6 +92,7 @@
                 <select class="form-select bg-secondary text-white" asp-for="AvailabilityModelInput.AppointmentType" asp-items="Model.Classes">
                     @if (Model.AvailabilityModelInput.CurrentUserTitle == "Instructor")
                     {
+
                         <option selected value="Office Hours">Office Hours</option>
                     }
                     else
