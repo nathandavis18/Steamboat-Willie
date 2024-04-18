@@ -38,7 +38,7 @@
                 {
                     var backgroundColor = @obj.Color == null ? "#135DD8" : obj.Color;
                     <text>
-                        var e = { id: '@obj.Id.ToString()', title: '@obj.Name.ToString()', start: '@obj.StartTime.ToString()', backgroundColor: '@backgroundColor', end: '@obj.EndTime.ToString()', url: '#' };
+                        var e = { id: '@obj.Id.ToString()', title: '@obj.Name.ToString()', start: '@obj.StartTime.ToString()', backgroundColor: '@backgroundColor', textColor: '@obj.TextColor', end: '@obj.EndTime.ToString()', url: '#' };
                         calendar.addEvent(e);
                     </text>
                 }
@@ -58,7 +58,6 @@
     </div>
     <hr />
     <form asp-page="./Index" method="get" id="filterForm">
-        <input asp-for="FilterModelInput.CurrentProviderType" name="PrevProviderType" id="prevProviderType" hidden />
         <div id="filter-options" class="form-actions form-group row text-center">
             <div class="text-center">
                 <label class="fw-bold text-white">Looking for a specific appointment? Choose from the filters below!</label>

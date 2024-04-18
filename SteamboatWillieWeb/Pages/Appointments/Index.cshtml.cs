@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SixLabors.ImageSharp.Processing;
+using System;
 using System.Linq;
 using Utility;
 using Utility.GoogleCalendar;
@@ -22,6 +24,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             public string? StartTime { get; set; }
             public string? EndTime {  get; set; }
             public string? Color { get; set; }
+            public string? TextColor {  get; set; }
         }
 
         private class xTypes
@@ -64,7 +67,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             public List<SelectListItem> ProviderTypes { get; set; } = new List<SelectListItem>();
         }
 
-        public IActionResult OnGet(string? campus, string? providerId, string? providerType, string? appointmentType, string? cls, string? prevProviderType)
+        public IActionResult OnGet(string? campus, string? providerId, string? providerType, string? appointmentType, string? cls)
         {
             if (!User.Identity!.IsAuthenticated)
             {
@@ -76,10 +79,6 @@ namespace SteamboatWillieWeb.Pages.Appointments
             {
                 TempData["error"] = "Access Denied. If you believe you should have access, report this to the administrator.";
                 return RedirectToPage("../Index");
-            }
-            if (prevProviderType != providerType)
-            {
-                providerId = String.Empty;
             }
 
             FilterModelInput.CurrentCampus = campus;
@@ -211,7 +210,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
             FilterModelInput.Providers = providers.Select(x => new SelectListItem
             {
-                Text = x.AppUser.FullName,
+                Text = x.AppUser.FullName + " - " + _unitOfWork.Department.GetById(x.DepartmentId).DepartmentName,
                 Value = x.AppUserId
             }).ToList();
 
@@ -243,9 +242,11 @@ namespace SteamboatWillieWeb.Pages.Appointments
                     Name = _unitOfWork.AppUser.GetById(a.ProviderId).FullName,
                     StartTime = DateTimeParser.ParseDateTime(a.StartTime),
                     EndTime = DateTimeParser.ParseDateTime(a.EndTime),
-                    Color = a.Provider.HexColor
+                    Color = a.Provider.HexColor,
+                    TextColor = a.Provider.HexColor != null ? GetTextColor(a.Provider.HexColor) : "#FFFFFF"
                 });
             }
+
 
             return Page();
         }
@@ -322,6 +323,26 @@ namespace SteamboatWillieWeb.Pages.Appointments
 
 
             return RedirectToPage("../Index");
+        }
+
+        private string GetTextColor(string hexCode)
+        {
+            string textColor = "#FFFFFF";
+            double brightness = 0;
+
+            int red = 0, blue = 0, green = 0;
+
+            red += Convert.ToInt32(hexCode.Substring(1, 2).ToUpper(), 16);
+            green += Convert.ToInt32(hexCode.Substring(3, 2).ToUpper(), 16);
+            blue += Convert.ToInt32(hexCode.Substring(5, 2).ToUpper(), 16);
+
+            brightness = 0.299 * red + 0.587 * green + 0.114 * blue;
+            if(brightness > 128)
+            {
+                textColor = "#000000";
+            }
+
+            return textColor;
         }
     }
 }
