@@ -66,7 +66,7 @@
                     <div class="col-md-9">
                         <span class="d-inline-block">
                             <input type="file" class="form-control form-control-sm bg-secondary text-white" asp-for="AppointmentModelInput.studentFile" />
-                            <a href="~/attachments/@Model.AppointmentModelInput.studentAttachment" download="@(Model.AppointmentModelInput.studentAttachment)">Student Attachment</a><input type="submit" class="btn btn-danger" value="Delete File" asp-page-handler="AppointmentDetails" asp-route-id="@Model.AppointmentModelInput.AvailabilityId" asp-route-file="true" />
+                            <a style="margin-right: 10px;" href="~/attachments/@Model.AppointmentModelInput.studentAttachment" download="@(Model.AppointmentModelInput.studentAttachment)">Student Attachment</a><input type="submit" class="btn btn-danger" value="Delete File" asp-page-handler="AppointmentDetails" asp-route-id="@Model.AppointmentModelInput.AvailabilityId" asp-route-file="true" />
                         </span>
                     </div>
                 }
