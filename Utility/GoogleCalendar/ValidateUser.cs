@@ -1,4 +1,7 @@
 ﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Util.Store;
 using Microsoft.Extensions.Configuration;
 
 namespace Utility.GoogleCalendar
@@ -7,28 +10,27 @@ namespace Utility.GoogleCalendar
     {
         //This method compares the userId to the current calendar config. If a user with this id exists, then it retrieves that user's credentials.
         //If no such user exists, it creates a new credential for that user, once they link their google account and accept the terms.
-        public static async Task<UserCredential?> ValidateUserCalendar(string userId, IConfiguration configuration)
+        public static async Task<GoogleAuthorizationCodeFlow?> ValidateUserCalendar(string userId, IConfiguration configuration)
         {
+            GoogleAuthorizationCodeFlow? flow = null;
             try
             {
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                CancellationToken token = cancellationTokenSource.Token;
                 var settings = configuration.GetSection("Authentication:Google");
-                UserCredential? credential = null;
                 if (settings.Exists())
                 {
-                    string[] scope = new string[] { "https://www.googleapis.com/auth/calendar" };
-                    credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets()
+                    flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
                     {
-                        ClientId = settings.GetValue(typeof(string), "ClientId") as string,
-                        ClientSecret = settings.GetValue(typeof(string), "ClientSecret") as string,
-                    },
-                        scope,
-                        userId,
-                        token);
-
-                    return credential;
+                        ClientSecrets = new ClientSecrets
+                        {
+                            ClientId = settings.GetValue(typeof(string), "ClientId") as string,
+                            ClientSecret = settings.GetValue(typeof(string), "ClientSecret") as string,
+                        },
+                        Scopes = new[] { CalendarService.Scope.Calendar },
+                        DataStore = new FileDataStore("Calendar.Api.Auth.Store"),
+                        ProjectId = userId,
+                    });
                 }
+                return flow;
             }
             catch (Exception e)
             {
@@ -38,10 +40,9 @@ namespace Utility.GoogleCalendar
         }
 
         //If the access token is null, the user has not been validated, and processes requiring the credential should not continue.
-        public static bool IsUserValidated(UserCredential? credential)
+        public static bool IsUserValidated(GoogleAuthorizationCodeFlow? flow)
         {
-            if(credential != null) return credential.Token.AccessToken != null;
-            return false;
+            return flow != null;
         }
     }
 }

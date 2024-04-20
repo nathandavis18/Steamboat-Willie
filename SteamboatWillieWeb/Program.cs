@@ -10,6 +10,7 @@ using Utility.GoogleCalendar;
 using Hangfire;
 using Hangfire.SqlServer;
 using Hangfire.AspNetCore;
+using Google.Apis.Calendar.v3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,9 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     IConfigurationSection googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
     googleOptions.ClientId = googleAuthSection["ClientId"];
     googleOptions.ClientSecret = googleAuthSection["ClientSecret"];
+    googleOptions.AccessType = "offline";
+    googleOptions.Scope.Add(CalendarService.Scope.Calendar);
+    googleOptions.SaveTokens = true;
 });
 
 builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>

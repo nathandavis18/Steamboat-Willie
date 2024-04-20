@@ -90,44 +90,34 @@ namespace SteamboatWillieWeb.Pages.Appointments
             var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").ToList();
             var classes = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").Where(c => c.Class.IsDisabled != true).ToList();
             var availabilities = _unitOfWork.ProviderAvailability.GetAll(a => !a.Scheduled && a.ProviderId != user.Id && a.StartTime >= DateTime.Today.AddDays(1), includes: "Provider,Location").ToList();
-            if (!client.StudentType.Contains("Flex"))
-            {
-                availabilities = availabilities.Where(a => !a.AppointmentType.Contains("Advising for Flex Students")).ToList();
-            }
-
-            if (!client.IsWeberStudent)
-            {
-                availabilities = availabilities.Where(a => a.AppointmentType.Contains("General Advising") || a.AppointmentType.Contains("Advising for New Students")).ToList();
-            }
-
             var appointmentTypes = new List<xTypes>
             {
                 new xTypes { Text = "General Advising", Value = String.Empty },
                 new xTypes {Text = "New Student Advising", Value = "Advising for New Students"}
             };
-            if (client.IsWeberStudent)
-            {
-                appointmentTypes.Add(new xTypes { Text = "Tutoring", Value = "Tutoring" });
-                appointmentTypes.Add(new xTypes { Text = "Current Student Advising", Value = "Advising for Current Students" });
-                appointmentTypes.Add(new xTypes { Text = "Office Hours", Value = "Office Hours" });
-            }
-            if (client.StudentType.Contains("Flex"))
-            {
-                appointmentTypes.Add(new xTypes { Text = "Flex Student Advising", Value = "Advising for Flex Students" }); //Only flex students can get this option.
-            }
+
             var providerTypes = new List<xTypes>
             {
                 new xTypes { Text = "Advisor", Value = "Advisor"}
             };
-            if (client.IsWeberStudent)
+
+            if (!client.IsWeberStudent)
             {
-                providerTypes.Add(new xTypes { Text = "Tutor", Value = "Tutor" });
-                providerTypes.Add(new xTypes { Text = "Instructor", Value = "Instructor" });
+                availabilities = availabilities.Where(a => a.AppointmentType.Contains("General Advising") || a.AppointmentType.Contains("Advising for New Students")).ToList();
+                providers = providers.Where(p => p.Title.Equals("Advisor")).ToList();
+                classes.Clear();
             }
             else
             {
-                providers = providers.Where(p => p.Title.Equals("Advisor")).ToList();
-                classes.Clear();
+                if (client.StudentType.Contains("Flex"))
+                {
+                    appointmentTypes.Add(new xTypes { Text = "Flex Student Advising", Value = "Advising for Flex Students" }); //Only flex students can get this option.
+                }
+                appointmentTypes.Add(new xTypes { Text = "Tutoring", Value = "Tutoring" });
+                appointmentTypes.Add(new xTypes { Text = "Current Student Advising", Value = "Advising for Current Students" });
+                appointmentTypes.Add(new xTypes { Text = "Office Hours", Value = "Office Hours" });
+                providerTypes.Add(new xTypes { Text = "Tutor", Value = "Tutor" });
+                providerTypes.Add(new xTypes { Text = "Instructor", Value = "Instructor" });
             }
 
             if (!String.IsNullOrEmpty(providerType))
@@ -198,7 +188,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             {
                 availabilities = availabilities.Where(a => a.AppointmentType.Contains(cls)).ToList();
             }
-            providers = providers.OrderBy(x => x.AppUser.LName).ThenBy(x => x.AppUser.FName).ToList();
+            providers = providers.Where(x => availabilities.Where(y => !y.Scheduled && y.ProviderId.Equals(x.AppUserId)).Count() > 0).OrderBy(x => x.AppUser.LName).ThenBy(x => x.AppUser.FName).ToList();
             classes = classes.OrderBy(x => x.Class.Name).ToList();
 
             FilterModelInput.Classes = classes.Select(x => new SelectListItem
