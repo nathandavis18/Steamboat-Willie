@@ -23,24 +23,38 @@ namespace Utility.GoogleCalendar
         public async Task<string> AddEvent(Event request, string userId, CancellationToken cancellationToken)
         {
             TokenRequest tokenRequest = new TokenRequest();
-            var flow = await ValidateUser.ValidateUserCalendar(userId, _configuration);
-            if (!ValidateUser.IsUserValidated(flow))                                    
-            {   
-                return String.Empty;
-            }
 
             UserCredential? credential = null;
             try
             {
-                tokenRequest.ClientSecret = flow.ClientSecrets.ClientSecret;
-                tokenRequest.ClientId = flow.ClientSecrets.ClientId;
-                tokenRequest.GrantType = "refresh_token";
-                tokenRequest.Scope = CalendarService.ScopeConstants.Calendar;
-                var token = await tokenRequest.ExecuteAsync(flow.HttpClient, flow.TokenServerUrl, cancellationToken, flow.Clock);
-                credential = new UserCredential(flow, userId, token);
                 var services = new CalendarService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential,
+                    ApplicationName = "Steamboat Willie Scheduler",
+                });
+
+                var eventRequest = services.Events.Insert(request, CalendarEnvironment);
+                var requestCreate = await eventRequest.ExecuteAsync(cancellationToken);
+
+                var id = requestCreate.Id;
+                return id;
+            }
+            catch
+            {
+                Console.WriteLine("x");
+            }
+            return String.Empty;
+        }
+
+        public async Task<string> AddEvent(Event request, string userId, UserCredential cred, CancellationToken cancellationToken)
+        {
+            TokenRequest tokenRequest = new TokenRequest();
+
+            try
+            {
+                var services = new CalendarService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = cred,
                     ApplicationName = "Steamboat Willie Scheduler",
                 });
 
@@ -61,16 +75,10 @@ namespace Utility.GoogleCalendar
         //With the passed in Id exists. If it exists, and has not been canceled, then it deletes the event. The string is returned in case someone wants to use it.
         public async Task<string> DeleteEvent(string eventId, string userId, CancellationToken cancellationToken)
         {
-            var flow = await ValidateUser.ValidateUserCalendar(userId, _configuration);
-            if (!ValidateUser.IsUserValidated(flow))
-            {
-                return String.Empty;
-            }
 
             UserCredential? credential = null;
             try
             {
-                credential = new UserCredential(flow, userId, await flow.FetchTokenAsync(userId, new TokenRequest(), CancellationToken.None));
             }
             catch
             {

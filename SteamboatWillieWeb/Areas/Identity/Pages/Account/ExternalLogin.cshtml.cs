@@ -219,6 +219,19 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
                         user.EmailConfirmed = true; //External login means user's email is theirs. Don't need to confirm.
                         _unitOfWork.AppUser.Update(user);
 
+                        if (info.LoginProvider.Equals("Google"))
+                        {
+                            var refreshToken = info.AuthenticationTokens.Where(x => x.Name.Equals("refresh_token")).FirstOrDefault().Value;
+                            GoogleToken newToken = new GoogleToken()
+                            {
+                                UserId = user.Id,
+                                TokenName = "refresh_token",
+                                TokenValue = refreshToken
+                            };
+
+                            _unitOfWork.GoogleToken.Add(newToken);
+                        }
+
                         await _unitOfWork.CommitAsync();
 
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);

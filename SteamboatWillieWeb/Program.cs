@@ -26,6 +26,8 @@ builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
+builder.Services.AddScoped<UserCredentials>();
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)

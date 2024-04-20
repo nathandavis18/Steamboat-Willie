@@ -1,4 +1,5 @@
 using DataAccess;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3.Data;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
@@ -37,13 +38,17 @@ namespace SteamboatWillieWeb.Pages.Appointments
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
         private readonly IGoogleCalendarService _googleCalendarService;
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IGoogleCalendarService googleCalendarService)
+        private readonly UserCredentials _userCredentials;
+        private readonly IConfiguration _configuration;
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IGoogleCalendarService googleCalendarService, UserCredentials userCredentials, IConfiguration config)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _googleCalendarService = googleCalendarService;
             CalendarObj = new List<Calendar>();
             FilterModelInput = new FilterModel();
+            _userCredentials = userCredentials;
+            _configuration = config;
         }
 
         [BindProperty]
@@ -296,7 +301,8 @@ namespace SteamboatWillieWeb.Pages.Appointments
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(providerId).FullName;
                 Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
-                string clientCalendarId = await _googleCalendarService.AddEvent(@event, clientId, new CancellationToken(false));
+                UserCredential? cred = await _userCredentials.GetUser(clientId, _configuration);
+                string clientCalendarId = await _googleCalendarService.AddEvent(@event, clientId, cred, new CancellationToken(false));
                 appointment.ClientEventId = clientCalendarId;
             }
 

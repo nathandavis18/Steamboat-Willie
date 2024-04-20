@@ -13,10 +13,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using Utility;
 using Utility.GoogleCalendar;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
 {
@@ -26,6 +24,7 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
+        private readonly UserCredentials _userCredentials;
         public string? CurrentUserTitle;
 
         [BindProperty]
@@ -38,12 +37,14 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             UnitOfWork unitOfWork,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            UserCredentials userCredentials)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
+            _userCredentials = userCredentials;
         }
 
         /// <summary>
@@ -321,8 +322,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (integrate)
             {
-                var credential = await ValidateUser.ValidateUserCalendar(user.Id, _configuration);
-                user.GoogleCalendarIntegration = ValidateUser.IsUserValidated(credential);
+                var credential = await _userCredentials.GetUser(user.Id, _configuration);
+                user.GoogleCalendarIntegration = credential != null;
                 if (user.GoogleCalendarIntegration == true)
                 {
                     TempData["success"] = "You have successfully integrated with Google Calendar!";
