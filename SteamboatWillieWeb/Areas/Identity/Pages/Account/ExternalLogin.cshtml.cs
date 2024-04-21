@@ -3,6 +3,9 @@
 #nullable disable
 
 using DataAccess;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Calendar.v3;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -30,6 +33,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly UnitOfWork _unitOfWork;
         private readonly AppDbContext _context;
+        private readonly UserCredentials _userCredentials;
+        private readonly IConfiguration _configuration;
 
         public ExternalLoginModel(
             SignInManager<AppUser> signInManager,
@@ -38,7 +43,9 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender,
             UnitOfWork unitOfWork,
-            AppDbContext context)
+            AppDbContext context,
+            UserCredentials userCredentials,
+            IConfiguration configuration)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -48,6 +55,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
             _emailSender = emailSender;
             _unitOfWork = unitOfWork;
             _context = context;
+            _userCredentials = userCredentials;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -88,10 +97,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account
 
         public IActionResult OnPost(string provider, string returnUrl = null)
         {
-            // Request a redirect to the external login provider.
             var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new {returnUrl = returnUrl});
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            var x = properties.Parameters;
             return new ChallengeResult(provider, properties);
         }
 

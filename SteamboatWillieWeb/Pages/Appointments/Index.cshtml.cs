@@ -301,17 +301,24 @@ namespace SteamboatWillieWeb.Pages.Appointments
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(providerId).FullName;
                 Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
-                UserCredential? cred = await _userCredentials.GetUser(clientId, _configuration);
-                string clientCalendarId = await _googleCalendarService.AddEvent(@event, clientId, cred, new CancellationToken(false));
-                appointment.ClientEventId = clientCalendarId;
+                UserCredential? cred = await _userCredentials.GetUserAsync(clientId, _configuration);
+                if (cred != null)
+                {
+                    string clientCalendarId = await _googleCalendarService.AddEvent(@event, clientId, cred);
+                    appointment.ClientEventId = clientCalendarId;
+                }
             }
 
             if (_unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(clientId).FullName;
                 Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
-                string providerCalendarId = await _googleCalendarService.AddEvent(@event, providerId, new CancellationToken(false));
-                appointment.ProviderEventId = providerCalendarId;
+                UserCredential? cred = await _userCredentials.GetUserAsync(providerId, _configuration);
+                if(cred != null)
+                {
+                    string providerCalendarId = await _googleCalendarService.AddEvent(@event, providerId, cred);
+                    appointment.ProviderEventId = providerCalendarId;
+                }
             }
 
             _unitOfWork.Appointment.Add(appointment);

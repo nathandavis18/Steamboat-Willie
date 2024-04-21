@@ -1,13 +1,7 @@
-﻿using Google.Apis.Auth.OAuth2.Flows;
-using Google.Apis.Auth.OAuth2;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Calendar.v3;
-using Google.Apis.Util.Store;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess
 {
@@ -19,7 +13,7 @@ namespace DataAccess
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<UserCredential?> GetUser(string userId, IConfiguration configuration)
+        public async Task<UserCredential?> GetUserAsync(string userId, IConfiguration configuration)
         {
             GoogleAuthorizationCodeFlow? flow = null;
             try
@@ -34,15 +28,21 @@ namespace DataAccess
                             ClientId = settings.GetValue(typeof(string), "ClientId") as string,
                             ClientSecret = settings.GetValue(typeof(string), "ClientSecret") as string,
                         },
-                        Scopes = new[] { CalendarService.Scope.Calendar },
                         ProjectId = userId,
+                        IncludeGrantedScopes = true
                     });
                 }
-
                 UserCredential? cred = null;
-                var refreshToken = _unitOfWork.GoogleToken.Get(x => x.UserId.Equals(userId) && x.TokenName.Equals("refresh_token")).TokenValue;
-                var token = await flow.RefreshTokenAsync(userId, refreshToken, CancellationToken.None);
-                cred = new UserCredential(flow, userId, token);
+                if (flow != null)
+                {
+                    var gt = _unitOfWork.GoogleToken.Get(x => x.UserId.Equals(userId) && x.TokenName.Equals("refresh_token"));
+                    if (gt != null)
+                    {
+                        var refreshToken = gt.TokenValue;
+                        var token = await flow.RefreshTokenAsync(userId, refreshToken, CancellationToken.None);
+                        cred = new UserCredential(flow, userId, token);
+                    }
+                }
                 return cred;
 
             }

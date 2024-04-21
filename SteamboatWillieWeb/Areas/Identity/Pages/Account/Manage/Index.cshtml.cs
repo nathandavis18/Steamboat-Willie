@@ -3,6 +3,7 @@
 #nullable disable
 
 using DataAccess;
+using Google.Apis.Auth.OAuth2;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.DotNet.Scaffolding.Shared;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.ComponentModel.DataAnnotations;
@@ -52,6 +54,8 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string Username { get; set; }
+
+        public List<string> ExternalProviders {  get; set; } = new List<string>();
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -143,6 +147,14 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                 };
             }
             FileInput = new FileInputModel();
+
+            var externProviders = await _userManager.GetLoginsAsync(user);
+
+            foreach(var p in externProviders)
+            {
+                ExternalProviders.Add(p.LoginProvider);
+            }
+
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -280,11 +292,6 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
                         _unitOfWork.ProviderClass.Delete(classToRemove);
                     }
                 }
-
-
-
-
-                
             }
 
             await _unitOfWork.CommitAsync();
@@ -322,7 +329,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (integrate)
             {
-                var credential = await _userCredentials.GetUser(user.Id, _configuration);
+                var credential = await _userCredentials.GetUserAsync(user.Id, _configuration);
+                if(credential == null)
+                {
+                    var redirectUrl = Url.Page("./Index", pageHandler: "ExternalLoginCallback", values: new {integrateCalendar = true});
+                    var properties = _signInManager.ConfigureExternalAuthenticationProperties("Calendar", redirectUrl);
+                    return new ChallengeResult("Calendar", properties);
+                }
                 user.GoogleCalendarIntegration = credential != null;
                 if (user.GoogleCalendarIntegration == true)
                 {
@@ -342,6 +355,43 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             _unitOfWork.AppUser.Update(user);
             await _unitOfWork.CommitAsync();
 
+            return RedirectToPage("./Index");
+        }
+
+        public IActionResult OnPostExternalLogin(string provider)
+        {
+            var redirectUrl = Url.Page("./Index", pageHandler: "ExternalLoginCallback");
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return new ChallengeResult(provider, properties);
+        }
+
+        public async Task<IActionResult> OnGetExternalLoginCallbackAsync(bool integrateCalendar = false)
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var user = await _userManager.GetUserAsync(User);
+            var result = await _userManager.AddLoginAsync(user, info);
+            if (result.Succeeded)
+            {
+                if (info.LoginProvider.Equals("Google"))
+                {
+                    var refreshToken = info.AuthenticationTokens.Where(x => x.Name.Equals("refresh_token")).SingleOrDefault().Value;
+                    GoogleToken token = new GoogleToken()
+                    {
+                        UserId = user.Id,
+                        TokenName = "refresh_token",
+                        TokenValue = refreshToken
+                    };
+                    _unitOfWork.GoogleToken.Add(token);
+                    await _unitOfWork.CommitAsync();
+                    if (integrateCalendar)
+                    {
+                        return await OnPostGoogleCalendarIntegrationAsync(true);
+                    }
+                }
+                TempData["success"] = "Login with " + info.LoginProvider + " added successfully!";
+                return RedirectToPage("./Index");
+            }
+            TempData["error"] = "Login with " + info.LoginProvider + " failed";
             return RedirectToPage("./Index");
         }
     }

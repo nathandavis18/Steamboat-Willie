@@ -1,16 +1,16 @@
 using DataAccess;
+using Google.Apis.Calendar.v3;
+using Hangfire;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using QuestPDF.Infrastructure;
 using Utility;
 using Utility.GoogleCalendar;
-using Hangfire;
-using Hangfire.SqlServer;
-using Hangfire.AspNetCore;
-using Google.Apis.Calendar.v3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,8 +48,19 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     googleOptions.ClientId = googleAuthSection["ClientId"];
     googleOptions.ClientSecret = googleAuthSection["ClientSecret"];
     googleOptions.AccessType = "offline";
-    googleOptions.Scope.Add(CalendarService.Scope.Calendar);
     googleOptions.SaveTokens = true;
+});
+
+builder.Services.AddAuthentication("Calendar").AddCookie().AddOAuth("Calendar", options =>
+{
+    IConfigurationSection googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleAuthSection["ClientId"];
+    options.ClientSecret = googleAuthSection["ClientSecret"];
+    options.CallbackPath = "/authorize";
+    options.Scope.Add(CalendarService.Scope.CalendarEvents);
+    options.AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint;
+    options.TokenEndpoint = GoogleDefaults.TokenEndpoint;
+    options.UserInformationEndpoint = GoogleDefaults.UserInformationEndpoint;
 });
 
 builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
