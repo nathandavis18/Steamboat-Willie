@@ -362,6 +362,13 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             return RedirectToPage("./Index");
         }
 
+        public IActionResult OnPostExternalLogin(string provider)
+        {
+            var redirectUrl = Url.Page("./Index", pageHandler: "ExternalLoginCallback", values: new { userCalendar = true });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return new ChallengeResult(provider, properties);
+        }
+
         public async Task<IActionResult> OnGetExternalLoginCallbackAsync(bool userCalendar = false)
         {
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -376,9 +383,14 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             {
                 try
                 {
-                    var token = AddGoogleAccount.CreateToken(info.AuthenticationTokens.Where(x => x.Name.Equals("refresh_token")).SingleOrDefault().Value, "refresh_token", user.Id, _unitOfWork);
+                    if (info.LoginProvider.Equals("Google"))
+                    {
+                        var token = AddGoogleAccount.CreateToken(info.AuthenticationTokens.Where(x => x.Name.Equals("refresh_token")).SingleOrDefault().Value, "refresh_token", user.Id, _unitOfWork);
+                        TempData["success"] = "Login with " + info.LoginProvider + " added successfully!";
+                        return await OnPostGoogleCalendarIntegrationAsync(true, true);
+                    }
                     TempData["success"] = "Login with " + info.LoginProvider + " added successfully!";
-                    return await OnPostGoogleCalendarIntegrationAsync(true, true);
+                    return RedirectToPage("./Index");
                 }
                 catch
                 {
