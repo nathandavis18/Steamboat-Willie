@@ -8,9 +8,9 @@ namespace DataAccess
     public class EmailReminder
     {
         private readonly UnitOfWork _unitOfWork;
-        private readonly IEmailSender _emailSender;
+        private readonly EmailSender _emailSender;
         private readonly IRecurringJobManager _recurringJobManager;
-        public EmailReminder(UnitOfWork unitOfWork, IEmailSender emailSender, IRecurringJobManager recurringJobManager)
+        public EmailReminder(UnitOfWork unitOfWork, EmailSender emailSender, IRecurringJobManager recurringJobManager)
         {
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
@@ -30,7 +30,7 @@ namespace DataAccess
                 var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
                 var link = "\"https://steamboatwillie.nathandavis18.com\"";
                 var message = EmailFormats.ReminderEmail.Replace("[Provider]", _unitOfWork.AppUser.GetById(appointment.ProviderAvailability.ProviderId).FullName).Replace("[Link]", link);
-                await _emailSender.SendEmailAsync(clientEmail, "Appointment Reminder", message);
+                _emailSender.SendEmail(clientEmail, "Appointment Reminder", message);
             }
         }
     }

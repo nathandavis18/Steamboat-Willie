@@ -34,5 +34,25 @@ namespace Utility
             }
             return Task.CompletedTask;
         }
+
+        public void SendEmail(string email, string subject, string htmlMessage)
+        {
+            var emailSender = _configuration.GetSection("Authentication:EmailSender");
+            if (emailSender.Exists())
+            {
+                string host = emailSender.GetValue(typeof(string), "Host") as string;
+                string sender = emailSender.GetValue(typeof(string), "Email") as string;
+                string pass = emailSender.GetValue(typeof(string), "Password") as string;
+                int port = (int)emailSender.GetValue(typeof(int), "Port");
+                var client = new SmtpClient(host, port)
+                {
+                    Credentials = new NetworkCredential(sender, pass),
+                };
+                MailMessage msg = new MailMessage(sender, email, subject, htmlMessage);
+                msg.IsBodyHtml = true;
+
+                client.Send(msg);
+            }
+        }
     }
 }

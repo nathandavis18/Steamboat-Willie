@@ -247,6 +247,9 @@ namespace SteamboatWillieWeb.Pages
 
             await _unitOfWork.CommitAsync();
 
+            await _emailSender.SendEmailAsync(_unitOfWork.AppUser.GetById(providerId).Email, "Appointment Cancelled",
+                _unitOfWork.AppUser.GetById(clientId).FullName + " has cancelled their " + availability.StartTime.ToShortTimeString() + " appointment with you on " + availability.StartTime.ToLongDateString());
+
             if (!String.IsNullOrEmpty(clientCalendarId) && _unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
             {
                 UserCredential? cred = await _userCredentials.GetUserAsync(clientId, _configuration);
