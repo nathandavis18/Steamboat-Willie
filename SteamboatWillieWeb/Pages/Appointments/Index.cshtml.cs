@@ -1,4 +1,5 @@
 using DataAccess;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3.Data;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
@@ -37,13 +38,17 @@ namespace SteamboatWillieWeb.Pages.Appointments
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
         private readonly IGoogleCalendarService _googleCalendarService;
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IGoogleCalendarService googleCalendarService)
+        private readonly UserCredentials _userCredentials;
+        private readonly IConfiguration _configuration;
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IGoogleCalendarService googleCalendarService, UserCredentials userCredentials, IConfiguration config)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _googleCalendarService = googleCalendarService;
             CalendarObj = new List<Calendar>();
             FilterModelInput = new FilterModel();
+            _userCredentials = userCredentials;
+            _configuration = config;
         }
 
         [BindProperty]
@@ -90,44 +95,34 @@ namespace SteamboatWillieWeb.Pages.Appointments
             var providers = _unitOfWork.Provider.GetAll(includes: "AppUser").ToList();
             var classes = _unitOfWork.ProviderClass.GetAll(includes: "Provider,Class").Where(c => c.Class.IsDisabled != true).ToList();
             var availabilities = _unitOfWork.ProviderAvailability.GetAll(a => !a.Scheduled && a.ProviderId != user.Id && a.StartTime >= DateTime.Today.AddDays(1), includes: "Provider,Location").ToList();
-            if (!client.StudentType.Contains("Flex"))
-            {
-                availabilities = availabilities.Where(a => !a.AppointmentType.Contains("Advising for Flex Students")).ToList();
-            }
-
-            if (!client.IsWeberStudent)
-            {
-                availabilities = availabilities.Where(a => a.AppointmentType.Contains("General Advising") || a.AppointmentType.Contains("Advising for New Students")).ToList();
-            }
-
             var appointmentTypes = new List<xTypes>
             {
                 new xTypes { Text = "General Advising", Value = String.Empty },
                 new xTypes {Text = "New Student Advising", Value = "Advising for New Students"}
             };
-            if (client.IsWeberStudent)
-            {
-                appointmentTypes.Add(new xTypes { Text = "Tutoring", Value = "Tutoring" });
-                appointmentTypes.Add(new xTypes { Text = "Current Student Advising", Value = "Advising for Current Students" });
-                appointmentTypes.Add(new xTypes { Text = "Office Hours", Value = "Office Hours" });
-            }
-            if (client.StudentType.Contains("Flex"))
-            {
-                appointmentTypes.Add(new xTypes { Text = "Flex Student Advising", Value = "Advising for Flex Students" }); //Only flex students can get this option.
-            }
+
             var providerTypes = new List<xTypes>
             {
                 new xTypes { Text = "Advisor", Value = "Advisor"}
             };
-            if (client.IsWeberStudent)
+
+            if (!client.IsWeberStudent)
             {
-                providerTypes.Add(new xTypes { Text = "Tutor", Value = "Tutor" });
-                providerTypes.Add(new xTypes { Text = "Instructor", Value = "Instructor" });
+                availabilities = availabilities.Where(a => a.AppointmentType.Contains("General Advising") || a.AppointmentType.Contains("Advising for New Students")).ToList();
+                providers = providers.Where(p => p.Title.Equals("Advisor")).ToList();
+                classes.Clear();
             }
             else
             {
-                providers = providers.Where(p => p.Title.Equals("Advisor")).ToList();
-                classes.Clear();
+                if (client.StudentType.Contains("Flex"))
+                {
+                    appointmentTypes.Add(new xTypes { Text = "Flex Student Advising", Value = "Advising for Flex Students" }); //Only flex students can get this option.
+                }
+                appointmentTypes.Add(new xTypes { Text = "Tutoring", Value = "Tutoring" });
+                appointmentTypes.Add(new xTypes { Text = "Current Student Advising", Value = "Advising for Current Students" });
+                appointmentTypes.Add(new xTypes { Text = "Office Hours", Value = "Office Hours" });
+                providerTypes.Add(new xTypes { Text = "Tutor", Value = "Tutor" });
+                providerTypes.Add(new xTypes { Text = "Instructor", Value = "Instructor" });
             }
 
             if (!String.IsNullOrEmpty(providerType))
@@ -198,7 +193,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             {
                 availabilities = availabilities.Where(a => a.AppointmentType.Contains(cls)).ToList();
             }
-            providers = providers.OrderBy(x => x.AppUser.LName).ThenBy(x => x.AppUser.FName).ToList();
+            providers = providers.Where(x => availabilities.Where(y => !y.Scheduled && y.ProviderId.Equals(x.AppUserId)).Count() > 0).OrderBy(x => x.AppUser.LName).ThenBy(x => x.AppUser.FName).ToList();
             classes = classes.OrderBy(x => x.Class.Name).ToList();
 
             FilterModelInput.Classes = classes.Select(x => new SelectListItem
@@ -306,16 +301,24 @@ namespace SteamboatWillieWeb.Pages.Appointments
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(providerId).FullName;
                 Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
-                string clientCalendarId = await _googleCalendarService.AddEvent(@event, clientId, new CancellationToken(false));
-                appointment.ClientEventId = clientCalendarId;
+                UserCredential? cred = await _userCredentials.GetUserAsync(clientId, _configuration);
+                if (cred != null)
+                {
+                    string clientCalendarId = await _googleCalendarService.AddEvent(@event, clientId, cred);
+                    appointment.ClientEventId = clientCalendarId;
+                }
             }
 
             if (_unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(clientId).FullName;
                 Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
-                string providerCalendarId = await _googleCalendarService.AddEvent(@event, providerId, new CancellationToken(false));
-                appointment.ProviderEventId = providerCalendarId;
+                UserCredential? cred = await _userCredentials.GetUserAsync(providerId, _configuration);
+                if(cred != null)
+                {
+                    string providerCalendarId = await _googleCalendarService.AddEvent(@event, providerId, cred);
+                    appointment.ProviderEventId = providerCalendarId;
+                }
             }
 
             _unitOfWork.Appointment.Add(appointment);

@@ -1,15 +1,15 @@
 using DataAccess;
+using Google.Apis.Calendar.v3;
+using Hangfire;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Utility;
 using Utility.GoogleCalendar;
-using Hangfire;
-using Hangfire.SqlServer;
-using Hangfire.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +19,13 @@ var connectionString = builder.Configuration.GetConnectionString("SmarterASP") ?
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddScoped<EmailSender>();
 
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
+
+builder.Services.AddScoped<UserCredentials>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -45,6 +46,9 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     IConfigurationSection googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
     googleOptions.ClientId = googleAuthSection["ClientId"];
     googleOptions.ClientSecret = googleAuthSection["ClientSecret"];
+    googleOptions.AccessType = "offline";
+    googleOptions.SaveTokens = true;
+    googleOptions.Scope.Add(CalendarService.Scope.CalendarEvents);
 });
 
 builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
