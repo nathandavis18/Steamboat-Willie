@@ -12,6 +12,7 @@ namespace Infrastructure.Interfaces
         IGenericRepository<ProviderAvailability> ProviderAvailability { get; }
         IGenericRepository<Class> Class { get; }
         IGenericRepository<ProviderClass> ProviderClass { get; }
+        IGenericRepository<GoogleToken> GoogleToken {  get; }
         int Commit();
         Task<int> CommitAsync();
     }

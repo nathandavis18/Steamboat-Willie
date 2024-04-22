@@ -29,5 +29,7 @@ namespace DataAccess
 
         public DbSet<DataProtectionKey> DataProtectionKeys {  get; set; }
 
+        public DbSet<GoogleToken> GoogleTokens { get; set; }
+
     }
 }

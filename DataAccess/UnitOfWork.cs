@@ -128,6 +128,19 @@ namespace DataAccess
             }
         }
 
+        private IGenericRepository<GoogleToken> _GoogleToken;
+        public IGenericRepository<GoogleToken> GoogleToken
+        {
+            get
+            {
+                if(_GoogleToken == null)
+                {
+                    _GoogleToken = new GenericRepository<GoogleToken>(_context);
+                }
+                return _GoogleToken;
+            }
+        }
+
         public int Commit()
         {
             return _context.SaveChanges();

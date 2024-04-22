@@ -1,10 +1,12 @@
 ﻿using DataAccess;
+using Google.Apis.Auth.OAuth2;
 using Infrastructure.Models;
 using Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SteamboatWillieWeb.ApiStuff;
 using System.Net.Mail;
 using Utility;
 using Utility.GoogleCalendar;
@@ -15,6 +17,8 @@ namespace SteamboatWillieWeb.Pages
     {
         private readonly UnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly UserCredentials _userCredentials;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly IGoogleCalendarService _googleCalendarService;
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
@@ -36,7 +40,7 @@ namespace SteamboatWillieWeb.Pages
         public string? PartialViewName {  get; set; }
         public string? CurrentView {  get; set; }
 
-        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService, IConfiguration configuration, IWebHostEnvironment web)
+        public IndexModel(UnitOfWork unitOfWork, UserManager<AppUser> userManager, IEmailSender emailSender, IGoogleCalendarService googleCalendarService, IConfiguration configuration, IWebHostEnvironment web, UserCredentials userCredentials, SignInManager<AppUser> signInManager)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -47,6 +51,8 @@ namespace SteamboatWillieWeb.Pages
             CalendarObj = new List<AppointmentCalendarModel>();
             _configuration = configuration;
             WebHostEnvironment = web;
+            _userCredentials = userCredentials;
+            _signInManager = signInManager;
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -128,7 +134,7 @@ namespace SteamboatWillieWeb.Pages
         }
 
         //Google Calendar Integration Question
-        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate)
+        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate, bool calendarApproved = false)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -137,15 +143,21 @@ namespace SteamboatWillieWeb.Pages
             }
             if (integrate)
             {
-                var credential = await ValidateUser.ValidateUserCalendar(user!.Id, _configuration);
-                user.GoogleCalendarIntegration = ValidateUser.IsUserValidated(credential);
-                if(user.GoogleCalendarIntegration == false)
+                try
                 {
-                    TempData["error"] = "Google Calendar Integration failed. You can try again from your profile settings.";
-                }
-                else
-                {
+                    if (!AddGoogleAccount.HasToken(user.Id, "refresh_token", _unitOfWork) && !calendarApproved)
+                    {
+                        var redirectUrl = Url.Page("./Index", pageHandler: "ExternalLoginCallback", values: new { userCalendar = true });
+                        var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+                        return new ChallengeResult("Google", properties);
+                    }
+                    user.GoogleCalendarIntegration = true;
                     TempData["success"] = "You have successfully integrated with Google Calendar!";
+                }
+                catch
+                {
+                    user.GoogleCalendarIntegration = false;
+                    TempData["error"] = "Google Calendar Integration failed. You can try again from your profile settings.";
                 }
             }
             else
@@ -156,6 +168,33 @@ namespace SteamboatWillieWeb.Pages
             _unitOfWork.AppUser.Update(user);
             await _unitOfWork.CommitAsync();
 
+            return RedirectToPage("./Index");
+        }
+
+        public async Task<IActionResult> OnGetExternalLoginCallbackAsync(bool userCalendar = false)
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var user = await _userManager.GetUserAsync(User);
+            if (!userCalendar)
+            {
+                return await OnPostGoogleCalendarIntegrationAsync(true, true);
+            }
+
+            var result = await _userManager.AddLoginAsync(user, info);
+            if (result.Succeeded)
+            {
+                try
+                {
+                    var token = AddGoogleAccount.CreateToken(info.AuthenticationTokens.Where(x => x.Name.Equals("refresh_token")).SingleOrDefault().Value, "refresh_token", user.Id, _unitOfWork);
+                    TempData["success"] = "Login with " + info.LoginProvider + " added successfully!";
+                    return await OnPostGoogleCalendarIntegrationAsync(true, true);
+                }
+                catch
+                {
+                    Console.WriteLine("Something went wrong");
+                }
+            }
+            TempData["error"] = "Login with " + info.LoginProvider + " failed";
             return RedirectToPage("./Index");
         }
 
@@ -210,12 +249,20 @@ namespace SteamboatWillieWeb.Pages
 
             if (!String.IsNullOrEmpty(clientCalendarId) && _unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
             {
-                await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, new CancellationToken(false));
+                UserCredential? cred = await _userCredentials.GetUserAsync(clientId, _configuration);
+                if (cred != null)
+                {
+                    await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, cred);
+                }
             }
 
             if (!String.IsNullOrEmpty(providerCalendarId) && _unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
             {
-                await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, new CancellationToken(false));
+                UserCredential? cred = await _userCredentials.GetUserAsync(providerId, _configuration);
+                if (cred != null)
+                {
+                    await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, cred);
+                }
             }
 
             return RedirectToPage("./Index");
@@ -446,12 +493,20 @@ namespace SteamboatWillieWeb.Pages
 
             if (!String.IsNullOrEmpty(clientCalendarId) && _unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
             {
-                await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, new CancellationToken(false));
+                UserCredential? cred = await _userCredentials.GetUserAsync(clientId, _configuration);
+                if (cred != null)
+                {
+                    await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, cred);
+                }
             }
 
             if (!String.IsNullOrEmpty(providerCalendarId) && _unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
             {
-                await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, new CancellationToken(false));
+                UserCredential? cred = await _userCredentials.GetUserAsync(providerId, _configuration);
+                if (cred != null)
+                {
+                    await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, cred);
+                }
             }
 
             return RedirectToPage("./Index");
@@ -495,12 +550,20 @@ namespace SteamboatWillieWeb.Pages
 
             if (!String.IsNullOrEmpty(clientCalendarId) && _unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
             {
-                await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, new CancellationToken(false));
+                UserCredential? cred = await _userCredentials.GetUserAsync(clientId, _configuration);
+                if (cred != null)
+                {
+                    await _googleCalendarService.DeleteEvent(clientCalendarId, clientId, cred);
+                }
             }
 
             if (!String.IsNullOrEmpty(providerCalendarId) && _unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
             {
-                await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, new CancellationToken(false));
+                UserCredential? cred = await _userCredentials.GetUserAsync(providerId, _configuration);
+                if (cred != null)
+                {
+                    await _googleCalendarService.DeleteEvent(providerCalendarId, providerId, cred);
+                }
             }
 
             return RedirectToPage("./Index");
