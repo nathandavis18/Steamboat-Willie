@@ -4,7 +4,7 @@ namespace Utility.GoogleCalendar
 {
     public class EventCreater
     {
-        public static Event CreateEvent(string summary, string location, string description, string start, string end)
+        public static Event CreateEvent(string summary, string location, string description, DateTime start, DateTime end)
         {
             Event gEvent = new Event()
             {
@@ -13,18 +13,17 @@ namespace Utility.GoogleCalendar
                 Description = description,
                 Start = new EventDateTime()
                 {
-                    DateTimeDateTimeOffset = DateTime.Parse(start),
-                    TimeZone = "America/Denver",
+                    DateTimeDateTimeOffset = start
                 },
                 End = new EventDateTime()
                 {
-                    DateTimeDateTimeOffset = DateTime.Parse(end),
-                    TimeZone = "America/Denver",
+                    DateTimeDateTimeOffset = end,
                 },
                 Reminders = new Event.RemindersData()
                 {
                     UseDefault = true
-                }
+                },
+                
             };
             return gEvent;
         }

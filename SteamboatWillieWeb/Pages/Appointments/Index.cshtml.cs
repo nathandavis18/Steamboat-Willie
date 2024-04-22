@@ -300,7 +300,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             if (_unitOfWork.AppUser.GetById(clientId).GoogleCalendarIntegration.Value)
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(providerId).FullName;
-                Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
+                Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime, availability.EndTime);
                 UserCredential? cred = await _userCredentials.GetUserAsync(clientId, _configuration);
                 if (cred != null)
                 {
@@ -312,7 +312,7 @@ namespace SteamboatWillieWeb.Pages.Appointments
             if (_unitOfWork.AppUser.GetById(providerId).GoogleCalendarIntegration.Value)
             {
                 string summary = availability.AppointmentType + " with " + _unitOfWork.AppUser.GetById(clientId).FullName;
-                Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime.ToString(), availability.EndTime.ToString());
+                Event @event = EventCreater.CreateEvent(summary, location, appointment.Description, availability.StartTime, availability.EndTime);
                 UserCredential? cred = await _userCredentials.GetUserAsync(providerId, _configuration);
                 if(cred != null)
                 {
