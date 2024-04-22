@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.DotNet.Scaffolding.Shared;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SteamboatWillieWeb.ApiStuff;
 using System.ComponentModel.DataAnnotations;
 using Utility;
 using Utility.GoogleCalendar;
@@ -324,32 +325,35 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             return RedirectToPage("./Index");
         }
 
-        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate)
+        public async Task<IActionResult> OnPostGoogleCalendarIntegrationAsync(bool integrate, bool calendarApproved = false)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToPage("/Account/Login", new { ReturnUrl = "/Index", Area = "Identity" });
+            }
             if (integrate)
             {
-                var credential = await _userCredentials.GetUserAsync(user.Id, _configuration);
-                if(credential == null)
+                try
                 {
-                    var redirectUrl = Url.Page("./Index", pageHandler: "ExternalLoginCallback", values: new {integrateCalendar = true});
-                    var properties = _signInManager.ConfigureExternalAuthenticationProperties("Calendar", redirectUrl);
-                    return new ChallengeResult("Calendar", properties);
-                }
-                user.GoogleCalendarIntegration = credential != null;
-                if (user.GoogleCalendarIntegration == true)
-                {
+                    if (!AddGoogleAccount.HasToken(user.Id, "refresh_token", _unitOfWork) && !calendarApproved)
+                    {
+                        var redirectUrl = Url.Page("./Index", pageHandler: "ExternalLoginCallback", values: new { userCalendar = true });
+                        var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+                        return new ChallengeResult("Google", properties);
+                    }
+                    user.GoogleCalendarIntegration = true;
                     TempData["success"] = "You have successfully integrated with Google Calendar!";
                 }
-                else
+                catch
                 {
-                    TempData["error"] = "Something went wrong. Please try again!";
+                    user.GoogleCalendarIntegration = false;
+                    TempData["error"] = "Google Calendar Integration failed. You can try again from your profile settings.";
                 }
             }
             else
             {
                 user.GoogleCalendarIntegration = false;
-                TempData["warning"] = "Your appointments will no longer automatically integrate with your Google Calendar.";
             }
 
             _unitOfWork.AppUser.Update(user);
@@ -358,38 +362,28 @@ namespace SteamboatWillieWeb.Areas.Identity.Pages.Account.Manage
             return RedirectToPage("./Index");
         }
 
-        public IActionResult OnPostExternalLogin(string provider)
-        {
-            var redirectUrl = Url.Page("./Index", pageHandler: "ExternalLoginCallback");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return new ChallengeResult(provider, properties);
-        }
-
-        public async Task<IActionResult> OnGetExternalLoginCallbackAsync(bool integrateCalendar = false)
+        public async Task<IActionResult> OnGetExternalLoginCallbackAsync(bool userCalendar = false)
         {
             var info = await _signInManager.GetExternalLoginInfoAsync();
             var user = await _userManager.GetUserAsync(User);
+            if (!userCalendar)
+            {
+                return await OnPostGoogleCalendarIntegrationAsync(true, true);
+            }
+
             var result = await _userManager.AddLoginAsync(user, info);
             if (result.Succeeded)
             {
-                if (info.LoginProvider.Equals("Google"))
+                try
                 {
-                    var refreshToken = info.AuthenticationTokens.Where(x => x.Name.Equals("refresh_token")).SingleOrDefault().Value;
-                    GoogleToken token = new GoogleToken()
-                    {
-                        UserId = user.Id,
-                        TokenName = "refresh_token",
-                        TokenValue = refreshToken
-                    };
-                    _unitOfWork.GoogleToken.Add(token);
-                    await _unitOfWork.CommitAsync();
-                    if (integrateCalendar)
-                    {
-                        return await OnPostGoogleCalendarIntegrationAsync(true);
-                    }
+                    var token = AddGoogleAccount.CreateToken(info.AuthenticationTokens.Where(x => x.Name.Equals("refresh_token")).SingleOrDefault().Value, "refresh_token", user.Id, _unitOfWork);
+                    TempData["success"] = "Login with " + info.LoginProvider + " added successfully!";
+                    return await OnPostGoogleCalendarIntegrationAsync(true, true);
                 }
-                TempData["success"] = "Login with " + info.LoginProvider + " added successfully!";
-                return RedirectToPage("./Index");
+                catch
+                {
+                    Console.WriteLine("Something went wrong");
+                }
             }
             TempData["error"] = "Login with " + info.LoginProvider + " failed";
             return RedirectToPage("./Index");

@@ -69,7 +69,7 @@
                             <p>
                                 @foreach (var provider in Model.ExternalLogins!)
                                 {
-                                    if (provider.DisplayName == "Google")
+                                    if (provider.Name == "Google")
                                     {
                                         <button type="submit" value="@provider.Name" name="provider" title="Log in using your @provider.DisplayName account" class="gsi-material-button ggl-btn bg-secondary text-white">
                                             <div class="gsi-material-button-state"></div>
@@ -96,10 +96,6 @@
                                                 Sign in with Microsoft
                                             </button>
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
                                     }
                                 }
                             </p>
