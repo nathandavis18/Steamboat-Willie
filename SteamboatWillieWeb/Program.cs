@@ -22,6 +22,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
+builder.Services.AddScoped<EmailSender>();
 
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
