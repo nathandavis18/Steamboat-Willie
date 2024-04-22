@@ -13,11 +13,11 @@ namespace Utility.GoogleCalendar
                 Description = description,
                 Start = new EventDateTime()
                 {
-                    DateTimeDateTimeOffset = start
+                    DateTimeDateTimeOffset = start.AddHours(-1) //For daylight savings time or smth
                 },
                 End = new EventDateTime()
                 {
-                    DateTimeDateTimeOffset = end,
+                    DateTimeDateTimeOffset = end.AddHours(-1)
                 },
                 Reminders = new Event.RemindersData()
                 {
