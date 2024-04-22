@@ -22,8 +22,8 @@ namespace DataAccess
         }
         public void SendEmail()
         {
-            var allUpcomingAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability") //Getting all appointments that are ~ 1 hour away. Adding -1 hours to adjust for smarterasp time being pacific
-                .Where(a => a.ProviderAvailability.StartTime <= DateTime.Now.AddHours(1).AddMinutes(5).AddHours(-1) && a.ProviderAvailability.StartTime > DateTime.Now.AddMinutes(55).AddHours(-1));
+            var allUpcomingAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability") //Getting all appointments that are ~ 1 hour away. Adding 1 hours to adjust for smarterasp time being pacific
+                .Where(a => a.ProviderAvailability.StartTime <= DateTime.Now.AddHours(1).AddMinutes(5).AddHours(1) && a.ProviderAvailability.StartTime > DateTime.Now.AddMinutes(55).AddHours(1));
             foreach (var appointment in allUpcomingAppointments)
             {
                 var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
