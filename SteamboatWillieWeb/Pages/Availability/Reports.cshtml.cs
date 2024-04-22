@@ -11,13 +11,11 @@ using System.ComponentModel.DataAnnotations;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
-using QuestPDF.Infrastructure;
-using QuestPDF.Drawing;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using Azure;
+using SelectPdf;
 
 namespace SteamboatWillieWeb.Pages.Availability
 {
@@ -132,11 +130,11 @@ namespace SteamboatWillieWeb.Pages.Availability
                 return Page();
             }
 
-            Report report = new Report();
+            HtmlToPdf report = new HtmlToPdf();
             var user = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
-            report.providerName = user.FullName;
-            IEnumerable<ProviderAvailability> providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == user.Id && x.StartTime.Date >= ReportsModelInput.StartDate.Date && x.StartTime.Date <= ReportsModelInput.EndDate.Date); 
-            report.numAvailabilities = providerAvailabilities.Count();
+            var providerName = user.FullName;
+            IEnumerable<ProviderAvailability> providerAvailabilities = _unitOfWork.ProviderAvailability.GetAll().Where(x => x.ProviderId == user.Id && x.StartTime.Date >= ReportsModelInput.StartDate.Date && x.StartTime.Date <= ReportsModelInput.EndDate.Date);
+            var numAvailabilities = providerAvailabilities.Count();
             List<Appointment> appointments = new List<Appointment>();
             foreach (ProviderAvailability availability in providerAvailabilities)
             {
@@ -145,17 +143,18 @@ namespace SteamboatWillieWeb.Pages.Availability
                     appointments.Add(_unitOfWork.Appointment.GetAll().Where(x => x.ProviderAvailabilityId == availability.Id).FirstOrDefault());
                 }
             }
-            
-            report.numAppointments = appointments.Count;
-            if (report.numAvailabilities > 0)
+
+            var numAppointments = appointments.Count;
+            var AppointmentAvailabilityPercent = 0.0;
+            if (numAvailabilities > 0)
             {
-                if (report.numAppointments > 0)
-                    report.AppointmentAvailabilityPercent = Math.Round(((double)report.numAppointments / report.numAvailabilities) * 100);
-                else report.AppointmentAvailabilityPercent = 0;
+                if (numAppointments > 0)
+                    AppointmentAvailabilityPercent = Math.Round(((double)numAppointments / numAvailabilities) * 100);
+                else AppointmentAvailabilityPercent = 0;
             }
             else
             {
-                report.AppointmentAvailabilityPercent = -1;
+                AppointmentAvailabilityPercent = -1;
             }
 
             int no = 0;
@@ -166,115 +165,86 @@ namespace SteamboatWillieWeb.Pages.Availability
                     no++;
                 }
             }
-            report.numNoShows = no;
-            if (report.numAppointments > 0)
+            var numNoShows = no;
+            var AppointmentNoShowPercent = 0.0;
+            if (numAppointments > 0)
             {
-                if (report.numNoShows > 0)
-                    report.AppointmentNoShowPercent = Math.Round(((double)report.numNoShows / report.numAppointments) * 100);
-                else report.AppointmentNoShowPercent = 0;
+                if (numNoShows > 0)
+                    AppointmentNoShowPercent = Math.Round(((double)numNoShows / numAppointments) * 100);
+                else AppointmentNoShowPercent = 0;
             }
             else
             {
-                report.AppointmentNoShowPercent = -1;
+                AppointmentNoShowPercent = -1;
             }
-
+            var dateRange = "y";
             if (ReportsModelInput.StartDate == ReportsModelInput.EndDate)
             {
-                report.dateRange = ReportsModelInput.StartDate.ToString("MM/dd/yyyy");
+                dateRange = ReportsModelInput.StartDate.ToString("MM/dd/yyyy");
             }
             else
             {
-                report.dateRange = ReportsModelInput.StartDate.ToString("MM/dd/yyyy") + " - " + ReportsModelInput.EndDate.ToString("MM/dd/yyyy");
+                dateRange = ReportsModelInput.StartDate.ToString("MM/dd/yyyy") + " - " + ReportsModelInput.EndDate.ToString("MM/dd/yyyy");
             }
 
             string fileName = ReportsModelInput.FileName + ".pdf";
-
-            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string downloadsFolder = Path.Combine(homeDirectory, "Downloads");
-            string filePath = Path.Combine(downloadsFolder, fileName);
-
-            byte[] fileBytes = Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-                    page.Margin(30);
-
-                    page.Header().Column(column =>
-                    {
-                        column.Item().Text($"Appointment Report for {report.providerName}").FontSize(24).Bold();
-
-                        column.Item().Text($"{report.dateRange}").FontSize(16);
-                        column.Item().PaddingVertical(20).LineHorizontal(5).LineColor(Colors.Black);
-                    });
-                    page.Content().Table(table =>
-                    {
-                        table.ColumnsDefinition(columns =>
-                        {
-                            columns.RelativeColumn(3);
-                            columns.RelativeColumn();
-                            columns.RelativeColumn();
-                            columns.RelativeColumn();
-                        });
-                        table.Header(header =>
-                        {
-                            header.Cell().Element(CellStyle).Text("Name");
-                            header.Cell().Element(CellStyle).Text("Number");
-                            header.Cell().Element(CellStyle).Text("Ratio");
-                            header.Cell().Element(CellStyle).Text("Percent");
-                            static QuestPDF.Infrastructure.IContainer CellStyle(QuestPDF.Infrastructure.IContainer container)
-                            {
-                                return container.DefaultTextStyle(x => x.SemiBold()).PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Black);
-                            }
-                        });
-                        table.Cell().Element(CellStyle).Text("Number of Availabilities");
-                        table.Cell().Element(CellStyle).Text($"{report.numAvailabilities}");
-                        table.Cell().Element(CellStyle).Text("N/A");
-                        table.Cell().Element(CellStyle).Text("N/A");
-
-
-                        table.Cell().Element(CellStyle).Text("Number of Appointments");
-                        table.Cell().Element(CellStyle).Text($"{report.numAppointments}");
-                        table.Cell().Element(CellStyle).Text($"{report.numAppointments}/{report.numAvailabilities}");
-                        if (report.AppointmentAvailabilityPercent == -1)
-                        {
-                            table.Cell().Element(CellStyle).Text("N/A");
-                        }
-                        else
-                        {
-                            table.Cell().Element(CellStyle).Text($"{report.AppointmentAvailabilityPercent}%");
-                        }
-
-
-                        table.Cell().Element(CellStyle).Text("Number of No Shows");
-                        table.Cell().Element(CellStyle).Text($"{report.numNoShows}");
-                        table.Cell().Element(CellStyle).Text($"{report.numNoShows}/{report.numAppointments}");
-                        if (report.AppointmentNoShowPercent == -1)
-                        {
-                            table.Cell().Element(CellStyle).Text("N/A");
-                        }
-                        else
-                        {
-                            table.Cell().Element(CellStyle).Text($"{report.AppointmentNoShowPercent}%");
-                        }
-
-
-                        static QuestPDF.Infrastructure.IContainer CellStyle(QuestPDF.Infrastructure.IContainer container)
-                        {
-                            return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2).PaddingVertical(5);
-                        }
-
-                    });
-
-                    page.Footer().AlignCenter().Text(text =>
-                    {
-                        text.DefaultTextStyle(x => x.Size(12));
-                        text.Span("Steamboat Scheduler");
-                    });
-                });
-            }).GeneratePdf();
             
-            return File(fileBytes, "application/pdf", fileName);
+            report.Options.PdfPageSize = PdfPageSize.A4;
+            report.Options.MarginBottom = 30;
+            report.Options.MarginLeft = 30;
+            report.Options.MarginRight = 30;
+            report.Options.MarginTop = 30;
+
+            string doozy = "<html>" +
+                "<head>" +
+                "<style>" +
+                "td, th { font-size: 25px; text-align: left; } table { width: 100%; border-collapse: collapse; } tr { border-bottom: 1px solid black; } .one { font-size: 25px; width: 40%; }" +
+                "footer { position: fixed; bottom: 0; width: 100%; color: #888; text-align: center; padding: 10px 0;" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<p style=\"font-size:40px; font-weight: 900;\">Appointment Report for " + providerName + "</p>" +
+                "<p style=\"font-size:30px;font-weight: 400;\">" + dateRange + "</p>" +
+                "<hr style=\"height:10px;background-color:black\">" +
+                "<table class=\"table\">" +
+                "<thead><tr style=\"border-bottom: 3px solid black;\">" +
+                "<th class=\"one\">Name</th><th>Number</th><th>Ratio</th><th>Percent</th></tr></thead>" +
+                "<tbody>" +
+                "<tr><td class=\"one\">Number of Availabilities</td><td>" + numAvailabilities + "</td><td>N/A</td><td>N/A</td></tr>";
+            string appointmentrow = "<tr><td class=\"one\">Number of Appointments</td><td>" + numAppointments + "</td><td>" + numAppointments + "/" + numAvailabilities + "</td><td>";
+            if (AppointmentAvailabilityPercent == -1) {
+                appointmentrow += "N/A</td></tr>";
+            }
+            else
+            {
+                appointmentrow += AppointmentAvailabilityPercent + "%</td></tr>";
+            }
+            doozy += appointmentrow;
+            string noshowrow = "<tr><td class=\"one\">Number of No Shows</td><td>" + numNoShows + "</td><td>" + numNoShows + "/" + numAppointments + "</td><td>";
+            if (AppointmentNoShowPercent == -1)
+            {
+                noshowrow += "N/A</td></tr>";
+            }
+            else
+            {
+                noshowrow += AppointmentNoShowPercent + "%</td></tr>";
+            }
+            doozy += noshowrow +
+            "</tbody>" +
+                "</table>" +
+                "<div style=\"padding-top: 1150px; text-align: center; color: gray; font-size: 20px;\">" +
+                "Steamboat Scheduler Reports" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+
+            PdfDocument doc = report.ConvertHtmlString(doozy);
+            MemoryStream memoryStream = new MemoryStream();
+            doc.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            doc.Close();
+
+            return File(memoryStream, "application/pdf", fileName);
         }
     }
 

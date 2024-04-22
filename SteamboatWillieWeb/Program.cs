@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Infrastructure;
 using Utility;
 using Utility.GoogleCalendar;
 using Hangfire;
@@ -19,7 +18,6 @@ var connectionString = builder.Configuration.GetConnectionString("SmarterASP") ?
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
