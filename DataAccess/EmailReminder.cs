@@ -27,7 +27,7 @@ namespace DataAccess
             foreach (var appointment in allUpcomingAppointments)
             {
                 var clientEmail = _unitOfWork.AppUser.GetById(appointment.ClientId).Email;
-                var link = "\"https://steamboatwillie.nathandavis18.com\"";
+                var link = "\"https://nathandavis18.com\"";
                 var message = EmailFormats.ReminderEmail.Replace("[Provider]", _unitOfWork.AppUser.GetById(appointment.ProviderAvailability.ProviderId).FullName).Replace("[Link]", link);
                 _emailSender.SendEmail(clientEmail, "Appointment Reminder", message);
             }

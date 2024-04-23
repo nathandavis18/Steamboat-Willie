@@ -72,9 +72,9 @@ namespace SteamboatWillieWeb.Pages
             {
                 if (user != null)
                 {
-                    var clientAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability").Where(a => a.ClientId == user.Id).ToList();
+                    var clientAppointments = _unitOfWork.Appointment.GetAll(includes: "ProviderAvailability").Where(a => a.ClientId == user.Id && a.ProviderAvailability.EndTime > DateTime.Now.AddHours(1)).ToList();
                     clientAppointments.Sort((x, y) =>
-                        _unitOfWork.ProviderAvailability.GetById(x.ProviderAvailabilityId).StartTime.CompareTo(_unitOfWork.ProviderAvailability.GetById(y.ProviderAvailabilityId).StartTime) //Cool
+                        x.ProviderAvailability.StartTime.CompareTo(y.ProviderAvailability.StartTime) //Cool
                     );
                     foreach(var app in clientAppointments)
                     {
