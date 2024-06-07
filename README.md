@@ -1,8 +1,8 @@
 # Steamboat Willie
 
-Welcome to Steamboat Willie, a SimplyBook.Me alternative, tailored for Weber State University students and faculty.
+##Site is no longer live since I am now hosting my portfolio website, but this repository is still active.
 
-All release versions are live at [this site](https://nathandavis18.com/)
+Welcome to Steamboat Willie, a SimplyBook.Me alternative, tailored for Weber State University students and faculty.
 
 ### What you can use this site for:
 This is an appointment scheduling system, designed to allow Current Weber State University Students/Prospective WSU Students to schedule an appointment with their instructor/advisor, or schedule a tutoring session.
