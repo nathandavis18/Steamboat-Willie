@@ -1,7 +1,5 @@
 # Steamboat Willie
 
-## Site is no longer live since I am now hosting my portfolio website, but this repository is still active.
-
 Welcome to Steamboat Willie, a SimplyBook.Me alternative, tailored for Weber State University students and faculty.
 
 ### What you can use this site for:
