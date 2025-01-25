@@ -1,6 +1,6 @@
 # Steamboat Willie
 
-### This project is no longer active. Feel free to browse through the repo if you'd like to learn how it was made!
+## This project is no longer active. Feel free to browse through the repo if you'd like to learn how it was made!
 
 Welcome to Steamboat Willie, a SimplyBook.Me alternative, tailored for Weber State University students and faculty.
 
