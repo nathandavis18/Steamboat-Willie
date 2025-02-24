@@ -74,10 +74,6 @@ This is an appointment scheduling system, designed to allow Current Weber State 
 
 
 When signing up for an account, you must confirm your email before you can use the site. If you sign up using an external service (Google/Microsoft), you are not required to confirm your email.
-
-If you have any questions, don't :P
-
-All contact info can be found on the website listed above.
     
 This software is released 'as is', without warranty of any kind, express or implied. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from, out of, or in connection with this software.
 This software is released to WSU, with no warranted support, for non-commercial use and learning purposes only.
