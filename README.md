@@ -26,6 +26,8 @@ Welcome to Steamboat Willie, a SimplyBook.Me alternative, tailored for Weber Sta
 #### User Profile Page
 ![Screenshot 2025-02-23 212649](https://github.com/user-attachments/assets/cd131948-3173-4d29-bbaa-c21580733cdf)
 
+<hr>
+
 ### What you can use this site for:
 This is an appointment scheduling system, designed to allow Current Weber State University Students/Prospective WSU Students to schedule an appointment with their instructor/advisor, or schedule a tutoring session.
 
